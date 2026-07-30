@@ -1,0 +1,7 @@
+<Solution>
+  <Project Path="ECommerce.Business/ECommerce.Business.csproj" Id="97fbb6c3-30e0-43c2-aff3-6602e5b793f7" />
+  <Project Path="ECommerce.DataAccess/ECommerce.DataAccess.csproj" Id="68d0809d-1960-4633-bed0-dcf8dc81f312" />
+  <Project Path="ECommerce.Models/ECommerce.Models.csproj" Id="8a03e2c5-14fc-471d-b777-991f98de7460" />
+  <Project Path="ECommerce.Utility/ECommerce.Utility.csproj" Id="d416d40c-3180-4bba-aabf-71538a2b5e58" />
+  <Project Path="ECommerce.Web/ECommerce.Web.csproj" />
+</Solution>
