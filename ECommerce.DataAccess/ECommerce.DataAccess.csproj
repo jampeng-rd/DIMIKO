@@ -6,4 +6,21 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <Compile Remove="Class1.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="10.0.10" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="10.0.10">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\ECommerce.Models\ECommerce.Models.csproj" />
+    <ProjectReference Include="..\ECommerce.Utility\ECommerce.Utility.csproj" />
+  </ItemGroup>
+
 </Project>

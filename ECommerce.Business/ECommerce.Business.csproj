@@ -6,4 +6,14 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <Compile Remove="Class1.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\ECommerce.DataAccess\ECommerce.DataAccess.csproj" />
+    <ProjectReference Include="..\ECommerce.Models\ECommerce.Models.csproj" />
+    <ProjectReference Include="..\ECommerce.Utility\ECommerce.Utility.csproj" />
+  </ItemGroup>
+
 </Project>
