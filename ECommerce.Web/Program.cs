@@ -1,3 +1,5 @@
+using ECommerce.Business.Services;
+using ECommerce.Business.Services.IServices;
 using ECommerce.DataAccess.Data;
 using Microsoft.EntityFrameworkCore;
 
@@ -11,6 +13,9 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 {
 	options.UseSqlServer(builder.Configuration.GetConnectionString("SQLConnection"));
 });
+
+// Register Repository Pattern
+builder.Services.AddScoped<ICategoryService, CategoryService>();
 
 
 var app = builder.Build();
@@ -32,9 +37,14 @@ app.UseAuthorization();
 app.MapStaticAssets();
 
 app.MapControllerRoute(
-	name: "default",
-	pattern: "{controller=Home}/{action=Index}/{id?}")
+	name: "MyArea",
+	pattern: "{area:exists}/{controller=Home}/{action=Index}/{id?}")
 	.WithStaticAssets();
 
+app.MapControllerRoute(
+	name: "default",
+	pattern: "{controller=Home}/{action=Index}/{id?}",
+	defaults: new { area = "Customer" })
+	.WithStaticAssets();
 
 app.Run();

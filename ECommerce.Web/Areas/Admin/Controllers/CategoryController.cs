@@ -1,28 +1,27 @@
-﻿using ECommerce.DataAccess.Data;
+﻿using ECommerce.Business.Services.IServices;
 using ECommerce.Models;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
-namespace ECommerce.Web.Controllers
+namespace ECommerce.Web.Areas.Admin.Controllers
 {
+	[Area("Admin")]
 	public class CategoryController : Controller
 	{
-		private readonly ApplicationDbContext dbContext;
+		private readonly ICategoryService _categoryService;
 
-		public CategoryController(ApplicationDbContext dbContext)
+		public CategoryController(ICategoryService categoryService)
 		{
-			this.dbContext = dbContext;
+			_categoryService = categoryService;
 		}
 
 		public async Task<IActionResult> Index()
 		{
-			var categories = await dbContext.Categories.ToListAsync();
+			var categories = await _categoryService.GetAllCategoriesAsync();
 
-			//return View("Index", categories);
 			return View(categories);
 		}
 
-		public IActionResult Create()
+		public async Task<IActionResult> Create()
 		{
 
 			return View();
@@ -42,7 +41,7 @@ namespace ECommerce.Web.Controllers
 			// 基本驗證通過後，再查名稱是否重複
 			category.Name = category.Name.Trim();
 
-			bool nameExists = await dbContext.Categories.AnyAsync(c => c.Name == category.Name);
+			bool nameExists = await _categoryService.CategoryNameExistsAsync(category.Name);
 
 			if (nameExists)
 			{
@@ -51,8 +50,8 @@ namespace ECommerce.Web.Controllers
 			}
 
 			// 所有驗證通過後才寫入資料庫
-			dbContext.Categories.Add(category);
-			await dbContext.SaveChangesAsync();
+			await _categoryService.CreateCategoryAsync(category);
+
 			TempData["success"] = "新增成功";
 
 			return RedirectToAction(nameof(Index));
@@ -65,11 +64,8 @@ namespace ECommerce.Web.Controllers
 				return NotFound();
 			}
 
-			// Method_1: 一般 LINQ 查詢，可以使用任意條件
-			// var category = await dbContext.Categories.FirstOrDefaultAsync(c => c.Id == id);
 
-			// Method_2: 單純根據主鍵 Id 尋找
-			var category = await dbContext.Categories.FindAsync(id.Value);
+			var category = await _categoryService.GetCategoryByIdAsync(id.Value);
 
 			if (category == null)
 			{
@@ -93,7 +89,7 @@ namespace ECommerce.Web.Controllers
 			// 基本驗證通過後，再查名稱是否重複
 			category.Name = category.Name.Trim();
 
-			bool nameExists = await dbContext.Categories.AnyAsync(c => c.Name == category.Name && c.Id != category.Id);
+			bool nameExists = await _categoryService.CategoryNameExistsAsync(category.Name, category.Id);
 
 			if (nameExists)
 			{
@@ -102,8 +98,13 @@ namespace ECommerce.Web.Controllers
 			}
 
 			// 所有驗證通過後才寫入資料庫
-			dbContext.Categories.Update(category);
-			await dbContext.SaveChangesAsync();
+			bool updated = await _categoryService.UpdateCategoryAsync(category);
+
+			if (!updated)
+			{
+				return NotFound();
+			}
+
 			TempData["success"] = "更新成功";
 
 			return RedirectToAction(nameof(Index));
@@ -116,7 +117,7 @@ namespace ECommerce.Web.Controllers
 				return NotFound();
 			}
 
-			var category = await dbContext.Categories.FindAsync(id.Value);
+			var category = await _categoryService.GetCategoryByIdAsync(id.Value);
 
 			if (category == null)
 			{
@@ -131,19 +132,17 @@ namespace ECommerce.Web.Controllers
 		[ActionName("Delete")]
 		public async Task<IActionResult> DeletePOST(int id)
 		{
-			var category = await dbContext.Categories.FindAsync(id);
+			bool deleted = await _categoryService.DeleteCategoryAsync(id);
 
-			if (category == null)
+			if (!deleted)
 			{
 				return NotFound();
 			}
 
-			dbContext.Categories.Remove(category);
-			await dbContext.SaveChangesAsync();
 			TempData["success"] = "刪除成功";
 
 			return RedirectToAction(nameof(Index));
 		}
-
+		
 	}
 }

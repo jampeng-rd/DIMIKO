@@ -7,24 +7,6 @@
     <UserSecretsId>f61ec1b0-06b5-4c2c-a51f-083076c6f05c</UserSecretsId>
   </PropertyGroup>
 
-  <ItemGroup>
-    <Compile Remove="Data\**" />
-    <Compile Remove="Migrations\**" />
-    <Compile Remove="Models\**" />
-    <Content Remove="Data\**" />
-    <Content Remove="Migrations\**" />
-    <Content Remove="Models\**" />
-    <EmbeddedResource Remove="Data\**" />
-    <EmbeddedResource Remove="Migrations\**" />
-    <EmbeddedResource Remove="Models\**" />
-    <None Remove="Data\**" />
-    <None Remove="Migrations\**" />
-    <None Remove="Models\**" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Content Remove="Views\Shared\Error.cshtml" />
-  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="10.0.10" />
