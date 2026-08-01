@@ -58,9 +58,8 @@ namespace ECommerce.Models
 		[ForeignKey(nameof(CategoryId))]
 		public Category Category { get; set; } = null!;
 
-		[StringLength(2048)]
-		[Display(Name = "商品圖片")]
-		public string? ImageUrl { get; set; }
+		[ValidateNever]
+		public ICollection<ProductImage> ProductImages { get; set; } = new List<ProductImage>();
 
 		[Display(Name = "是否上架")]
 		public bool IsActive { get; set; } = true;

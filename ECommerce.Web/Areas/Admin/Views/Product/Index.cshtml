@@ -22,6 +22,7 @@
             <table id="tblData" class="table-styled">
                 <thead>
                     <tr>
+                        <th>首圖</th>
                         <th>商品名稱</th>
                         <th>商品編號</th>
                         <th>售價</th>
@@ -35,6 +36,28 @@
                     @foreach (var product in Model)
                     {
                         <tr>
+                            @{
+                                var primaryImage = product.ProductImages.FirstOrDefault(image => image.IsPrimary)
+                                    ?? product.ProductImages.OrderBy(image => image.SortOrder).FirstOrDefault();
+                            }
+
+                            <td>
+                                @if (primaryImage != null)
+                                {
+                                    <img src="@primaryImage.ImageUrl"
+                                         alt="@product.Title"
+                                         class="img-thumbnail"
+                                         style="width: 70px; height: 70px; object-fit: cover;" />
+                                }
+                                else
+                                {
+                                    <div class="bg-light border rounded d-flex align-items-center justify-content-center"
+                                         style="width: 70px; height: 70px;">
+                                        <i class="bi bi-image text-secondary"></i>
+                                    </div>
+                                }
+                            </td>
+
                             <td class="fw-medium" style="color: #1e293b;">@product.Title</td>
                             <td class="fw-medium" style="color: #1e293b;">@product.SKU</td>
                             <td class="fw-medium" style="color: #1e293b;">@product.Price.ToString("N0")</td>

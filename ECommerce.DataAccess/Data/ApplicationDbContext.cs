@@ -10,11 +10,17 @@ namespace ECommerce.DataAccess.Data
 
 		public DbSet<Category> Categories { get; set; }
 		public DbSet<Product> Products { get; set; }
-
+		public DbSet<ProductImage> ProductImages { get; set; }
 
 		protected override void OnModelCreating(ModelBuilder modelBuilder)
 		{
 			base.OnModelCreating(modelBuilder);
+
+			modelBuilder.Entity<ProductImage>()
+				.HasOne(productImage => productImage.Product)
+				.WithMany(product => product.ProductImages)
+				.HasForeignKey(productImage => productImage.ProductId)
+				.OnDelete(DeleteBehavior.Cascade);
 
 			modelBuilder.Entity<Category>().HasData(
 				new Category { Id = 1, Name = "帳篷與天幕", DisplayOrder = 1 },

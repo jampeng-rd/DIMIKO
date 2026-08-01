@@ -34,23 +34,6 @@
                     <div class="form-control bg-light">@(Model?.StockQuantity ?? 0)</div>
                 </div>
 
-                @if (!string.IsNullOrWhiteSpace(Model?.ImageUrl))
-                {
-                    <div class="mb-3">
-                        <label asp-for="ImageUrl"
-                               class="form-label fw-semibold small"></label>
-
-                        <div>
-                            <img src="@Model.ImageUrl"
-                                 alt="@(Model?.Title ?? "未知商品")"
-                                 class="img-thumbnail"
-                                 style="max-width: 200px;
-                            max-height: 200px;
-                            object-fit: contain;" />
-                        </div>
-                    </div>
-                }
-
                 <div class="mb-3">
                     <label asp-for="IsActive" class="form-label fw-semibold small"></label>
                     <div class="form-control bg-light">@(Model?.IsActive == true ? "已上架" : "未上架")</div>

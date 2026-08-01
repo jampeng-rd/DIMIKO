@@ -1,5 +1,5 @@
-﻿@using ECommerce.Models
-@model Product
+﻿@using ECommerce.Models.ViewModels
+@model ProductCreateViewModel
 
 @{
     ViewData["Title"] = "Create Product";
@@ -15,91 +15,83 @@
             <p class="mb-0 small" style="color: #0B9BFE;">新增商品</p>
         </div>
         <div class="card-body p-4">
-            <form method="post" asp-controller="Product" asp-action="Create">
+            <form method="post" asp-controller="Product" asp-action="Create" enctype="multipart/form-data">
                 <div class="mb-3">
-                    <label asp-for="Title" class="form-label fw-semibold small"></label>
-                    <input asp-for="Title" class="form-control" placeholder="請輸入商品名稱" />
-                    <span asp-validation-for="Title" class="text-danger small"></span>
+                    <label asp-for="Product.Title" class="form-label fw-semibold small"></label>
+                    <input asp-for="Product.Title" class="form-control" placeholder="請輸入商品名稱" />
+                    <span asp-validation-for="Product.Title" class="text-danger small"></span>
                 </div>
 
                 <div class="mb-3">
-                    <label asp-for="Description" class="form-label fw-semibold small"></label>
-                    <textarea asp-for="Description" class="form-control" rows="5" placeholder="請輸入商品描述"></textarea>
-                    <span asp-validation-for="Description" class="text-danger small"></span>
+                    <label asp-for="Product.Description" class="form-label fw-semibold small"></label>
+                    <textarea asp-for="Product.Description" class="form-control" rows="5" placeholder="請輸入商品描述"></textarea>
+                    <span asp-validation-for="Product.Description" class="text-danger small"></span>
                 </div>
 
                 <div class="mb-3">
-                    <label asp-for="SKU" class="form-label fw-semibold small"></label>
-                    <input asp-for="SKU" class="form-control" placeholder="請輸入商品編號" />
-                    <span asp-validation-for="SKU" class="text-danger small"></span>
+                    <label asp-for="Product.SKU" class="form-label fw-semibold small"></label>
+                    <input asp-for="Product.SKU" class="form-control" placeholder="請輸入商品編號" />
+                    <span asp-validation-for="Product.SKU" class="text-danger small"></span>
                 </div>
 
                 <div class="mb-3">
-                    <label asp-for="ListPrice" class="form-label fw-semibold small"></label>
-                    <input asp-for="ListPrice" asp-format="{0:0.##}" type="number" class="form-control" min="0" max="99999" step="0.01" placeholder="請輸入原價" />
-                    <span asp-validation-for="ListPrice" class="text-danger small"></span>
+                    <label asp-for="Product.ListPrice" class="form-label fw-semibold small"></label>
+                    <input asp-for="Product.ListPrice" asp-format="{0:0.##}" type="number" class="form-control" min="0" max="99999" step="0.01" placeholder="請輸入原價" />
+                    <span asp-validation-for="Product.ListPrice" class="text-danger small"></span>
                 </div>
 
                 <div class="mb-3">
-                    <label asp-for="Price" class="form-label fw-semibold small"></label>
-                    <input asp-for="Price" asp-format="{0:0.##}" type="number" class="form-control" min="0" max="99999" step="0.01" placeholder="請輸入售價" />
-                    <span asp-validation-for="Price" class="text-danger small"></span>
+                    <label asp-for="Product.Price" class="form-label fw-semibold small"></label>
+                    <input asp-for="Product.Price" asp-format="{0:0.##}" type="number" class="form-control" min="0" max="99999" step="0.01" placeholder="請輸入售價" />
+                    <span asp-validation-for="Product.Price" class="text-danger small"></span>
                 </div>
 
                 <div class="mb-3">
-                    <label asp-for="Price5" class="form-label fw-semibold small"></label>
-                    <input asp-for="Price5" asp-format="{0:0.##}" type="number" class="form-control" min="0" max="99999" step="0.01" placeholder="選填：請輸入 5 件以上價格" />
-                    <span asp-validation-for="Price5" class="text-danger small"></span>
+                    <label asp-for="Product.Price5" class="form-label fw-semibold small"></label>
+                    <input asp-for="Product.Price5" asp-format="{0:0.##}" type="number" class="form-control" min="0" max="99999" step="0.01" placeholder="選填：請輸入 5 件以上價格" />
+                    <span asp-validation-for="Product.Price5" class="text-danger small"></span>
                 </div>
 
                 <div class="mb-3">
-                    <label asp-for="Price10" class="form-label fw-semibold small"></label>
-                    <input asp-for="Price10" asp-format="{0:0.##}" type="number" class="form-control" min="0" max="99999" step="0.01" placeholder="選填：請輸入 10 件以上價格" />
-                    <span asp-validation-for="Price10" class="text-danger small"></span>
+                    <label asp-for="Product.Price10" class="form-label fw-semibold small"></label>
+                    <input asp-for="Product.Price10" asp-format="{0:0.##}" type="number" class="form-control" min="0" max="99999" step="0.01" placeholder="選填：請輸入 10 件以上價格" />
+                    <span asp-validation-for="Product.Price10" class="text-danger small"></span>
                 </div>
 
                 <div class="mb-3">
-                    <label asp-for="StockQuantity" class="form-label fw-semibold small"></label>
-                    <input asp-for="StockQuantity" type="number" class="form-control" min="0" step="1" placeholder="請輸入庫存數量" />
-                    <span asp-validation-for="StockQuantity" class="text-danger small"></span>
+                    <label asp-for="Product.StockQuantity" class="form-label fw-semibold small"></label>
+                    <input asp-for="Product.StockQuantity" type="number" class="form-control" min="0" step="1" placeholder="請輸入庫存數量" />
+                    <span asp-validation-for="Product.StockQuantity" class="text-danger small"></span>
                 </div>
 
                 <div class="mb-3">
-                    <label asp-for="CategoryId" class="form-label fw-semibold small"></label>
+                    <label asp-for="Product.CategoryId" class="form-label fw-semibold small"></label>
 
-                    <select asp-for="CategoryId" asp-items="ViewBag.CategoryList" class="form-select">
+                    <select asp-for="Product.CategoryId" asp-items="ViewBag.CategoryList" class="form-select">
                         <option value="">-- 請選擇商品分類 --</option>
                     </select>
 
-                    <span asp-validation-for="CategoryId" class="text-danger small"></span>
+                    <span asp-validation-for="Product.CategoryId" class="text-danger small"></span>
                 </div>
 
                 <div class="mb-3">
-                    <label asp-for="ImageUrl" class="form-label fw-semibold small"></label>
+                    <label asp-for="Images" class="form-label fw-semibold small"></label>
+                    <input asp-for="Images" type="file" class="form-control" accept=".jpg,.jpeg,.png,.webp" multiple />
+                    <span asp-validation-for="Images" class="text-danger small"></span>
 
-                    <div class="mb-2">
-                        <img id="imagePreview"
-                             src="@(Model?.ImageUrl ?? string.Empty)"
-                             alt="商品圖片預覽"
-                             class="img-thumbnail @(string.IsNullOrWhiteSpace(Model?.ImageUrl) ? "d-none" : "")"
-                             style="max-width: 200px; max-height: 200px; object-fit: contain;" />
+                    <div class="form-text">
+                        可選擇多張圖片，第一張圖片將作為首圖，單張不可超過 5 MB。
                     </div>
 
-                    <input asp-for="ImageUrl" id="imageUrlInput" class="form-control" placeholder="請輸入商品圖片網址" />
-
-                    <span asp-validation-for="ImageUrl" class="text-danger small"></span>
-
-                    <div id="imagePreviewError" class="text-danger small mt-1 d-none">
-                        無法載入這個圖片網址
-                    </div>
+                    <div id="imagePreviewContainer" class="d-flex flex-wrap gap-2 mt-3"></div>
                 </div>
 
                 <div class="mb-3">
                     <div class="form-check form-switch">
-                        <input asp-for="IsActive" class="form-check-input" />
-                        <label asp-for="IsActive" class="form-check-label"></label>
+                        <input asp-for="Product.IsActive" class="form-check-input" />
+                        <label asp-for="Product.IsActive" class="form-check-label"></label>
                     </div>
-                    <span asp-validation-for="IsActive" class="text-danger small"></span>
+                    <span asp-validation-for="Product.IsActive" class="text-danger small"></span>
                 </div>
 
                 <div class="d-flex gap-2 mt-4">
@@ -118,34 +110,53 @@
     }
 
     <script>
-        const imageUrlInput = document.getElementById("imageUrlInput");
-        const imagePreview = document.getElementById("imagePreview");
-        const imagePreviewError = document.getElementById("imagePreviewError");
+        const imageInput = document.getElementById("Images");
 
-        imageUrlInput.addEventListener("input", function(event) {
-            const imageUrl = event.target.value.trim();
+        const previewContainer = document.getElementById("imagePreviewContainer");
 
+        imageInput.addEventListener("change", function (event) {
+            previewContainer.innerHTML = "";
 
-            imagePreviewError.classList.add("d-none");
+            const files = Array.from(event.target.files);
 
-            if (imageUrl === "") {
-                imagePreview.removeAttribute("src");
-                imagePreview.classList.add("d-none");
-                return;
-            }
+            files.forEach(function (file, index) {
+                if (!file.type.startsWith("image/")) {
+                    return;
+                }
 
-            imagePreview.classList.add("d-none");
-            imagePreview.src = imageUrl;
-        });
+                const previewUrl = URL.createObjectURL(file);
 
-        imagePreview.addEventListener("load", function() {
-            imagePreview.classList.remove("d-none");
-            imagePreviewError.classList.add("d-none");
-        });
+                const wrapper = document.createElement("div");
 
-        imagePreview.addEventListener("error", function() {
-            imagePreview.classList.add("d-none");
-            imagePreviewError.classList.remove("d-none");
+                wrapper.className = "position-relative";
+
+                const image = document.createElement("img");
+
+                image.src = previewUrl;
+                image.alt = `商品圖片 ${index + 1}`;
+                image.className = "img-thumbnail";
+                image.style.width = "150px";
+                image.style.height = "150px";
+                image.style.objectFit = "cover";
+
+                image.addEventListener("load", function () {
+                    URL.revokeObjectURL(previewUrl);
+                });
+
+                wrapper.appendChild(image);
+
+                if (index === 0) {
+                    const badge = document.createElement("span");
+
+                    badge.className = "position-absolute top-0 start-0 badge bg-primary m-1";
+
+                    badge.textContent = "首圖";
+
+                    wrapper.appendChild(badge);
+                }
+
+                previewContainer.appendChild(wrapper);
+            });
         });
     </script>
 }
