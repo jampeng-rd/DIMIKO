@@ -17,7 +17,7 @@
             <div class="container">
 
                 <a class="navbar-brand d-flex align-items-center gap-2" asp-area="Customer" asp-controller="Home" asp-action="Index">
-                    <div class="d-flex align-items-center justify-content-center rounded" style="width: 36px; height: 36px; background: rgba(255,255,255,0.2);">
+                    <div class="d-flex align-items-center justify-content-center rounded" style="width: 36px; height: 36px; background: rgba(255,255,255,0);">
                         <img src="/images/dimiko.png" style="width: 24px; height: 24px;" />
                     </div>
                     <span class="fw-bold fs-5 d-none d-sm-inline">
@@ -40,6 +40,9 @@
                         </li>
                         <li class="nav-item">
                             <a class="nav-link" asp-area="Admin" asp-controller="category" asp-action="Index">Category</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" asp-area="Admin" asp-controller="product" asp-action="Index">Product</a>
                         </li>
                     </ul>
                 </div>

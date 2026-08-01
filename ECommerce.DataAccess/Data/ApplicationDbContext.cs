@@ -9,6 +9,7 @@ namespace ECommerce.DataAccess.Data
 		{ }
 
 		public DbSet<Category> Categories { get; set; }
+		public DbSet<Product> Products { get; set; }
 
 
 		protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -16,15 +17,91 @@ namespace ECommerce.DataAccess.Data
 			base.OnModelCreating(modelBuilder);
 
 			modelBuilder.Entity<Category>().HasData(
-				new Category { Id = 1, Name = "客廳家具", DisplayOrder = 1 },
-				new Category { Id = 2, Name = "臥室家具", DisplayOrder = 2 },
-				new Category { Id = 3, Name = "餐廳家具", DisplayOrder = 3 },
-				new Category { Id = 4, Name = "書房家具", DisplayOrder = 4 },
-				new Category { Id = 5, Name = "辦公家具", DisplayOrder = 5 },
-				new Category { Id = 6, Name = "戶外家具", DisplayOrder = 6 },
-				new Category { Id = 7, Name = "收納家具", DisplayOrder = 7 }
+				new Category { Id = 1, Name = "帳篷與天幕", DisplayOrder = 1 },
+				new Category { Id = 2, Name = "睡眠裝備", DisplayOrder = 2 },
+				new Category { Id = 3, Name = "露營家具", DisplayOrder = 3 },
+				new Category { Id = 4, Name = "炊具與餐具", DisplayOrder = 4 },
+				new Category { Id = 5, Name = "照明與電源", DisplayOrder = 5 },
+				new Category { Id = 6, Name = "戶外服飾", DisplayOrder = 6 },
+				new Category { Id = 7, Name = "戶外配件", DisplayOrder = 7 }
+			);
+
+
+			modelBuilder.Entity<Product>().HasData(
+				new Product 
+				{
+					Id = 1,
+					Title = "星野四人家庭帳篷",
+					Description = "適合三至四人使用的雙層家庭帳篷，具備防潑水外帳與通風紗網。",
+					SKU = "TENT-001",
+					ListPrice = 12800m,
+					Price = 10800m,
+					Price5 = 10200m,
+					Price10 = 9500m,
+					StockQuantity = 20,
+					CategoryId = 1,
+					IsActive = true
+				},
+				new Product
+				{
+					Id = 2,
+					Title = "自動充氣露營睡墊",
+					Description = "厚度 8 公分的自動充氣睡墊，適合露營與車宿使用。",
+					SKU = "SLEEP-001",
+					ListPrice = 3200m,
+					Price = 2680m,
+					Price5 = 2500m,
+					Price10 = 2300m,
+					StockQuantity = 40,
+					CategoryId = 2,
+					IsActive = true
+				},
+				new Product
+				{
+					Id = 3,
+					Title = "鋁合金折疊露營桌",
+					Description = "輕量鋁合金桌板，可快速折疊收納，適合二至四人使用。",
+					SKU = "FURN-001",
+					ListPrice = 2800m,
+					Price = 2380m,
+					Price5 = 2200m,
+					Price10 = 2050m,
+					StockQuantity = 30,
+					CategoryId = 3,
+					IsActive = true
+				},
+				new Product
+				{
+					Id = 4,
+					Title = "戶外不鏽鋼炊具組",
+					Description = "包含湯鍋、平底鍋、杯具與收納袋，適合兩至三人露營使用。",
+					SKU = "COOK-001",
+					ListPrice = 1800m,
+					Price = 1480m,
+					Price5 = 1380m,
+					Price10 = 1280m,
+					StockQuantity = 50,
+					CategoryId = 4,
+					IsActive = true
+				},
+				new Product
+				{
+					Id = 5,
+					Title = "輕量防風防潑水外套",
+					Description = "適合春秋露營穿著的輕量外套，具備防風與基本防潑水功能。",
+					SKU = "WEAR-001",
+					ListPrice = 2600m,
+					Price = 2180m,
+					Price5 = 1980m,
+					Price10 = 1850m,
+					StockQuantity = 60,
+					CategoryId = 6,
+					IsActive = true
+				}
+
 			);
 
 		}
+
 	}
 }

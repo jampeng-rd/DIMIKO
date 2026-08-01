@@ -1,0 +1,151 @@
+﻿@using ECommerce.Models
+@model Product
+
+@{
+    ViewData["Title"] = "Create Product";
+}
+
+<div class="container-fluid px-0">
+    <a asp-action="Index" class="text-decoration-none text-secondary small fw-medium d-inline-flex align-items-center gap-1 my-2">
+        <i class="bi bi-arrow-left"></i> 返回商品列表
+    </a>
+    <div class="card border shadow-sm overflow-hidden">
+        <div class="card-header text-white py-3 px-4" style="background: linear-gradient(to right, #025A93, #282828, #191414);">
+            <h5 class="mb-0 fw-bold"><i class="bi bi-plus-lg me-2"></i>Create Product</h5>
+            <p class="mb-0 small" style="color: #0B9BFE;">新增商品</p>
+        </div>
+        <div class="card-body p-4">
+            <form method="post" asp-controller="Product" asp-action="Create">
+                <div class="mb-3">
+                    <label asp-for="Title" class="form-label fw-semibold small"></label>
+                    <input asp-for="Title" class="form-control" placeholder="請輸入商品名稱" />
+                    <span asp-validation-for="Title" class="text-danger small"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="Description" class="form-label fw-semibold small"></label>
+                    <textarea asp-for="Description" class="form-control" rows="5" placeholder="請輸入商品描述"></textarea>
+                    <span asp-validation-for="Description" class="text-danger small"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="SKU" class="form-label fw-semibold small"></label>
+                    <input asp-for="SKU" class="form-control" placeholder="請輸入商品編號" />
+                    <span asp-validation-for="SKU" class="text-danger small"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="ListPrice" class="form-label fw-semibold small"></label>
+                    <input asp-for="ListPrice" asp-format="{0:0.##}" type="number" class="form-control" min="0" max="99999" step="0.01" placeholder="請輸入原價" />
+                    <span asp-validation-for="ListPrice" class="text-danger small"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="Price" class="form-label fw-semibold small"></label>
+                    <input asp-for="Price" asp-format="{0:0.##}" type="number" class="form-control" min="0" max="99999" step="0.01" placeholder="請輸入售價" />
+                    <span asp-validation-for="Price" class="text-danger small"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="Price5" class="form-label fw-semibold small"></label>
+                    <input asp-for="Price5" asp-format="{0:0.##}" type="number" class="form-control" min="0" max="99999" step="0.01" placeholder="選填：請輸入 5 件以上價格" />
+                    <span asp-validation-for="Price5" class="text-danger small"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="Price10" class="form-label fw-semibold small"></label>
+                    <input asp-for="Price10" asp-format="{0:0.##}" type="number" class="form-control" min="0" max="99999" step="0.01" placeholder="選填：請輸入 10 件以上價格" />
+                    <span asp-validation-for="Price10" class="text-danger small"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="StockQuantity" class="form-label fw-semibold small"></label>
+                    <input asp-for="StockQuantity" type="number" class="form-control" min="0" step="1" placeholder="請輸入庫存數量" />
+                    <span asp-validation-for="StockQuantity" class="text-danger small"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="CategoryId" class="form-label fw-semibold small"></label>
+
+                    <select asp-for="CategoryId" asp-items="ViewBag.CategoryList" class="form-select">
+                        <option value="">-- 請選擇商品分類 --</option>
+                    </select>
+
+                    <span asp-validation-for="CategoryId" class="text-danger small"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="ImageUrl" class="form-label fw-semibold small"></label>
+
+                    <div class="mb-2">
+                        <img id="imagePreview"
+                             src="@(Model?.ImageUrl ?? string.Empty)"
+                             alt="商品圖片預覽"
+                             class="img-thumbnail @(string.IsNullOrWhiteSpace(Model?.ImageUrl) ? "d-none" : "")"
+                             style="max-width: 200px; max-height: 200px; object-fit: contain;" />
+                    </div>
+
+                    <input asp-for="ImageUrl" id="imageUrlInput" class="form-control" placeholder="請輸入商品圖片網址" />
+
+                    <span asp-validation-for="ImageUrl" class="text-danger small"></span>
+
+                    <div id="imagePreviewError" class="text-danger small mt-1 d-none">
+                        無法載入這個圖片網址
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <div class="form-check form-switch">
+                        <input asp-for="IsActive" class="form-check-input" />
+                        <label asp-for="IsActive" class="form-check-label"></label>
+                    </div>
+                    <span asp-validation-for="IsActive" class="text-danger small"></span>
+                </div>
+
+                <div class="d-flex gap-2 mt-4">
+                    <button type="submit" class="btn btn-accent fw-semibold">確認新增</button>
+                    <a asp-action="Index" class="btn btn-light fw-medium">取消</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+
+    <script>
+        const imageUrlInput = document.getElementById("imageUrlInput");
+        const imagePreview = document.getElementById("imagePreview");
+        const imagePreviewError = document.getElementById("imagePreviewError");
+
+        imageUrlInput.addEventListener("input", function(event) {
+            const imageUrl = event.target.value.trim();
+
+
+            imagePreviewError.classList.add("d-none");
+
+            if (imageUrl === "") {
+                imagePreview.removeAttribute("src");
+                imagePreview.classList.add("d-none");
+                return;
+            }
+
+            imagePreview.classList.add("d-none");
+            imagePreview.src = imageUrl;
+        });
+
+        imagePreview.addEventListener("load", function() {
+            imagePreview.classList.remove("d-none");
+            imagePreviewError.classList.add("d-none");
+        });
+
+        imagePreview.addEventListener("error", function() {
+            imagePreview.classList.add("d-none");
+            imagePreviewError.classList.remove("d-none");
+        });
+    </script>
+}
