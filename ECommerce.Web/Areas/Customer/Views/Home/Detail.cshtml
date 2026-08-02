@@ -1,0 +1,249 @@
+﻿@using ECommerce.Models.ViewModels
+@model ProductDetailViewModel
+
+@{
+    ViewData["Title"] = Model.Product.Title;
+
+    var primaryImage = Model.Product.ProductImages
+        .FirstOrDefault(image => image.IsPrimary)
+        ?? Model.Product.ProductImages
+            .OrderBy(image => image.SortOrder)
+            .FirstOrDefault();
+
+    var otherImages = Model.Product.ProductImages
+        .Where(image => primaryImage == null || image.Id != primaryImage.Id)
+        .OrderBy(image => image.SortOrder)
+        .ToList();
+}
+
+<div class="container py-4">
+    <div class="mb-3">
+        <a asp-action="Index" class="text-decoration-none text-secondary small fw-medium d-inline-flex align-items-center gap-1">
+            <i class="bi bi-arrow-left"></i> 回首頁
+        </a>
+    </div>
+
+    <form method="post">
+
+        <input asp-for="Product.Id" type="hidden" />
+
+        <div class="card border shadow-sm overflow-hidden">
+            <div class="row g-0">
+                <!-- 商品圖片 -->
+                <div class="col-lg-5 p-4 @(primaryImage != null ? "product-gallery" : "product-gallery-empty")">
+
+                    <div class="product-main-image-container">
+
+                        @if (primaryImage != null)
+                        {
+                            <img id="mainProductImage" class="product-main-image"
+                                 src="@primaryImage.ImageUrl"
+                                 alt="@Model.Product.Title"
+                            />
+                        }
+                        else
+                        {
+                            <div class="product-image-placeholder">
+                                <i class="bi bi-image"></i>
+
+                                <p class="small mt-3 mb-0">
+                                    目前沒有商品圖片
+                                </p>
+                            </div>
+                        }
+
+                    </div>
+
+                    @if (primaryImage != null && otherImages.Any())
+                    {
+                        <div class="d-flex flex-wrap justify-content-center gap-2 mt-3">
+
+                            <button type="button"
+                                    class="btn p-0 product-thumbnail-button active"
+                                    data-image-url="@primaryImage.ImageUrl">
+
+                                <img src="@primaryImage.ImageUrl" alt="@Model.Product.Title"
+                                     class="product-thumbnail-image" />
+                            </button>
+                            
+                            @foreach (var image in otherImages)
+                            {
+                                <button type="button"
+                                        class="btn p-0 border rounded product-thumbnail-button"
+                                        data-image-url="@image.ImageUrl">
+
+                                    <img src="@image.ImageUrl" alt="@Model.Product.Title"
+                                         class="product-thumbnail-image" />
+                                </button>
+                            }
+
+                        </div>
+                    }
+
+                </div>
+
+                <!-- 商品內容 -->
+                <div class="col-lg-7 p-4 p-lg-5">
+                    <span class="badge mb-3" style="background: rgba(23,163,74,0.1); color: #17A34A;">
+                        <i class="bi bi-bookmark me-1"></i>
+                        @(Model.Product.Category?.Name ?? "未分類")
+                    </span>
+
+                    <h1 class="h3 fw-bold mb-2">@Model.Product.Title</h1>
+
+                    <p class="text-secondary small mb-3">商品編號：@Model.Product.SKU</p>
+
+                    <div class="d-flex align-items-baseline gap-2 mb-4">
+
+                        <span class="h3 fw-bold mb-0" style="color: #17A34A;">
+                            @Model.Product.Price.ToString("C0")
+                        </span>
+
+                        @if (Model.Product.ListPrice > Model.Product.Price)
+                        {
+                            <span class="text-decoration-line-through text-secondary">
+                                @Model.Product.ListPrice.ToString("C0")
+                            </span>
+                        }
+
+                    </div>
+
+                    <!-- 數量優惠 -->
+                    <div class="border rounded p-3 mb-4 bg-light">
+
+                        <p class="text-uppercase fw-bold text-secondary mb-3" style="font-size: 0.65rem; letter-spacing: 0.1em;">
+                            <i class="bi bi-stack me-1" style="color: #17A34A;"></i>
+                            數量優惠
+                        </p>
+
+                        <div class="row g-2 text-center">
+
+                            <div class="col-4">
+                                <div class="bg-white border rounded p-2 shadow-sm h-100 d-flex flex-column align-items-center justify-content-center">
+
+                                    <p class="text-uppercase text-secondary mb-1" style="font-size: 0.6rem; font-weight: 700;">
+                                        1－4 件
+                                    </p>
+
+                                    <p class="fw-bold mb-0" style="color: #17A34A;">
+                                        @Model.Product.Price.ToString("C0")
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div class="col-4">
+                                <div class="bg-white border rounded p-2 shadow-sm h-100 d-flex flex-column align-items-center justify-content-center"
+                                     style="border-color: rgba(23,163,74,0.3) !important;">
+
+                                    <p class="text-uppercase text-secondary mb-1" style="font-size: 0.6rem; font-weight: 700;">
+                                        5－9 件
+                                    </p>
+
+                                    <p class="fw-bold mb-0" style="color: #17A34A;">
+                                        @(Model.Product.Price5?.ToString("C0") ?? "尚未設定")
+                                    </p>
+                                    
+                                    <span class="badge mt-1" style="font-size: 0.55rem; background: rgba(23,163,74,0.1); color: #17A34A;">
+                                        優惠
+                                    </span>
+                                </div>
+                            </div>
+
+                            <div class="col-4">
+                                <div class="bg-white border rounded p-2 shadow-sm h-100 d-flex flex-column align-items-center justify-content-center"
+                                     style="border-color: #17A34A !important;">
+
+                                    <p class="text-uppercase text-secondary mb-1" style="font-size: 0.6rem; font-weight: 700;">
+                                        10 件以上
+                                    </p>
+
+                                    <p class="fw-bold mb-0" style="color: #17A34A;">
+                                        @(Model.Product.Price10?.ToString("C0") ?? "尚未設定")
+                                    </p>
+                                   
+                                    <span class="badge text-white mt-1" style="font-size: 0.55rem; background: #17A34A;">
+                                        最優惠
+                                    </span>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <!-- 商品說明 -->
+                    <div class="text-secondary mb-4">
+                        @Html.Raw(Model.Product.Description)
+                    </div>
+
+                    <!-- 庫存 -->
+                    <div class="mb-4">
+
+                        @if (Model.Product.StockQuantity > 0)
+                        {
+                            <span class="badge bg-success-subtle text-success">
+                                <i class="bi bi-check-circle me-1"></i>
+                                尚有庫存：@Model.Product.StockQuantity
+                            </span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-danger-subtle text-danger">
+                                <i class="bi bi-x-circle me-1"></i>
+                                商品目前缺貨
+                            </span>
+                        }
+
+                    </div>
+
+                    <div class="d-flex flex-column flex-sm-row align-items-stretch gap-2">
+                        <div class="input-group" style="max-width: 160px;">
+
+                            <span class="input-group-text fw-semibold small" style="background: #17A34A; color: #fff;">
+                                數量
+                            </span>
+
+                            <input asp-for="Quantity" type="number" class="form-control text-center fw-medium"
+                                   min="1"
+                                   max="@Model.Product.StockQuantity"
+                            />
+                        </div>
+
+                        <button type="submit" class="btn btn-accent flex-grow-1 fw-semibold py-2" 
+                                disabled="@(Model.Product.StockQuantity <= 0)">
+
+                            <i class="bi bi-cart-plus me-1"></i>
+                            加入購物車
+                        </button>
+
+                    </div>
+
+                    <span asp-validation-for="Quantity" class="text-danger small"></span>
+
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+
+    <script>
+        document.querySelectorAll(".product-thumbnail-button").forEach(button => {
+            button.addEventListener("click", () => {
+                const imageUrl = button.dataset.imageUrl;
+                const mainImage = document.getElementById("mainProductImage");
+
+                if (!mainImage || !imageUrl) {
+                    return;
+                }
+
+                mainImage.src = imageUrl;
+
+                document.querySelectorAll(".product-thumbnail-button").forEach(item => item.classList.remove("active"));
+
+                button.classList.add("active");
+            });
+         });
+    </script>
+}

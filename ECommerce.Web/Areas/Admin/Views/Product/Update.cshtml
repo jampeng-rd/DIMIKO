@@ -10,9 +10,9 @@
         <i class="bi bi-arrow-left"></i> 返回商品列表
     </a>
     <div class="card border shadow-sm overflow-hidden">
-        <div class="card-header text-white py-3 px-4" style="background: linear-gradient(to right, #025A93, #282828, #191414);">
-            <h5 class="mb-0 fw-bold"><i class="bi bi-plus-lg me-2"></i>Update Product</h5>
-            <p class="mb-0 small" style="color: #0B9BFE;">更新商品</p>
+        <div class="card-header admin-card-header text-white py-3 px-4">
+            <h5 class="mb-0 fw-bold"><i class="bi bi-pencil-square me-2"></i>Update Product</h5>
+            <p class="admin-card-subtitle mb-0 small">更新商品</p>
         </div>
         <div class="card-body p-4">
             <form method="post" asp-controller="Product" asp-action="Update" enctype="multipart/form-data">
@@ -91,15 +91,10 @@
                         <div class="d-flex flex-wrap gap-3">
                             @foreach (var image in Model.ExistingImages)
                             {
-                                <div class="card p-2" style="width: 180px;">
+                                <div class="card p-2 product-image-card">
 
                                     <div class="position-relative">
-                                        <img src="@image.ImageUrl"
-                                             alt="商品圖片"
-                                             class="img-thumbnail"
-                                             style="width: 160px;
-                                                    height: 160px;
-                                                    object-fit: cover;" />
+                                        <img src="@image.ImageUrl" alt="商品圖片" class="img-thumbnail" product-existing-image/>
 
                                         @if (image.IsPrimary)
                                         {
@@ -197,10 +192,7 @@
 
                 image.src = previewUrl;
                 image.alt = `新增商品圖片 ${index + 1}`;
-                image.className = "img-thumbnail";
-                image.style.width = "150px";
-                image.style.height = "150px";
-                image.style.objectFit = "cover";
+                image.className = "img-thumbnail product-image-preview";
 
                 image.addEventListener("load",function () {
                     URL.revokeObjectURL(previewUrl);

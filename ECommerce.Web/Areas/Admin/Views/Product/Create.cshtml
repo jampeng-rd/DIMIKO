@@ -10,9 +10,9 @@
         <i class="bi bi-arrow-left"></i> 返回商品列表
     </a>
     <div class="card border shadow-sm overflow-hidden">
-        <div class="card-header text-white py-3 px-4" style="background: linear-gradient(to right, #025A93, #282828, #191414);">
+        <div class="card-header admin-card-header text-white py-3 px-4">
             <h5 class="mb-0 fw-bold"><i class="bi bi-plus-lg me-2"></i>Create Product</h5>
-            <p class="mb-0 small" style="color: #0B9BFE;">新增商品</p>
+            <p class="admin-card-subtitle mb-0 small">新增商品</p>
         </div>
         <div class="card-body p-4">
             <form method="post" asp-controller="Product" asp-action="Create" enctype="multipart/form-data">
@@ -134,10 +134,7 @@
 
                 image.src = previewUrl;
                 image.alt = `商品圖片 ${index + 1}`;
-                image.className = "img-thumbnail";
-                image.style.width = "150px";
-                image.style.height = "150px";
-                image.style.objectFit = "cover";
+                image.className = "img-thumbnail product-image-preview";
 
                 image.addEventListener("load", function () {
                     URL.revokeObjectURL(previewUrl);
