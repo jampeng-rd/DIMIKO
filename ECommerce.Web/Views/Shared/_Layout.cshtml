@@ -1,4 +1,6 @@
-﻿<!DOCTYPE html>
+﻿@using ECommerce.Utility
+
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
@@ -36,12 +38,22 @@
                             <a class="nav-link" asp-area="Customer" asp-controller="Home" asp-action="Index">Home</a>
                         </li>
                         
-                        <li class="nav-item">
-                            <a class="nav-link" asp-area="Admin" asp-controller="category" asp-action="Index">Category</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" asp-area="Admin" asp-controller="product" asp-action="Index">Product</a>
-                        </li>
+                        @if (User.IsInRole(SD.RoleAdmin) || User.IsInRole(SD.RoleEmployee))
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link" asp-area="Admin" asp-controller="category" asp-action="Index">商品類型管理</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" asp-area="Admin" asp-controller="product" asp-action="Index">商品管理</a>
+                            </li>
+
+                            @if (User.IsInRole(SD.RoleAdmin))
+                            {
+                                <li class="nav-item">
+                                    <a class="nav-link" asp-area="Admin" asp-controller="User"  asp-action="Index">使用者管理</a>
+                                </li>
+                            }
+                        }
                     </ul>
 
                     <div class="d-flex align-items-center gap-3">

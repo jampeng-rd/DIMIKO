@@ -1,10 +1,13 @@
 ﻿using ECommerce.Business.Services.IServices;
 using ECommerce.Models;
+using ECommerce.Utility;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ECommerce.Web.Areas.Admin.Controllers
 {
 	[Area("Admin")]
+	[Authorize(Roles = $"{SD.RoleAdmin},{SD.RoleEmployee}")]
 	public class CategoryController : Controller
 	{
 		private readonly ICategoryService _categoryService;

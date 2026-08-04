@@ -1,5 +1,6 @@
 ﻿using ECommerce.Models;
 using ECommerce.Models.ViewModels;
+using ECommerce.Utility;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
@@ -55,7 +56,14 @@ namespace ECommerce.Web.Areas.Identity.Controllers
 					routeValues: new { area = "Customer" });
 			}
 
-			ModelState.AddModelError(string.Empty, "帳號或密碼不正確。");
+			if (result.IsLockedOut)
+			{
+				ModelState.AddModelError(string.Empty, "此帳號已被停用，請聯絡客服或管理員");
+
+				return View(loginViewModel);
+			}
+
+			ModelState.AddModelError(string.Empty, "帳號或密碼不正確");
 
 			return View(loginViewModel);
 		}
@@ -111,6 +119,22 @@ namespace ECommerce.Web.Areas.Identity.Controllers
 
 			if (result.Succeeded)
 			{
+				var roleResult = await _userManager.AddToRoleAsync(applicationUser, SD.RoleCustomer);
+
+				// 加入角色失敗時要刪除使用者
+				if (!roleResult.Succeeded)
+				{
+					await _userManager.DeleteAsync(applicationUser);
+
+					foreach (var error in roleResult.Errors)
+					{
+						ModelState.AddModelError(string.Empty, error.Description);
+					}
+
+					return View(registerViewModel);
+				}
+
+
 				await _signInManager.SignInAsync(applicationUser, isPersistent: false);
 
 				if (!string.IsNullOrWhiteSpace(returnUrl) && Url.IsLocalUrl(returnUrl))

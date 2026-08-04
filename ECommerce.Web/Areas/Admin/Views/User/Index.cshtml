@@ -1,0 +1,141 @@
+﻿@using ECommerce.Models.ViewModels
+@using ECommerce.Models
+@using Microsoft.AspNetCore.Identity
+@inject UserManager<ApplicationUser> UserManager
+@model IEnumerable<UserListViewModel>
+
+@{
+    ViewData["Title"] = "Users";
+    var currentUserId = UserManager.GetUserId(User);
+}
+
+<div class="container-fluid py-4 px-4">
+    <div class="card border shadow-sm overflow-hidden">
+        <div class="card-header text-white py-3 px-4 d-flex align-items-center justify-content-between" style="background: linear-gradient(to right, #065f46, #282828, #191414);">
+            <div>
+                <h5 class="mb-0 fw-bold"><i class="bi bi-people me-2"></i>Users Management</h5>
+                <p class="mb-0 small" style="color: #1DB954;">查看使用者及目前角色</p>
+            </div>
+
+            @* <a asp-controller="User" asp-action="Create"
+               class="btn btn-sm btn-outline-light fw-semibold d-inline-flex align-items-center gap-1">
+                <i class="bi bi-person-plus"></i> Create User
+            </a> *@
+
+        </div>
+        <div class="table-responsive">
+            <table class="table-styled">
+                <thead>
+                    <tr>
+                        <th class="px-4 py-3">
+                            @Html.DisplayNameFor(model => model.Name)
+                        </th>
+
+                        <th class="py-3">
+                            @Html.DisplayNameFor(model => model.Email)
+                        </th>
+
+                        <th class="py-3">
+                            @Html.DisplayNameFor(model => model.PhoneNumber)
+                        </th>
+
+                        <th class="py-3">
+                            @Html.DisplayNameFor(model => model.Roles)
+                        </th>
+
+                        <th class="py-3">
+                            @Html.DisplayNameFor(model => model.IsLockedOut)
+                        </th>
+
+                        <th class="text-end px-4 py-3">
+                            操作
+                        </th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    @if (!Model.Any())
+                    {
+                        <tr>
+                            <td colspan="6" class="text-center text-secondary py-5">
+                                目前沒有使用者資料。
+                            </td>
+                        </tr>
+                    }
+                    else
+                    {
+                        @foreach (var user in Model)
+                        {
+                            <tr>
+                                <td class="px-4 py-3 fw-semibold">@user.Name</td>
+
+                                <td class="py-3">@user.Email</td>
+
+                                <td class="py-3">
+                                    @(string.IsNullOrWhiteSpace(user.PhoneNumber)
+                                        ? "未提供"
+                                        : user.PhoneNumber)
+                                </td>
+
+                                <td class="py-3">
+                                    @if (user.Roles == "尚未設定")
+                                    {
+                                        <span class="badge text-bg-secondary">尚未設定</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge text-bg-dark">@user.Roles</span>
+                                    }
+                                </td>
+
+                                <td class="py-3">
+                                    @if (user.IsLockedOut)
+                                    {
+                                        <span class="badge text-bg-danger">已停用</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge text-bg-success">使用中</span>
+                                    }
+                                </td>
+
+                                <td class="text-end">
+                                    <a asp-action="EditRole" asp-route-id="@user.Id" class="btn btn-sm btn-outline-success me-1">
+                                        <i class="bi bi-pencil-square me-1"></i>更新
+                                    </a>
+                                    
+                                    @if (user.IsLockedOut)
+                                    {
+                                        <form asp-action="Enable" asp-route-id="@user.Id" method="post" class="d-inline">
+                                            <button type="submit" class="btn btn-sm btn-outline-success">
+                                                啟用
+                                            </button>
+                                        </form>
+                                    }
+                                    else if (user.Id != currentUserId)
+                                    {
+                                        <form asp-action="Disable" asp-route-id="@user.Id" method="post" class="d-inline"
+                                              onsubmit="return confirm('確定要停用這個帳號嗎？');">
+
+                                            <button type="submit" class="btn btn-sm btn-outline-danger">
+                                                停用
+                                            </button>
+                                        </form>
+                                    }
+                                    else
+                                    {
+                                        <span class="small text-secondary">
+                                            目前帳號
+                                        </span>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+

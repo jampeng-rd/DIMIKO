@@ -42,9 +42,9 @@ namespace ECommerce.Models.ViewModels
 		[Display(Name = "電話號碼")]
 		public string? PhoneNumber { get; set; }
 
-		public string? Role { get; set; }
+		//public string? Role { get; set; }
 
-		[ValidateNever]
-		public IEnumerable<SelectListItem> RoleList { get; set; } = Enumerable.Empty<SelectListItem>();
+		//[ValidateNever]
+		//public IEnumerable<SelectListItem> RoleList { get; set; } = Enumerable.Empty<SelectListItem>();
 	}
 }

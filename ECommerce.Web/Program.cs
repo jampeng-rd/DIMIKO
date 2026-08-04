@@ -3,6 +3,7 @@ using ECommerce.Business.Services.IServices;
 using ECommerce.DataAccess.Data;
 using ECommerce.Models;
 using ECommerce.Utility.Identity;
+using ECommerce.Web.DataInitialization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
@@ -39,8 +40,29 @@ builder.Services.AddScoped<ICategoryService, CategoryService>();
 builder.Services.AddScoped<IProductService, ProductService>();
 builder.Services.AddScoped<IProductImageFileService, ProductImageFileService>();
 
+// 設定 Identity 登入與拒絕存取路徑
+builder.Services.ConfigureApplicationCookie(options =>
+{
+	options.LoginPath = "/Identity/Account/login";
+	options.LogoutPath = "/Identity/Account/Logout";
+	options.AccessDeniedPath = "/Identity/Account/AccessDenied";
+	options.ExpireTimeSpan = TimeSpan.FromDays(1);
+});
+// 最多約 5 分鐘後重新驗證安全戳記
+builder.Services.Configure<SecurityStampValidatorOptions>(options =>
+{
+	options.ValidationInterval = TimeSpan.FromMinutes(5);
+});
+
 
 var app = builder.Build();
+
+
+// Initialize Identity roles and initial administrator.
+using (var scope = app.Services.CreateScope())
+{
+	await IdentityInitializer.InitializeAsync(scope.ServiceProvider, app.Configuration);
+}
 
 
 // Configure the HTTP request pipeline.
