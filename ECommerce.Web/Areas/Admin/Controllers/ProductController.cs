@@ -33,6 +33,7 @@ namespace ECommerce.Web.Areas.Admin.Controllers
 			return View(products);
 		}
 
+		[Authorize(Roles = SD.RoleAdmin)]
 		public async Task<IActionResult> Create()
 		{
 			await LoadCategoryListAsync();
@@ -42,6 +43,7 @@ namespace ECommerce.Web.Areas.Admin.Controllers
 
 		[HttpPost]
 		[ValidateAntiForgeryToken]
+		[Authorize(Roles = SD.RoleAdmin)]
 		public async Task<IActionResult> Create(ProductCreateViewModel viewModel)
 		{
 			Product product = viewModel.Product;
@@ -115,6 +117,7 @@ namespace ECommerce.Web.Areas.Admin.Controllers
 			return RedirectToAction(nameof(Index));
 		}
 
+		[Authorize(Roles = SD.RoleAdmin)]
 		public async Task<IActionResult> Update(int? id)
 		{
 			if (id is null or 0)
@@ -144,6 +147,7 @@ namespace ECommerce.Web.Areas.Admin.Controllers
 
 		[HttpPost]
 		[ValidateAntiForgeryToken]
+		[Authorize(Roles = SD.RoleAdmin)]
 		public async Task<IActionResult> Update(ProductUpdateViewModel viewModel)
 		{
 			Product product = viewModel.Product;
@@ -212,6 +216,7 @@ namespace ECommerce.Web.Areas.Admin.Controllers
 			return RedirectToAction(nameof(Index));
 		}
 
+		[Authorize(Roles = SD.RoleAdmin)]
 		public async Task<IActionResult> Delete(int? id)
 		{
 			if (id == null || id == 0)
@@ -232,6 +237,7 @@ namespace ECommerce.Web.Areas.Admin.Controllers
 		[HttpPost]
 		[ValidateAntiForgeryToken]
 		[ActionName("Delete")]
+		[Authorize(Roles = SD.RoleAdmin)]
 		public async Task<IActionResult> DeletePOST(int id)
 		{
 			bool deleted = await _productService.DeleteProductAsync(id);
@@ -253,6 +259,7 @@ namespace ECommerce.Web.Areas.Admin.Controllers
 		//刪除圖片
 		[HttpPost]
 		[ValidateAntiForgeryToken]
+		[Authorize(Roles = SD.RoleAdmin)]
 		public async Task<IActionResult> DeleteImage(int imageId, int productId)
 		{
 			var image = await _productService.GetProductImageByIdAsync(imageId);
@@ -281,6 +288,7 @@ namespace ECommerce.Web.Areas.Admin.Controllers
 		// 設定首圖
 		[HttpPost]
 		[ValidateAntiForgeryToken]
+		[Authorize(Roles = SD.RoleAdmin)]
 		public async Task<IActionResult> SetPrimaryImage(int imageId, int productId)
 		{
 			bool updated = await _productService.SetPrimaryImageAsync(productId, imageId);

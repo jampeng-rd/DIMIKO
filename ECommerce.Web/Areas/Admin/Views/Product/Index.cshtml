@@ -1,4 +1,5 @@
-﻿@using ECommerce.Models
+﻿@using ECommerce.Utility
+@using ECommerce.Models
 @model List<Product>
 
 @{
@@ -14,9 +15,19 @@
                 <p class="admin-card-subtitle mb-0 small">商品管理</p>
             </div>
 
-            <a asp-controller="Product" asp-action="Create" class="btn btn-sm btn-outline-light fw-semibold d-inline-flex align-items-center gap-1">
-                <i class="bi bi-plus-lg"></i> 新增商品
-            </a>
+            @if (User.IsInRole(SD.RoleAdmin))
+            {
+                <a asp-controller="Product" asp-action="Create" class="btn btn-sm btn-outline-light fw-semibold d-inline-flex align-items-center gap-1">
+                    <i class="bi bi-plus-lg"></i> 新增商品
+                </a>
+            }
+
+            @if (User.IsInRole(SD.RoleEmployee))
+            {
+                <div class="alert alert-info p-2">
+                    帳號無編輯權限
+                </div>
+            }
         </div>
         <div class="table-responsive">
             <table class="table-styled">
@@ -28,7 +39,7 @@
                         <th>售價</th>
                         <th>庫存數量</th>
                         <th>商品分類</th>
-                        <th class="text-end">操作</th>
+                        @* <th class="text-end">操作</th> *@
                     </tr>
                 </thead>
 
@@ -64,10 +75,13 @@
                             <td class="fw-medium">@product.StockQuantity</td>
                             <td class="fw-medium">@(product.Category?.Name ?? "未分類")</td>
 
-                            <td class="text-end">
-                                <a asp-action="Update" asp-route-id="@product.Id" class="btn btn-sm btn-outline-success me-1"><i class="bi bi-pencil-square me-1"></i>更新</a>
-                                <a asp-action="Delete" asp-route-id="@product.Id" class="btn btn-sm btn-outline-danger"><i class="bi bi-trash me-1"></i>刪除</a>
-                            </td>
+                            @if (User.IsInRole(SD.RoleAdmin))
+                            {
+                                <td class="text-end">
+                                    <a asp-action="Update" asp-route-id="@product.Id" class="btn btn-sm btn-outline-success me-1"><i class="bi bi-pencil-square me-1"></i>更新</a>
+                                    <a asp-action="Delete" asp-route-id="@product.Id" class="btn btn-sm btn-outline-danger"><i class="bi bi-trash me-1"></i>刪除</a>
+                                </td>
+                            }
                         </tr>
                     }
                 </tbody>

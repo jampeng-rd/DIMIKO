@@ -1,4 +1,5 @@
-﻿@using ECommerce.Models
+﻿@using ECommerce.Utility
+@using ECommerce.Models
 @model List<Category>
 
 @{
@@ -10,12 +11,22 @@
         <div class="card-header admin-card-header text-white py-3 px-4 d-flex align-items-center justify-content-between">
             <div>
                 <h5 class="mb-0 fw-bold"><i class="bi bi-grid me-2"></i>Categories</h5>
-                <p class="admin-card-subtitle mb-0 small">類別管理</p>
+                <p class="admin-card-subtitle mb-0 small">商品類別管理</p>
             </div>
 
-            <a asp-controller="Category" asp-action="Create" class="btn btn-sm btn-outline-light fw-semibold d-inline-flex align-items-center gap-1">
-                <i class="bi bi-plus-lg"></i> 新增類別
-            </a>
+            @if (User.IsInRole(SD.RoleAdmin))
+            {
+                <a asp-controller="Category" asp-action="Create" class="btn btn-sm btn-outline-light fw-semibold d-inline-flex align-items-center gap-1">
+                    <i class="bi bi-plus-lg"></i> 新增類別
+                </a>
+            }
+
+            @if (User.IsInRole(SD.RoleEmployee))
+            {
+                <div class="alert alert-info p-2">
+                    帳號無編輯權限
+                </div>
+            }
         </div>
         <div class="table-responsive">
             <table class="table-styled">
@@ -23,7 +34,7 @@
                     <tr>
                         <th>Display Order</th>
                         <th>Category Name</th>
-                        <th class="text-end">操作</th>
+                        @* <th class="text-end">操作</th> *@
                     </tr>
                 </thead>
                 <tbody>
@@ -32,10 +43,14 @@
                         <tr>
                             <td><span class="badge bg-light text-dark border">@category.DisplayOrder</span></td>
                             <td class="fw-medium">@category.Name</td>
-                            <td class="text-end">
-                                <a asp-action="Update" asp-route-id="@category.Id" class="btn btn-sm btn-outline-success me-1"><i class="bi bi-pencil-square me-1"></i>更新</a>
-                                <a asp-action="Delete" asp-route-id="@category.Id" class="btn btn-sm btn-outline-danger"><i class="bi bi-trash me-1"></i>刪除</a>
-                            </td>
+                            
+                            @if (User.IsInRole(SD.RoleAdmin))
+                            {
+                                <td class="text-end">
+                                    <a asp-action="Update" asp-route-id="@category.Id" class="btn btn-sm btn-outline-success me-1"><i class="bi bi-pencil-square me-1"></i>更新</a>
+                                    <a asp-action="Delete" asp-route-id="@category.Id" class="btn btn-sm btn-outline-danger"><i class="bi bi-trash me-1"></i>刪除</a>
+                                </td>
+                            }
                         </tr>
                     }
                 </tbody>

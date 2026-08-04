@@ -35,24 +35,17 @@
                 <div class="navbar-collapse collapse">
                     <ul class="navbar-nav me-auto mb-2 mb-lg-0">
                         <li class="nav-item">
-                            <a class="nav-link" asp-area="Customer" asp-controller="Home" asp-action="Index">Home</a>
+                            <a class="nav-link" asp-area="Customer" asp-controller="Home" asp-action="Index">
+                                <i class="bi bi-house me-1"></i>Home</a>
                         </li>
                         
                         @if (User.IsInRole(SD.RoleAdmin) || User.IsInRole(SD.RoleEmployee))
                         {
                             <li class="nav-item">
-                                <a class="nav-link" asp-area="Admin" asp-controller="category" asp-action="Index">商品類型管理</a>
+                                <a class="nav-link" asp-area="Admin" asp-controller="Dashboard" asp-action="Index">
+                                    <i class="bi bi-speedometer2 me-1"></i>後台系統
+                                </a>
                             </li>
-                            <li class="nav-item">
-                                <a class="nav-link" asp-area="Admin" asp-controller="product" asp-action="Index">商品管理</a>
-                            </li>
-
-                            @if (User.IsInRole(SD.RoleAdmin))
-                            {
-                                <li class="nav-item">
-                                    <a class="nav-link" asp-area="Admin" asp-controller="User"  asp-action="Index">使用者管理</a>
-                                </li>
-                            }
                         }
                     </ul>
 

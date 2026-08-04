@@ -24,15 +24,16 @@ namespace ECommerce.Web.Areas.Admin.Controllers
 			return View(categories);
 		}
 
-		public async Task<IActionResult> Create()
+		[Authorize(Roles = SD.RoleAdmin)]
+		public IActionResult Create()
 		{
-
 			return View();
 		}
 
 		[HttpPost]
 		[ValidateAntiForgeryToken]
 		[ActionName("Create")]
+		[Authorize(Roles = SD.RoleAdmin)]
 		public async Task<IActionResult> CreatePOST(Category category)
 		{
 			// 先檢查 Data Annotations
@@ -60,6 +61,7 @@ namespace ECommerce.Web.Areas.Admin.Controllers
 			return RedirectToAction(nameof(Index));
 		}
 
+		[Authorize(Roles = SD.RoleAdmin)]
 		public async Task<IActionResult> Update(int? id)
 		{
 			if(id == null ||  id == 0)
@@ -81,6 +83,7 @@ namespace ECommerce.Web.Areas.Admin.Controllers
 		[HttpPost]
 		[ValidateAntiForgeryToken]
 		[ActionName("Update")]
+		[Authorize(Roles = SD.RoleAdmin)]
 		public async Task<IActionResult> UpdatePOST(Category category)
 		{
 			// 先檢查 Data Annotations
@@ -113,6 +116,7 @@ namespace ECommerce.Web.Areas.Admin.Controllers
 			return RedirectToAction(nameof(Index));
 		}
 
+		[Authorize(Roles = SD.RoleAdmin)]
 		public async Task<IActionResult> Delete(int? id)
 		{
 			if (id is null or 0)
@@ -133,6 +137,7 @@ namespace ECommerce.Web.Areas.Admin.Controllers
 		[HttpPost]
 		[ValidateAntiForgeryToken]
 		[ActionName("Delete")]
+		[Authorize(Roles = SD.RoleAdmin)]
 		public async Task<IActionResult> DeletePOST(int id)
 		{
 			bool deleted = await _categoryService.DeleteCategoryAsync(id);
