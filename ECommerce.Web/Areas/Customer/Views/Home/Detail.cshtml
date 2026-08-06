@@ -23,9 +23,9 @@
         </a>
     </div>
 
-    <form method="post">
+    <form method="post" asp-area="Customer" asp-controller="Home" asp-action="Detail">
 
-        <input asp-for="Product.Id" type="hidden" />
+        <input type="hidden" name="productId" value="@Model.Product.Id" />
 
         <div class="card border shadow-sm overflow-hidden">
             <div class="row g-0">
@@ -198,19 +198,21 @@
                     <div class="d-flex flex-column flex-sm-row align-items-stretch gap-2">
                         <div class="input-group" style="max-width: 160px;">
 
-                            <span class="input-group-text fw-semibold small" style="background: #17A34A; color: #fff;">
+                            <span class="input-group-text fw-semibold small" 
+                                  style="background: #17A34A; color: #fff;">
                                 數量
                             </span>
 
-                            <input asp-for="Quantity" type="number" class="form-control text-center fw-medium"
-                                   min="1"
-                                   max="@Model.Product.StockQuantity"
-                            />
+                            <input asp-for="Quantity" type="number" 
+                                   id="quantityInput" class="form-control text-center fw-medium"
+                                   min="1" max="@Model.Product.StockQuantity" 
+                                   data-stock="@Model.Product.StockQuantity"
+                                   data-msg-min="商品數量至少必須為 1 件" 
+                                   data-msg-max="目前庫存僅剩 @Model.Product.StockQuantity 件" />
                         </div>
 
                         <button type="submit" class="btn btn-accent flex-grow-1 fw-semibold py-2" 
-                                disabled="@(Model.Product.StockQuantity <= 0)">
-
+                                disabled="@(Model.Product.StockQuantity <= 0 ? "disabled" : null)">
                             <i class="bi bi-cart-plus me-1"></i>
                             加入購物車
                         </button>
@@ -229,6 +231,7 @@
     <partial name="_ValidationScriptsPartial" />
 
     <script>
+        // 照片處理
         document.querySelectorAll(".product-thumbnail-button").forEach(button => {
             button.addEventListener("click", () => {
                 const imageUrl = button.dataset.imageUrl;
@@ -245,5 +248,39 @@
                 button.classList.add("active");
             });
          });
+
+         // 數量輸入錯誤的訊息處理
+        const quantityInput = document.getElementById("quantityInput");
+        if (quantityInput) {
+            quantityInput.addEventListener("invalid", function() {
+                const stock = Number(this.dataset.stock);
+                const quantity = Number(this.value);
+
+                this.setCustomValidity("");
+
+                if (this.validity.valueMissing) {
+                    this.setCustomValidity("請輸入商品數量");
+                    return;
+                }
+
+                if (this.validity.rangeUnderflow) {
+                    this.setCustomValidity("商品數量至少必須為 1 件");
+                    return;
+                }
+
+                if (this.validity.rangeOverflow) {
+                    this.setCustomValidity(`目前庫存僅剩 ${stock} 件`);
+                    return;
+                }
+
+                if (this.validity.badInput || !Number.isInteger(quantity)) {
+                    this.setCustomValidity("請輸入有效的整數數量");
+                }
+            });
+
+            quantityInput.addEventListener("input", function() {
+                this.setCustomValidity("");
+            });
+        }
     </script>
 }

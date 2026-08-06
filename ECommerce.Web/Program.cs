@@ -39,6 +39,16 @@ builder.Services
 builder.Services.AddScoped<ICategoryService, CategoryService>();
 builder.Services.AddScoped<IProductService, ProductService>();
 builder.Services.AddScoped<IProductImageFileService, ProductImageFileService>();
+builder.Services.AddScoped<IShoppingCartService, ShoppingCartService>();
+
+// Register Session
+builder.Services.AddDistributedMemoryCache();
+builder.Services.AddSession(options =>
+{
+	options.IdleTimeout = TimeSpan.FromMinutes(30);
+	options.Cookie.HttpOnly = true;
+	options.Cookie.IsEssential = true;
+});
 
 // 設定 Identity 登入與拒絕存取路徑
 builder.Services.ConfigureApplicationCookie(options =>
@@ -58,12 +68,11 @@ builder.Services.Configure<SecurityStampValidatorOptions>(options =>
 var app = builder.Build();
 
 
-// Initialize Identity roles and initial administrator.
+// Initialize Identity roles and initial administrator. 初始化建立管理員
 using (var scope = app.Services.CreateScope())
 {
 	await IdentityInitializer.InitializeAsync(scope.ServiceProvider, app.Configuration);
 }
-
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
@@ -78,6 +87,8 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 
 app.UseRouting();
+
+app.UseSession();
 
 app.UseAuthentication();
 app.UseAuthorization();

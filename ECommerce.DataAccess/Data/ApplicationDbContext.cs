@@ -14,6 +14,9 @@ namespace ECommerce.DataAccess.Data
 		public DbSet<ProductImage> ProductImages { get; set; }
 
 		public DbSet<ApplicationUser> ApplicationUsers { get; set; }
+		public DbSet<ShoppingCart> ShoppingCarts { get; set; }
+		public DbSet<OrderHeader> OrderHeaders { get; set; }
+		public DbSet<OrderDetail> OrderDetails { get; set; }
 
 
 		protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -25,6 +28,30 @@ namespace ECommerce.DataAccess.Data
 				.WithMany(product => product.ProductImages)
 				.HasForeignKey(productImage => productImage.ProductId)
 				.OnDelete(DeleteBehavior.Cascade);
+
+			// 限制同一商品在購物車只出現一次
+			modelBuilder.Entity<ShoppingCart>()
+				.HasIndex(cart => new
+				{
+					cart.ApplicationUserId,
+					cart.ProductId
+				})
+				.IsUnique();
+
+			// 刪除整張訂單時，連同該訂單的所有明細一起刪除
+			modelBuilder.Entity<OrderDetail>()
+				.HasOne(detail => detail.OrderHeader)
+				.WithMany(header => header.OrderDetails)
+				.HasForeignKey(detail => detail.OrderHeaderId)
+				.OnDelete(DeleteBehavior.Cascade);
+
+			// 只要商品有在歷史訂單中時，禁止從資料庫刪除
+			modelBuilder.Entity<OrderDetail>()
+				.HasOne(detail => detail.Product)
+				.WithMany()
+				.HasForeignKey(detail => detail.ProductId)
+				.OnDelete(DeleteBehavior.Restrict);
+
 
 			modelBuilder.Entity<Category>().HasData(
 				new Category { Id = 1, Name = "帳篷與天幕", DisplayOrder = 1 },

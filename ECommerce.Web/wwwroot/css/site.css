@@ -781,3 +781,70 @@
     object-fit: cover;
     display: block;
 }
+
+
+/* Navbar 購物車按鈕 */
+.navbar-cart {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 38px;
+    height: 38px;
+    color: #e5e7eb;
+    text-decoration: none;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 0.4rem;
+    background-color: rgba(255, 255, 255, 0.05);
+    transition: color 0.2s ease, background-color 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+}
+
+.navbar-cart i {
+    font-size: 1.2rem;
+    line-height: 1;
+}
+
+.navbar-cart:hover {
+    color: #ffffff;
+    background-color: rgba(255, 255, 255, 0.12);
+    border-color: rgba(255, 255, 255, 0.2);
+    transform: translateY(-1px);
+}
+
+.navbar-cart i:hover {
+    color: #1DB954;
+}
+
+/* 購物車右上角數量 */
+.navbar-cart-count {
+    position: absolute;
+    top: -7px;
+    right: -8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 19px;
+    height: 19px;
+    padding: 0 5px;
+    color: #ffffff;
+    font-size: 0.68rem;
+    font-weight: 700;
+    line-height: 1;
+    background-color: #dc3545;
+    border: 2px solid #191414;
+    border-radius: 999px;
+}
+
+/* 隱藏購物車頁面的數量 input 的上下箭頭 */
+.cart-quantity-input::-webkit-inner-spin-button,
+.cart-quantity-input::-webkit-outer-spin-button {
+    margin: 0;
+    appearance: none;
+    -webkit-appearance: none;
+}
+
+/* Firefox */
+.cart-quantity-input {
+    appearance: textfield;
+    -moz-appearance: textfield;
+}
