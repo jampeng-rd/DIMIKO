@@ -52,6 +52,11 @@ namespace ECommerce.DataAccess.Data
 				.HasForeignKey(detail => detail.ProductId)
 				.OnDelete(DeleteBehavior.Restrict);
 
+			// 限制訂單編號是唯一值
+			modelBuilder.Entity<OrderHeader>()
+				.HasIndex(order => order.OrderNumber)
+				.IsUnique();
+
 
 			modelBuilder.Entity<Category>().HasData(
 				new Category { Id = 1, Name = "帳篷與天幕", DisplayOrder = 1 },

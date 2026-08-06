@@ -1,0 +1,57 @@
+﻿@model ECommerce.Models.OrderHeader
+
+@{
+    ViewData["Title"] = "成功建立訂單";
+}
+
+<div class="container py-5" style="max-width: 760px;">
+
+    <div class="card border shadow-sm text-center overflow-hidden">
+
+        <div class="card-body px-4 py-5">
+
+            <div class="d-inline-flex align-items-center justify-content-center rounded-circle mb-4"
+                 style="width: 84px;
+                        height: 84px;
+                        background: rgba(23, 163, 74, 0.12);
+                        color: #17A34A;">
+
+                <i class="bi bi-check-lg" style="font-size: 2.8rem;">
+                </i>
+            </div>
+
+            <h2 class="fw-bold mb-3">
+                訂單建立成功
+            </h2>
+
+            <p class="text-secondary mb-2">
+                感謝您的訂購，我們已收到您的訂單。
+            </p>
+
+            <p class="mb-4">
+                訂單編號：
+                <strong class="text-success">
+                    @Model.OrderNumber
+                </strong>
+            </p>
+
+            <p class="text-secondary small mb-4">
+                建立時間：
+                @Model.OrderDate.ToLocalTime().ToString("yyyy/MM/dd HH:mm")
+            </p>
+
+            <div class="d-flex flex-column flex-sm-row justify-content-center gap-2">
+                <a asp-area="Customer" asp-controller="Home" asp-action="Index" class="btn btn-accent px-4">
+                    <i class="bi bi-shop me-1"></i>
+                    繼續購物
+                </a>
+
+                <a asp-area="Customer" asp-controller="Order" asp-action="Details" asp-route-id="@Model.Id"
+                   class="btn btn-outline-secondary px-4">
+                    <i class="bi bi-receipt me-1"></i>
+                    查看訂單
+                </a>
+            </div>
+        </div>
+    </div>
+</div>

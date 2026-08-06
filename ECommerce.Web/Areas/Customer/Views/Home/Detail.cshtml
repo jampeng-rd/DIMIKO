@@ -2,7 +2,7 @@
 @model ProductDetailViewModel
 
 @{
-    ViewData["Title"] = Model.Product.Title;
+    ViewData["Title"] = "商品詳情";
 
     var primaryImage = Model.Product.ProductImages
         .FirstOrDefault(image => image.IsPrimary)
