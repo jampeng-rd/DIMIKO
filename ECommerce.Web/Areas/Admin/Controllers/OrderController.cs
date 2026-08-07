@@ -139,7 +139,137 @@ namespace ECommerce.Web.Areas.Admin.Controllers
 
 			return View(viewModel);
 		}
-		
+
+
+		[HttpPost]
+		[ValidateAntiForgeryToken]
+		public async Task<IActionResult> Confirm(
+			int id,
+			DateTime? returnDate,
+			string? returnStatus,
+			int returnPage = PaginationSettings.DefaultPageNumber,
+			int returnPageSize = PaginationSettings.DefaultPageSize)
+		{
+			var success = await _orderService.ConfirmOrderAsync(id);
+
+			if (!success)
+			{
+				TempData["error"] = "訂單確認失敗，訂單可能不存在或目前狀態無法確認";
+			}
+			else
+			{
+				TempData["success"] = "訂單已確認";
+			}
+
+			return RedirectToAction(nameof(Details),
+				new
+				{
+					id,
+					returnDate,
+					returnStatus,
+					returnPage,
+					returnPageSize
+				});
+		}
+
+		[HttpPost]
+		[ValidateAntiForgeryToken]
+		public async Task<IActionResult> StartProcessing(
+			int id,
+			DateTime? returnDate,
+			string? returnStatus,
+			int returnPage = PaginationSettings.DefaultPageNumber,
+			int returnPageSize = PaginationSettings.DefaultPageSize)
+		{
+			var success = await _orderService.StartProcessingOrderAsync(id);
+
+			if (!success)
+			{
+				TempData["error"] = "開始處理訂單失敗，訂單可能不存在或目前狀態無法處理";
+			}
+			else
+			{
+				TempData["success"] = "訂單已開始處理";
+			}
+
+			return RedirectToAction(nameof(Details),
+				new
+				{
+					id,
+					returnDate,
+					returnStatus,
+					returnPage,
+					returnPageSize
+				});
+		}
+
+		// 處理物流
+		[HttpPost]
+		[ValidateAntiForgeryToken]
+		public async Task<IActionResult> Ship(
+			int id,
+			string carrier,
+			string trackingNumber,
+			DateTime? returnDate,
+			string? returnStatus,
+			int returnPage = PaginationSettings.DefaultPageNumber,
+			int returnPageSize = PaginationSettings.DefaultPageSize)
+		{
+			var success = await _orderService.ShipOrderAsync(id, carrier, trackingNumber);
+
+			if (!success)
+			{
+				TempData["error"] = "訂單出貨失敗，請確認訂單狀態、物流公司與追蹤編號";
+			}
+			else
+			{
+				TempData["success"] = "訂單已標記為出貨";
+			}
+
+			return RedirectToAction(nameof(Details),
+				new
+				{
+					id,
+					returnDate,
+					returnStatus,
+					returnPage,
+					returnPageSize
+				});
+		}
+
+		// 取消訂單 + 恢復商品庫存量
+		[HttpPost]
+		[ValidateAntiForgeryToken]
+		public async Task<IActionResult> Cancel(
+			int id,
+			DateTime? returnDate,
+			string? returnStatus,
+			int returnPage = PaginationSettings.DefaultPageNumber,
+			int returnPageSize = PaginationSettings.DefaultPageSize)
+		{
+			var success = await _orderService.CancelOrderAsync(id);
+
+			if (!success)
+			{
+				TempData["error"] = "取消訂單失敗，訂單可能不存在或目前狀態無法取消";
+			}
+			else
+			{
+				TempData["success"] = "訂單已取消，商品庫存已恢復";
+			}
+
+			return RedirectToAction(nameof(Details),
+				new
+				{
+					id,
+					returnDate,
+					returnStatus,
+					returnPage,
+					returnPageSize
+				});
+		}
+
+
 
 	}
 }

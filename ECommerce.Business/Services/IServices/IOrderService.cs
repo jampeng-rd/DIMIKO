@@ -39,5 +39,17 @@ namespace ECommerce.Business.Services.IServices
 		// 後台：取得單筆完整訂單
 		Task<OrderHeader?> GetOrderDetailsByIdAsync(int orderId);
 
+		// 後台：狀態處理- 待確認 -> 確認訂單
+		Task<bool> ConfirmOrderAsync(int orderId);
+
+		// 後台：狀態處理- 確認訂單 -> 開始處理
+		Task<bool> StartProcessingOrderAsync(int orderId);
+
+		// 後台：狀態處理- 開始處理 -> 已出貨
+		Task<bool> ShipOrderAsync(int orderId, string carrier, string trackingNumber);
+
+		// 後台：取消訂單並恢復庫存
+		Task<bool> CancelOrderAsync(int orderId);
+
 	}
 }

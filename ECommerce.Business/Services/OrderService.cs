@@ -295,7 +295,7 @@ namespace ECommerce.Business.Services
 		}
 
 
-		// 後台：取得全部訂單
+		// 後台：取得全部訂單 (未使用)
 		public async Task<IEnumerable<OrderHeader>> GetAllOrdersAsync()
 		{
 			return await _dbContext.OrderHeaders
@@ -320,6 +320,147 @@ namespace ECommerce.Business.Services
 					.ThenInclude(detail => detail.Product)
 					.ThenInclude(product => product.ProductImages)
 				.FirstOrDefaultAsync(order => order.Id == orderId);
+		}
+
+		// 後台：狀態處理- 待確認 -> 確認訂單
+		public async Task<bool> ConfirmOrderAsync(int orderId)
+		{
+			if (orderId <= 0)
+			{
+				return false;
+			}
+
+			var order = await _dbContext.OrderHeaders.FirstOrDefaultAsync(order => order.Id == orderId);
+
+			if (order == null)
+			{
+				return false;
+			}
+
+			if (order.OrderStatus != SD.OrderStatusPending)
+			{
+				return false;
+			}
+
+			order.OrderStatus = SD.OrderStatusApproved;
+
+			await _dbContext.SaveChangesAsync();
+
+			return true;
+		}
+
+		// 後台：狀態處理- 確認訂單 -> 開始處理
+		public async Task<bool> StartProcessingOrderAsync(int orderId)
+		{
+			if (orderId <= 0)
+			{
+				return false;
+			}
+
+			var order = await _dbContext.OrderHeaders.FirstOrDefaultAsync(order => order.Id == orderId);
+
+			if (order == null)
+			{
+				return false;
+			}
+
+			if (order.OrderStatus != SD.OrderStatusApproved)
+			{
+				return false;
+			}
+
+			order.OrderStatus = SD.OrderStatusInProcess;
+
+			await _dbContext.SaveChangesAsync();
+
+			return true;
+		}
+
+		// 後台：狀態處理- 開始處理 -> 已出貨
+		public async Task<bool> ShipOrderAsync(int orderId, string carrier, string trackingNumber)
+		{
+			if (orderId <= 0)
+			{
+				return false;
+			}
+
+			if (string.IsNullOrWhiteSpace(carrier) || string.IsNullOrWhiteSpace(trackingNumber))
+			{
+				return false;
+			}
+
+			var order = await _dbContext.OrderHeaders.FirstOrDefaultAsync(order => order.Id == orderId);
+
+			if (order == null)
+			{
+				return false;
+			}
+
+			if (order.OrderStatus != SD.OrderStatusInProcess)
+			{
+				return false;
+			}
+
+			order.Carrier = carrier.Trim();
+			order.TrackingNumber = trackingNumber.Trim();
+			order.ShippingDate = DateTime.UtcNow;
+			order.OrderStatus = SD.OrderStatusShipped;
+
+			await _dbContext.SaveChangesAsync();
+
+			return true;
+		}
+
+		// 後台：取消訂單並恢復庫存
+		public async Task<bool> CancelOrderAsync(int orderId)
+		{
+			if (orderId <= 0)
+			{
+				return false;
+			}
+
+			await using var transaction = await _dbContext.Database.BeginTransactionAsync();
+
+			try
+			{
+				var order = await _dbContext.OrderHeaders
+					.Include(order => order.OrderDetails)
+					.ThenInclude(detail => detail.Product)
+					.FirstOrDefaultAsync(order => order.Id == orderId);
+
+				if (order == null)
+				{
+					return false;
+				}
+
+				var canCancel =
+					order.OrderStatus == SD.OrderStatusPending ||
+					order.OrderStatus == SD.OrderStatusApproved ||
+					order.OrderStatus == SD.OrderStatusInProcess;
+
+				if (!canCancel)
+				{
+					return false;
+				}
+
+				foreach (var detail in order.OrderDetails)
+				{
+					detail.Product.StockQuantity += detail.Count;
+				}
+
+				order.OrderStatus = SD.OrderStatusCancelled;
+
+				await _dbContext.SaveChangesAsync();
+
+				await transaction.CommitAsync();
+
+				return true;
+			}
+			catch
+			{
+				await transaction.RollbackAsync();
+				throw;
+			}
 		}
 
 

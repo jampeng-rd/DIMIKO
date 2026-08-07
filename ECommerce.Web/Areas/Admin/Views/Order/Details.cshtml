@@ -6,6 +6,11 @@
 @{
     ViewData["Title"] = "訂單明細";
 
+    var canCancel =
+        Model.Order.OrderStatus == SD.OrderStatusPending ||
+        Model.Order.OrderStatus == SD.OrderStatusApproved ||
+        Model.Order.OrderStatus == SD.OrderStatusInProcess;
+
     var orderStatusText = Model.Order.OrderStatus switch
     {
         SD.OrderStatusPending => "待確認",
@@ -226,7 +231,6 @@
                     @if (Model.Order.ShippingDate.HasValue)
                     {
                         <hr />
-
                         <div class="mb-0">
                             <div class="text-secondary small mb-1">
                                 出貨時間
@@ -237,6 +241,104 @@
                             </div>
                         </div>
                     }
+
+                    @* 如果是 pennding 狀態，就會顯示 [確認訂單] 按鈕 *@
+                    @if (Model.Order.OrderStatus == SD.OrderStatusPending)
+                    {
+                        <hr />
+                        <form method="post" asp-area="Admin" asp-controller="Order" asp-action="Confirm">
+
+                            <input type="hidden" name="id" value="@Model.Order.Id" />
+                            <input type="hidden" name="returnDate" value="@(Model.ReturnDate?.ToString("yyyy-MM-dd"))" />
+                            <input type="hidden" name="returnStatus" value="@Model.ReturnStatus" />
+                            <input type="hidden" name="returnPage" value="@Model.ReturnPage" />
+                            <input type="hidden" name="returnPageSize" value="@Model.ReturnPageSize" />
+
+                            <button type="submit" class="btn btn-primary w-100">
+                                <i class="bi bi-check-circle me-1"></i>
+                                確認訂單
+                            </button>
+                        </form>
+                    }
+
+                    @* 如果是 Approved 狀態，就會顯示 [開始處理] 按鈕 *@
+                    @if (Model.Order.OrderStatus == SD.OrderStatusApproved)
+                    {
+                        <hr />
+                        <form method="post" asp-area="Admin" asp-controller="Order" asp-action="StartProcessing">
+
+                            <input type="hidden" name="id" value="@Model.Order.Id" />
+                            <input type="hidden" name="returnDate" value="@(Model.ReturnDate?.ToString("yyyy-MM-dd"))" />
+                            <input type="hidden" name="returnStatus" value="@Model.ReturnStatus" />
+                            <input type="hidden" name="returnPage" value="@Model.ReturnPage" />
+                            <input type="hidden" name="returnPageSize" value="@Model.ReturnPageSize" />
+
+                            <button type="submit" class="btn btn-warning w-100">
+                                <i class="bi bi-gear me-1"></i>
+                                開始處理
+                            </button>
+                        </form>
+                    }
+
+                    @* 如果是 Processing 狀態，就顯示物流資訊輸入與 [標記已出貨]，這是在沒有配合物流公司的人工手動方式' *@
+                    @if (Model.Order.OrderStatus == SD.OrderStatusInProcess)
+                    {
+                        <hr />
+                        <form method="post" asp-area="Admin" asp-controller="Order" asp-action="Ship">
+
+                            <input type="hidden" name="id" value="@Model.Order.Id" />
+                            <input type="hidden" name="returnDate" value="@(Model.ReturnDate?.ToString("yyyy-MM-dd"))" />
+                            <input type="hidden" name="returnStatus" value="@Model.ReturnStatus" />
+                            <input type="hidden" name="returnPage" value="@Model.ReturnPage" />
+                            <input type="hidden" name="returnPageSize" value="@Model.ReturnPageSize" />
+
+                            <div class="mb-3">
+                                <label for="carrier" class="form-label fw-semibold">
+                                    物流公司
+                                </label>
+
+                                <input type="text" id="carrier" name="carrier"
+                                       class="form-control" maxlength="100" placeholder="例如：黑貓宅急便"
+                                       required />
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="trackingNumber" class="form-label fw-semibold">
+                                    追蹤編號
+                                </label>
+
+                                <input type="text" id="trackingNumber" name="trackingNumber"
+                                       class="form-control" maxlength="100" placeholder="請輸入物流追蹤編號"
+                                       required />
+                            </div>
+
+                            <button type="submit" class="btn btn-success w-100">
+                                <i class="bi bi-truck me-1"></i>
+                                標記已出貨
+                            </button>
+                        </form>
+                    }
+
+                    @* 取消訂單 + 恢復庫存 *@
+                    @if (canCancel)
+                    {
+                        <hr />
+                        <form method="post" asp-area="Admin" asp-controller="Order" asp-action="Cancel"
+                              onsubmit="return confirm('確定要取消這筆訂單嗎？取消後商品庫存會恢復。');">
+
+                            <input type="hidden" name="id" value="@Model.Order.Id" />
+                            <input type="hidden" name="returnDate" value="@(Model.ReturnDate?.ToString("yyyy-MM-dd"))" />
+                            <input type="hidden" name="returnStatus" value="@Model.ReturnStatus" />
+                            <input type="hidden" name="returnPage" value="@Model.ReturnPage" />
+                            <input type="hidden" name="returnPageSize" value="@Model.ReturnPageSize" />
+
+                            <button type="submit" class="btn btn-outline-danger w-100">
+                                <i class="bi bi-x-circle me-1"></i>
+                                取消訂單
+                            </button>
+                        </form>
+                    }
+
                 </div>
             </div>
 
