@@ -106,7 +106,7 @@ namespace ECommerce.Business.Services
 			}
 		}
 
-		// 取訂單編號
+		// 前台：取訂單編號
 		public async Task<OrderHeader?> GetOrderByIdAsync(int orderId, string userId)
 		{
 			if (orderId <= 0 || string.IsNullOrWhiteSpace(userId))
@@ -121,7 +121,7 @@ namespace ECommerce.Business.Services
 					order.ApplicationUserId == userId);
 		}
 
-		// 取使用者訂單
+		// 前台：取使用者訂單
 		public async Task<IEnumerable<OrderHeader>> GetUserOrdersAsync(string userId)
 		{
 			if (string.IsNullOrWhiteSpace(userId))
@@ -149,6 +149,113 @@ namespace ECommerce.Business.Services
 					.ThenInclude(detail => detail.Product)
 					.ThenInclude(product => product.ProductImages)
 				.FirstOrDefaultAsync(order => order.Id == orderId && order.ApplicationUserId == userId);
+		}
+
+
+		// 後台：取得指定月份每日的訂單數量
+		public async Task<IReadOnlyDictionary<int, int>>GetMonthlyOrderCountsAsync(int year, int month)
+		{
+			if (year is < 2000 or > 2100)
+			{
+				throw new ArgumentOutOfRangeException(nameof(year),"年份必須介於 2000 到 2100 之間");
+			}
+
+			if (month is < 1 or > 12)
+			{
+				throw new ArgumentOutOfRangeException(nameof(month), "月份必須介於 1 到 12 之間");
+			}
+
+			
+			// 先建立台灣時間的月份範圍：
+			// 例如 2026/08/01 00:00 到 2026/09/01 00:00
+			var monthStartTaiwan = new DateTime(
+				year,
+				month,
+				1,
+				0,
+				0,
+				0,
+				DateTimeKind.Unspecified
+			);
+
+			var nextMonthStartTaiwan = monthStartTaiwan.AddMonths(1);
+
+			// 資料庫保存 UTC，因此查詢前轉成 UTC。
+			var monthStartUtc = TaiwanTimeHelper.ConvertTaiwanToUtc(monthStartTaiwan);
+
+			var nextMonthStartUtc = TaiwanTimeHelper.ConvertTaiwanToUtc(nextMonthStartTaiwan);
+
+
+			// 只從資料庫取回 OrderDate，不載入會員、訂單明細或商品資料。
+			var orderDates = await _dbContext.OrderHeaders
+				.AsNoTracking()
+				.Where(order =>
+					order.OrderDate >= monthStartUtc &&
+					order.OrderDate < nextMonthStartUtc)
+				.Select(order => order.OrderDate)
+				.ToListAsync();
+
+			// 將 UTC 訂單時間轉回台灣時間，再按照日期統計。
+			var dailyCounts = orderDates
+				.Select(TaiwanTimeHelper.ConvertUtcToTaiwan)
+				.GroupBy(orderDate => orderDate.Day)
+				.ToDictionary(
+					group => group.Key,
+					group => group.Count()
+				);
+
+			return dailyCounts;
+		}
+
+		// 後台：取得指定日期的訂單
+		public async Task<IReadOnlyList<OrderHeader>> GetOrdersByDateAsync(DateTime taiwanDate)
+		{
+			var date = taiwanDate.Date;
+
+			var dayStartTaiwan = DateTime.SpecifyKind(date, DateTimeKind.Unspecified);
+
+			var nextDayStartTaiwan = dayStartTaiwan.AddDays(1);
+
+			var dayStartUtc = TaiwanTimeHelper.ConvertTaiwanToUtc(dayStartTaiwan);
+
+			var nextDayStartUtc = TaiwanTimeHelper.ConvertTaiwanToUtc(nextDayStartTaiwan);
+
+			return await _dbContext.OrderHeaders
+				.AsNoTracking()
+				.Include(order => order.ApplicationUser)
+				.Where(order =>
+					order.OrderDate >= dayStartUtc &&
+					order.OrderDate < nextDayStartUtc)
+				.OrderByDescending(order => order.OrderDate)
+				.ToListAsync();
+		}
+
+
+		// 後台：取得全部訂單
+		public async Task<IEnumerable<OrderHeader>> GetAllOrdersAsync()
+		{
+			return await _dbContext.OrderHeaders
+				.AsNoTracking()
+				.Include(order => order.ApplicationUser)
+				.OrderByDescending(order => order.OrderDate)
+				.ToListAsync();
+		}
+
+		// 後台：取得單筆完整訂單
+		public async Task<OrderHeader?> GetOrderDetailsByIdAsync(int orderId)
+		{
+			if (orderId <= 0)
+			{
+				return null;
+			}
+
+			return await _dbContext.OrderHeaders
+				.AsNoTracking()
+				.Include(order => order.ApplicationUser)
+				.Include(order => order.OrderDetails)
+					.ThenInclude(detail => detail.Product)
+					.ThenInclude(product => product.ProductImages)
+				.FirstOrDefaultAsync(order => order.Id == orderId);
 		}
 
 

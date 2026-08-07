@@ -1,0 +1,191 @@
+﻿@using ECommerce.Models.ViewModels
+@using ECommerce.Utility.Helpers
+@model AdminOrderCalendarViewModel
+
+@{
+    ViewData["Title"] = "訂單管理";
+
+    var taiwanToday = TaiwanTimeHelper.GetTaiwanNow().Date;
+
+    var isCurrentMonth = 
+        Model.Year == taiwanToday.Year && 
+        Model.Month == taiwanToday.Month;
+
+    var monthTitle = $"{Model.Year} 年 {Model.Month} 月";
+
+    var calendarCellCount = Model.StartDayOffset + Model.DaysInMonth;
+
+    var trailingCellCount = (7 - calendarCellCount % 7) % 7;
+}
+
+<div class="container-fluid px-4 py-4">
+
+    <div class="card border shadow-sm overflow-hidden">
+
+        <!-- Header -->
+        <div class="card-header admin-card-header text-white px-4 py-3">
+
+            <div class="d-flex flex-wrap align-items-center
+                justify-content-between gap-3">
+
+                <div>
+                    <h5 class="fw-bold mb-0">
+                        <i class="bi bi-calendar3 me-2"></i>
+                        訂單月曆
+                    </h5>
+
+                    <p class="admin-card-subtitle small mb-0">
+                        每日訂單統計
+                    </p>
+                </div>
+
+                <span class="badge rounded-pill bg-light text-dark">
+                    本月共 @Model.TotalOrders 筆
+                </span>
+            </div>
+        </div>
+
+        <!-- 月份控制列 -->
+        <div class="card-body border-bottom px-4 py-3">
+
+            <div class="d-flex flex-wrap align-items-center
+                justify-content-between gap-3">
+
+                <a asp-area="Admin" asp-controller="Order" asp-action="Index" asp-route-year="@Model.PreviousYear"
+                   asp-route-month="@Model.PreviousMonth"
+                   class="btn btn-outline-secondary btn-sm">
+
+                    <i class="bi bi-chevron-left me-1"></i>
+                    上個月
+                </a>
+
+                <div class="text-center">
+
+                    <h4 class="fw-bold mb-1">
+                        @monthTitle
+                    </h4>
+
+                    @if (isCurrentMonth)
+                    {
+                        <span class="badge bg-success">
+                            目前月份
+                        </span>
+                    }
+                </div>
+
+                <a asp-area="Admin" asp-controller="Order" asp-action="Index"
+                   asp-route-year="@Model.NextYear"
+                   asp-route-month="@Model.NextMonth"
+                   class="btn btn-outline-secondary btn-sm">
+
+                    下個月
+                    <i class="bi bi-chevron-right ms-1"></i>
+                </a>
+
+            </div>
+        </div>
+
+        <!-- 月曆 -->
+        <div class="card-body p-0">
+
+            <div class="admin-order-calendar">
+
+                <!-- 星期標題 -->
+                <div class="admin-calendar-weekday text-danger">日</div>
+                <div class="admin-calendar-weekday">一</div>
+                <div class="admin-calendar-weekday">二</div>
+                <div class="admin-calendar-weekday">三</div>
+                <div class="admin-calendar-weekday">四</div>
+                <div class="admin-calendar-weekday">五</div>
+                <div class="admin-calendar-weekday text-primary">六</div>
+
+                <!-- 月初前方空格 -->
+                @for (var emptyIndex = 0; emptyIndex < Model.StartDayOffset; emptyIndex++)
+                {
+                    <div class="admin-calendar-day admin-calendar-empty"></div>
+                }
+
+                <!-- 日期 -->
+                @for (var day = 1; day <= Model.DaysInMonth; day++)
+                {
+                    var currentDate = new DateTime(
+                        Model.Year,
+                        Model.Month,
+                        day
+                    );
+
+                    var isToday =
+                        currentDate == taiwanToday;
+
+                    var hasOrders = Model.DailyOrderCounts.TryGetValue(day, out var orderCount);
+
+                    <div class="admin-calendar-day
+                         @(isToday ? "is-today" : "")
+                         @(hasOrders ? "has-orders" : "")">
+
+                        <div class="d-flex align-items-start
+                            justify-content-between gap-2">
+
+                            <span class="admin-calendar-date-number">
+                                @day
+                            </span>
+
+                            @if (isToday)
+                            {
+                                <span class="badge bg-primary">
+                                    今天
+                                </span>
+                            }
+                        </div>
+
+                        @if (hasOrders)
+                        {
+                            <a asp-area="Admin" asp-controller="Order" asp-action="Daily"
+                               asp-route-date="@currentDate.ToString("yyyy-MM-dd")"
+                               class="admin-calendar-order-count text-decoration-none"
+                               aria-label="查看 @currentDate.ToString("yyyy 年 MM 月 dd 日") 的 @orderCount 筆訂單">
+
+                                <i class="bi bi-receipt me-1"></i>
+                                @orderCount 筆訂單
+                            </a>
+                        }
+                        @* else
+                        {
+                            <div class="admin-calendar-no-orders">
+                                無訂單
+                            </div>
+                        } *@
+                    </div>
+                }
+
+                <!-- 月末補空格 -->
+                @for (var emptyIndex = 0; emptyIndex < trailingCellCount; emptyIndex++)
+                {
+                    <div class="admin-calendar-day admin-calendar-empty"></div>
+                }
+
+            </div>
+        </div>
+
+        <div class="card-footer bg-white px-4 py-3">
+
+            <div class="d-flex flex-wrap align-items-center gap-4 small">
+
+                <span class="d-inline-flex align-items-center gap-2">
+                    <span class="calendar-legend calendar-legend-today"></span>
+                    今天
+                </span>
+
+                <span class="d-inline-flex align-items-center gap-2">
+                    <span class="calendar-legend calendar-legend-orders"></span>
+                    有訂單
+                </span>
+
+                <span class="text-secondary">
+                    下一階段會讓有訂單的日期可以點擊查看。
+                </span>
+            </div>
+        </div>
+
+    </div>
+</div>

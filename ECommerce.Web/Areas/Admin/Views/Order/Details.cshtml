@@ -1,0 +1,324 @@
+﻿@using ECommerce.Models
+@using ECommerce.Utility
+@using ECommerce.Models.ViewModels
+@model AdminOrderDetailsViewModel
+
+@{
+    ViewData["Title"] = "訂單明細";
+
+    var orderStatusText = Model.Order.OrderStatus switch
+    {
+        SD.OrderStatusPending => "待處理",
+        SD.OrderStatusApproved => "已確認",
+        SD.OrderStatusInProcess => "處理中",
+        SD.OrderStatusShipped => "已出貨",
+        SD.OrderStatusCancelled => "已取消",
+        _ => Model.Order.OrderStatus
+    };
+
+    var paymentStatusText = Model.Order.PaymentStatus switch
+    {
+        SD.PaymentStatusPending => "待付款",
+        SD.PaymentStatusApproved => "已付款",
+        SD.PaymentStatusRejected => "付款失敗",
+        SD.PaymentStatusRefunded => "已退款",
+        _ => Model.Order.PaymentStatus
+    };
+
+    var orderStatusClass = Model.Order.OrderStatus switch
+    {
+        SD.OrderStatusPending => "bg-warning text-dark",
+        SD.OrderStatusApproved => "bg-primary",
+        SD.OrderStatusInProcess => "bg-info text-dark",
+        SD.OrderStatusShipped => "bg-success",
+        SD.OrderStatusCancelled => "bg-danger",
+        _ => "bg-secondary"
+    };
+
+    var paymentStatusClass = Model.Order.PaymentStatus switch
+    {
+        SD.PaymentStatusPending => "bg-secondary",
+        SD.PaymentStatusApproved => "bg-success",
+        SD.PaymentStatusRejected => "bg-danger",
+        SD.PaymentStatusRefunded => "bg-info text-dark",
+        _ => "bg-secondary"
+    };
+}
+
+<div class="container-fluid px-4 py-4">
+
+    @if (Model.ReturnDate.HasValue)
+    {
+        <a asp-area="Admin" asp-controller="Order" asp-action="Daily"
+           asp-route-date="@Model.ReturnDate.Value.ToString("yyyy-MM-dd")"
+           class="text-decoration-none text-secondary small fw-medium d-inline-flex align-items-center gap-1 mb-3">
+
+            <i class="bi bi-arrow-left"></i>
+            返回 @Model.ReturnDate.Value.ToString("yyyy/MM/dd") 訂單列表
+        </a>
+    }
+    else
+    {
+        <a asp-area="Admin" asp-controller="Order" asp-action="Index"
+           class="text-decoration-none text-secondary small fw-medium d-inline-flex align-items-center gap-1 mb-3">
+
+            <i class="bi bi-arrow-left"></i>
+            返回訂單月曆
+        </a>
+    }
+
+    <div class="row g-4 align-items-start">
+
+        <!-- 左側：訂單商品 -->
+        <div class="col-xl-8">
+
+            <div class="card border shadow-sm overflow-hidden">
+
+                <div class="card-header admin-card-header text-white py-3 px-4">
+
+                    <div class="d-flex flex-wrap align-items-center
+                        justify-content-between gap-3">
+
+                        <div>
+                            <p class="admin-card-subtitle small mb-1">
+                                訂單編號
+                            </p>
+
+                            <h5 class="fw-bold mb-0">
+                                @Model.Order.OrderNumber
+                            </h5>
+                        </div>
+
+                        <span class="badge @orderStatusClass">
+                            @orderStatusText
+                        </span>
+                    </div>
+                </div>
+
+                <div class="card-body p-0">
+
+                    @foreach (var detail in Model.Order.OrderDetails)
+                    {
+                        var primaryImage =
+                            detail.Product.ProductImages
+                                .FirstOrDefault(image => image.IsPrimary)
+                            ?? detail.Product.ProductImages
+                                .OrderBy(image => image.SortOrder)
+                                .FirstOrDefault();
+
+                        <div class="d-flex gap-3 px-4 py-3 border-bottom">
+
+                            <div class="flex-shrink-0 rounded overflow-hidden bg-light border"
+                                 style="width: 76px; height: 76px;">
+
+                                @if (primaryImage != null)
+                                {
+                                    <img src="@primaryImage.ImageUrl"
+                                         alt="@detail.Product.Title"
+                                         class="w-100 h-100"
+                                         style="object-fit: cover;" />
+                                }
+                                else
+                                {
+                                    <div class="w-100 h-100 d-flex align-items-center justify-content-center text-secondary">
+                                        <i class="bi bi-image fs-4"></i>
+                                    </div>
+                                }
+                            </div>
+
+                            <div class="flex-grow-1"
+                                 style="min-width: 0;">
+
+                                <div class="fw-semibold text-truncate">
+                                    @detail.Product.Title
+                                </div>
+
+                                <small class="text-secondary d-block mt-1">
+                                    商品編號：@detail.Product.SKU
+                                </small>
+
+                                <small class="text-secondary">
+                                    單價：
+                                    @detail.Price.ToString("C0") × @detail.Count
+                                </small>
+                            </div>
+
+                            <div class="text-end flex-shrink-0">
+
+                                <div class="fw-bold">
+                                    @((detail.Price * detail.Count).ToString("C0"))
+                                </div>
+
+                                <small class="text-secondary">
+                                    @detail.Count 件
+                                </small>
+                            </div>
+                        </div>
+                    }
+
+                </div>
+
+                <div class="card-footer bg-white px-4 py-3">
+
+                    <div class="d-flex justify-content-between align-items-center">
+
+                        <span class="fw-semibold">
+                            訂單總額
+                        </span>
+
+                        <span class="fw-bold fs-5 text-success">
+                            @Model.Order.OrderTotal.ToString("C0")
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 右側：訂單及顧客資訊 -->
+        <div class="col-xl-4">
+
+            <div class="card border shadow-sm mb-4">
+
+                <div class="card-header bg-white px-4 py-3">
+
+                    <h6 class="fw-bold mb-0">
+                        <i class="bi bi-info-circle me-2 text-primary"></i>
+                        訂單資訊
+                    </h6>
+                </div>
+
+                <div class="card-body px-4">
+
+                    <div class="mb-3">
+                        <div class="text-secondary small mb-1">
+                            建立時間
+                        </div>
+
+                        <div class="fw-medium">
+                            @(Model.Order.OrderDate.ToLocalTime().ToString("yyyy/MM/dd HH:mm"))
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+
+                        <span class="text-secondary">
+                            訂單狀態
+                        </span>
+
+                        <span class="badge @orderStatusClass">
+                            @orderStatusText
+                        </span>
+                    </div>
+
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span class="text-secondary">
+                            付款狀態
+                        </span>
+
+                        <span class="badge @paymentStatusClass">
+                            @paymentStatusText
+                        </span>
+                    </div>
+
+                    @if (Model.Order.ShippingDate.HasValue)
+                    {
+                        <hr />
+
+                        <div class="mb-0">
+                            <div class="text-secondary small mb-1">
+                                出貨時間
+                            </div>
+
+                            <div class="fw-medium">
+                                @(Model.Order.ShippingDate.Value.ToLocalTime().ToString("yyyy/MM/dd HH:mm"))
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <div class="card border shadow-sm mb-4">
+
+                <div class="card-header bg-white px-4 py-3">
+
+                    <h6 class="fw-bold mb-0">
+                        <i class="bi bi-person me-2 text-primary"></i>
+                        顧客資訊
+                    </h6>
+                </div>
+
+                <div class="card-body px-4">
+
+                    <p class="fw-semibold mb-1">
+                        @Model.Order.Name
+                    </p>
+
+                    <p class="text-secondary mb-1">
+                        <i class="bi bi-envelope me-1"></i>
+                        @(Model.Order.ApplicationUser?.Email ?? "無會員信箱")
+                    </p>
+
+                    <p class="text-secondary mb-0">
+                        <i class="bi bi-telephone me-1"></i>
+                        @Model.Order.PhoneNumber
+                    </p>
+                </div>
+            </div>
+
+            <div class="card border shadow-sm">
+
+                <div class="card-header bg-white px-4 py-3">
+
+                    <h6 class="fw-bold mb-0">
+                        <i class="bi bi-truck me-2 text-primary"></i>
+                        收件資訊
+                    </h6>
+                </div>
+
+                <div class="card-body px-4">
+
+                    <div class="d-flex align-items-start gap-2">
+
+                        <i class="bi bi-geo-alt text-secondary mt-1"></i>
+
+                        <div>
+                            <div>@Model.Order.PostalCode</div>
+                            <div>
+                                @Model.Order.City @Model.Order.State
+                            </div>
+                            <div>
+                                @Model.Order.StreetAddress
+                            </div>
+                        </div>
+                    </div>
+
+                    @if (!string.IsNullOrWhiteSpace(Model.Order.Carrier) ||
+                         !string.IsNullOrWhiteSpace(Model.Order.TrackingNumber))
+                    {
+                        <hr />
+
+                        <div class="small">
+
+                            <div class="mb-2">
+                                <span class="text-secondary">物流公司：</span>
+
+                                <span class="fw-medium">
+                                    @(Model.Order.Carrier ?? "尚未填寫")
+                                </span>
+                            </div>
+
+                            <div>
+                                <span class="text-secondary">追蹤編號：</span>
+
+                                <span class="fw-medium">
+                                    @(Model.Order.TrackingNumber ?? "尚未填寫")
+                                </span>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>

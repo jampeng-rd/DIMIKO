@@ -1,0 +1,196 @@
+﻿@using ECommerce.Models.ViewModels
+@using ECommerce.Utility
+@using ECommerce.Utility.Helpers
+@model AdminDailyOrderListViewModel
+
+@{
+    ViewData["Title"] = "當日訂單";
+
+    var dateTitle = Model.Date.ToString("yyyy 年 MM 月 dd 日");
+}
+
+<div class="container-fluid px-4 py-4">
+
+    <a asp-area="Admin" asp-controller="Order" asp-action="Index"
+       asp-route-year="@Model.Date.Year"
+       asp-route-month="@Model.Date.Month"
+       class="text-decoration-none text-secondary small fw-medium d-inline-flex align-items-center gap-1 mb-3">
+
+        <i class="bi bi-arrow-left"></i>
+        返回訂單月曆
+    </a>
+
+    <div class="card border shadow-sm overflow-hidden">
+
+        <div class="card-header admin-card-header text-white px-4 py-3">
+
+            <div class="d-flex flex-wrap align-items-center
+                justify-content-between gap-3">
+
+                <div>
+                    <h5 class="fw-bold mb-0">
+                        <i class="bi bi-calendar-check me-2"></i>
+                        @dateTitle
+                    </h5>
+
+                    <p class="admin-card-subtitle small mb-0">
+                        當日訂單列表
+                    </p>
+                </div>
+
+                <div class="d-flex align-items-center gap-2">
+
+                    <span class="badge rounded-pill bg-light text-dark">
+                        共 @Model.TotalOrders 筆
+                    </span>
+
+                    @if (Model.TotalOrders > 0)
+                    {
+                        <span class="badge rounded-pill bg-success">
+                            @Model.TotalAmount.ToString("C0")
+                        </span>
+                    }
+                </div>
+            </div>
+        </div>
+
+        @if (Model.TotalOrders == 0)
+        {
+            <div class="card-body text-center py-5">
+
+                <i class="bi bi-calendar-x display-3 text-secondary"></i>
+
+                <h5 class="fw-bold mt-3">
+                    當日沒有訂單
+                </h5>
+
+                <p class="text-secondary mb-4">
+                    @dateTitle 沒有任何訂單紀錄。
+                </p>
+
+                <a asp-area="Admin" asp-controller="Order" asp-action="Index" asp-route-year="@Model.Date.Year"
+                   asp-route-month="@Model.Date.Month" class="btn btn-outline-secondary">
+
+                    返回月曆
+                </a>
+            </div>
+        }
+        else
+        {
+            <div class="table-responsive">
+
+                <table class="table-styled">
+
+                    <thead>
+                        <tr>
+                            <th style="min-width: 205px;">訂單編號</th>
+                            <th style="min-width: 175px;">顧客</th>
+                            <th style="min-width: 105px;">建立時間</th>
+                            <th>訂單狀態</th>
+                            <th>付款狀態</th>
+                            <th class="text-end" style="min-width: 115px;">訂單總額</th>
+                            <th class="text-end" style="width: 100px;">
+                                @* 操作 *@
+                            </th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+
+                        @foreach (var order in Model.Orders)
+                        {
+                            var orderStatusText = order.OrderStatus switch
+                            {
+                                SD.OrderStatusPending => "待處理",
+                                SD.OrderStatusApproved => "已確認",
+                                SD.OrderStatusInProcess => "處理中",
+                                SD.OrderStatusShipped => "已出貨",
+                                SD.OrderStatusCancelled => "已取消",
+                                _ => order.OrderStatus
+                            };
+
+                            var paymentStatusText = order.PaymentStatus switch
+                            {
+                                SD.PaymentStatusPending => "待付款",
+                                SD.PaymentStatusApproved => "已付款",
+                                SD.PaymentStatusRejected => "付款失敗",
+                                SD.PaymentStatusRefunded => "已退款",
+                                _ => order.PaymentStatus
+                            };
+
+                            var orderStatusClass = order.OrderStatus switch
+                            {
+                                SD.OrderStatusPending => "bg-warning text-dark",
+                                SD.OrderStatusApproved => "bg-primary",
+                                SD.OrderStatusInProcess => "bg-info text-dark",
+                                SD.OrderStatusShipped => "bg-success",
+                                SD.OrderStatusCancelled => "bg-danger",
+                                _ => "bg-secondary"
+                            };
+
+                            var paymentStatusClass = order.PaymentStatus switch
+                            {
+                                SD.PaymentStatusPending => "bg-secondary",
+                                SD.PaymentStatusApproved => "bg-success",
+                                SD.PaymentStatusRejected => "bg-danger",
+                                SD.PaymentStatusRefunded => "bg-info text-dark",
+                                _ => "bg-secondary"
+                            };
+
+                            var taiwanOrderDate = TaiwanTimeHelper.ConvertUtcToTaiwan(order.OrderDate);
+
+                            <tr>
+                                <td>
+                                    <span class="fw-semibold text-primary text-nowrap">
+                                        @order.OrderNumber
+                                    </span>
+                                </td>
+
+                                <td>
+                                    <div class="fw-medium">
+                                        @order.Name
+                                    </div>
+
+                                    <small class="text-secondary">
+                                        @(order.ApplicationUser?.Email ?? "無會員信箱")
+                                    </small>
+                                </td>
+
+                                <td class="text-nowrap">
+                                    @taiwanOrderDate.ToString("HH:mm")
+                                </td>
+
+                                <td>
+                                    <span class="badge @orderStatusClass">
+                                        @orderStatusText
+                                    </span>
+                                </td>
+
+                                <td>
+                                    <span class="badge @paymentStatusClass">
+                                        @paymentStatusText
+                                    </span>
+                                </td>
+
+                                <td class="text-end fw-semibold">
+                                    @order.OrderTotal.ToString("C0")
+                                </td>
+
+                                <td class="text-end">
+                                    <a asp-area="Admin" asp-controller="Order" asp-action="Details" asp-route-id="@order.Id"
+                                       asp-route-returnDate="@Model.Date.ToString("yyyy-MM-dd")"
+                                       class="btn btn-sm btn-outline-primary text-nowrap">
+
+                                        <i class="bi bi-eye me-1"></i>
+                                        查看
+                                    </a>
+                                </td>
+                            </tr>
+                        }
+
+                    </tbody>
+                </table>
+            </div>
+        }
+    </div>
+</div>

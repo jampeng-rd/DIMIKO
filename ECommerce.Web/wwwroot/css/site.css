@@ -848,3 +848,185 @@
     appearance: textfield;
     -moz-appearance: textfield;
 }
+
+/* 公開 Navbar 的目前頁面 */
+.public-navbar .navbar-nav .nav-link {
+    position: relative;
+    color: #9ca3af;
+    transition: color 0.2s ease;
+}
+
+.public-navbar .navbar-nav .nav-link:hover,
+.public-navbar .navbar-nav .nav-link:focus {
+    color: #ffffff;
+}
+
+.public-navbar .navbar-nav .nav-link.active {
+    color: #ffffff;
+    font-weight: 500;
+}
+
+/* Active 下方綠色線條 */
+.public-navbar .navbar-nav .nav-link.active::after {
+    content: "";
+    position: absolute;
+    left: 0.75rem;
+    right: 0.75rem;
+    bottom: 0.15rem;
+    height: 0.15rem;
+    background-color: #17A34A;
+    border-radius: 999px;
+}
+
+/* ============================================
+Admin Order Calendar
+============================================ */
+.admin-order-calendar {
+    display: grid;
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+}
+
+.admin-calendar-weekday {
+    padding: 0.85rem 0.5rem;
+    color: #64748b;
+    font-size: 0.78rem;
+    font-weight: 700;
+    text-align: center;
+    background: #f8fafc;
+    border-right: 1px solid #e2e8f0;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.admin-calendar-weekday:nth-child(7) {
+    border-right: none;
+}
+
+.admin-calendar-day {
+    position: relative;
+    min-height: 120px;
+    padding: 0.85rem;
+    background: #ffffff;
+    border-right: 1px solid #e2e8f0;
+    border-bottom: 1px solid #e2e8f0;
+    transition: background-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.admin-calendar-day:nth-child(7n) {
+    border-right: none;
+}
+
+.admin-calendar-day.has-orders {
+    background: linear-gradient( 135deg, rgba(23, 163, 74, 0.08), rgba(23, 163, 74, 0.02) );
+}
+
+.admin-calendar-day.has-orders:hover {
+    background: linear-gradient( 135deg, rgba(23, 163, 74, 0.14), rgba(23, 163, 74, 0.04) );
+}
+
+.admin-calendar-day.is-today {
+    z-index: 1;
+    box-shadow: inset 0 0 0 3px #0d6efd;
+}
+
+.admin-calendar-empty {
+    background: #f8fafc;
+}
+
+.admin-calendar-date-number {
+    color: #1e293b;
+    font-size: 1rem;
+    font-weight: 700;
+}
+
+.admin-calendar-order-count {
+    display: inline-flex;
+    align-items: center;
+    margin-top: 1.5rem;
+    padding: 0.35rem 0.6rem;
+    color: #166534;
+    font-size: 0.78rem;
+    font-weight: 700;
+    background: #dcfce7;
+    border-radius: 999px;
+    cursor: pointer;
+    transition: background-color 0.2s ease, color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.admin-calendar-order-count:hover,
+.admin-calendar-order-count:focus {
+    color: #ffffff;
+    background: #17A34A;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 10px rgba(23, 163, 74, 0.22);
+}
+
+/*.admin-calendar-no-orders {
+    margin-top: 1.5rem;
+    color: #cbd5e1;
+    font-size: 0.75rem;
+}*/
+
+.calendar-legend {
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    border-radius: 0.25rem;
+}
+
+.calendar-legend-today {
+    border: 3px solid #0d6efd;
+}
+
+.calendar-legend-orders {
+    background: rgba(23, 163, 74, 0.16);
+    border: 1px solid rgba(23, 163, 74, 0.35);
+}
+
+@media (max-width: 991.98px) {
+    .admin-order-calendar {
+        min-width: 850px;
+    }
+
+    .admin-order-calendar {
+        overflow-x: visible;
+    }
+
+    .admin-calendar-day {
+        min-height: 105px;
+    }
+
+    .card-body:has(.admin-order-calendar) {
+        overflow-x: auto;
+    }
+}
+
+/*補 Dark Mode*/
+[data-bs-theme="dark"] .admin-calendar-weekday,
+[data-bs-theme="dark"] .admin-calendar-empty {
+    background: #1a1a1a;
+    border-color: #2a2a2a;
+}
+
+[data-bs-theme="dark"] .admin-calendar-day {
+    background: #1e1e1e;
+    border-color: #2a2a2a;
+}
+
+[data-bs-theme="dark"] .admin-calendar-day.has-orders {
+    background: linear-gradient( 135deg, rgba(23, 163, 74, 0.18), rgba(23, 163, 74, 0.04) );
+}
+
+[data-bs-theme="dark"] .admin-calendar-date-number {
+    color: #e2e8f0;
+}
+
+[data-bs-theme="dark"] .admin-calendar-order-count {
+    color: #86efac;
+    background: rgba(23, 163, 74, 0.2);
+}
+
+[data-bs-theme="dark"] .admin-calendar-order-count:hover,
+[data-bs-theme="dark"] .admin-calendar-order-count:focus {
+    color: #ffffff;
+    background: #17A34A;
+}

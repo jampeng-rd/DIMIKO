@@ -30,17 +30,25 @@
                 padding: 0.5rem 0.75rem;
                 border-radius: 0.375rem;
                 text-decoration: none;
+                
+                transition: color 0.2s ease, background-color 0.2s ease, transform 0.2s ease;
             }
 
-                .admin-sidebar-nav .nav-link:hover {
-                    color: #fff;
-                    background: rgba(255,255,255,0.05);
-                }
+            .admin-sidebar-nav .nav-link:hover {
+                color: #fff;
+                background: rgba(255,255,255,0.05);
+            }
 
-                .admin-sidebar-nav .nav-link.active {
-                    color: #fff;
-                    background: #17A34A;
-                }
+            .admin-sidebar-nav .nav-link.active {
+                color: #fff;
+                background: #17A34A;
+
+                box-shadow: 0 4px 12px rgba(23, 163, 74, 0.22);
+            }
+
+            .admin-sidebar-nav .nav-link.active i {
+                color: #fff;
+            }
 
             .admin-sidebar-nav .nav-section {
                 font-size: 0.65rem;

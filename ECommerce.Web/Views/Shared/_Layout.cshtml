@@ -1,5 +1,11 @@
 ﻿@using ECommerce.Utility
 
+@{
+    var currentArea = ViewContext.RouteData.Values["area"]?.ToString();
+    var currentController = ViewContext.RouteData.Values["controller"]?.ToString();
+    var currentAction = ViewContext.RouteData.Values["action"]?.ToString();
+}
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -15,7 +21,7 @@
 </head>
 <body class="d-flex flex-column min-vh-100" style="background-color:#f5f5f5">
     <header class="sticky-top">
-        <nav class="navbar navbar-expand-lg navbar-dark" style="background-color:#191414">
+        <nav class="navbar navbar-expand-lg navbar-dark public-navbar" style="background-color:#191414">
             <div class="container">
 
                 <a class="navbar-brand d-flex align-items-center gap-2" asp-area="Customer" asp-controller="Home" asp-action="Index">
@@ -35,22 +41,30 @@
                 <div class="navbar-collapse collapse">
                     <ul class="navbar-nav me-auto mb-2 mb-lg-0">
                         <li class="nav-item">
-                            <a class="nav-link" asp-area="Customer" asp-controller="Home" asp-action="Index">
+                            <a asp-area="Customer" asp-controller="Home" asp-action="Index"
+                               class="nav-link nav-link-hover
+                               @(currentArea == "Customer" && currentController == "Home" ? "active" : "")">
                                 <i class="bi bi-house me-1"></i>Home</a>
                         </li>
 
-                        <li class="nav-item">
-                            <a asp-area="Customer" asp-controller="Order" asp-action="Index"
-                               class="nav-link nav-link-hover">
-                                <i class="bi bi-receipt me-1"></i>
-                                我的訂單
-                            </a>
-                        </li>
+                        @if (User.Identity?.IsAuthenticated == true)
+                        {
+                            <li class="nav-item">
+                                <a asp-area="Customer" asp-controller="Order" asp-action="Index"
+                                   class="nav-link nav-link-hover
+                                    @(currentArea == "Customer" && currentController == "Order" ? "active" : "")">
+                                    <i class="bi bi-receipt me-1"></i>
+                                    我的訂單
+                                </a>
+                            </li>
+                        }
                         
                         @if (User.IsInRole(SD.RoleAdmin) || User.IsInRole(SD.RoleEmployee))
                         {
                             <li class="nav-item">
-                                <a class="nav-link" asp-area="Admin" asp-controller="Dashboard" asp-action="Index">
+                                <a asp-area="Admin" asp-controller="Dashboard" asp-action="Index"
+                                   class="nav-link nav-link-hover
+                                   @(currentArea == "Admin" ? "active" : "")">
                                     <i class="bi bi-speedometer2 me-1"></i>後台系統
                                 </a>
                             </li>
