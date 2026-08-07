@@ -1,0 +1,152 @@
+﻿@using ECommerce.Models.ViewModels
+@using ECommerce.Utility
+@model PaginationViewModel
+
+@if (Model.TotalCount > 0)
+{
+    var startPage = Math.Max(1, Model.PageNumber - 2);
+
+    var endPage = Math.Min(Model.TotalPages, Model.PageNumber + 2);
+
+    <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 px-4 py-3 border-top">
+
+        <div class="small text-secondary">
+
+            顯示第
+            <span class="fw-semibold">
+                @Model.FirstItemNumber
+            </span>
+            至
+            <span class="fw-semibold">
+                @Model.LastItemNumber
+            </span>
+            筆，共
+            <span class="fw-semibold">
+                @Model.TotalCount
+            </span>
+            筆
+        </div>
+
+        <div class="d-flex flex-wrap align-items-center gap-3">
+
+            <!-- 每頁筆數 -->
+            <form asp-area="@Model.Area" asp-controller="@Model.Controller" asp-action="@Model.Action"
+                  method="get"
+                  class="d-flex align-items-center gap-2">
+
+                @foreach (var routeValue in Model.RouteValues)
+                {
+                    <input type="hidden" name="@routeValue.Key" value="@routeValue.Value" />
+                }
+
+                <input type="hidden" name="page" value="1" />
+
+                <label for="pageSize" class="small text-secondary text-nowrap">
+                    每頁
+                </label>
+
+                <select id="pageSize"  name="pageSize"  class="form-select form-select-sm" style="width: 80px;"
+                        onchange="this.form.submit()">
+
+                    @foreach (var size in PaginationSettings.AllowedPageSizes)
+                    {
+                        if (size == Model.PageSize)
+                        {
+                            <option value="@size" selected>
+                                @size
+                            </option>
+                        }
+                        else
+                        {
+                            <option value="@size">
+                                @size
+                            </option>
+                        }
+                    }
+                </select>
+
+                <span class="small text-secondary">
+                    筆
+                </span>
+            </form>
+
+            <!-- 頁碼 -->
+            @if (Model.TotalPages > 1)
+            {
+                <nav aria-label="分頁導覽">
+
+                    <ul class="pagination pagination-sm mb-0">
+
+                        <li class="page-item @(!Model.PageNumber.Equals(1) ? "" : "disabled")">
+
+                            <a class="page-link"
+                               href="@BuildPageUrl(1)"
+                               aria-label="第一頁">
+
+                                <i class="bi bi-chevron-double-left"></i>
+                            </a>
+                        </li>
+
+                        <li class="page-item @(Model.PageNumber > 1 ? "" : "disabled")">
+
+                            <a class="page-link"
+                               href="@BuildPageUrl(Model.PageNumber - 1)"
+                               aria-label="上一頁">
+
+                                <i class="bi bi-chevron-left"></i>
+                            </a>
+                        </li>
+
+                        @for (var pageNumber = startPage; pageNumber <= endPage; pageNumber++)
+                        {
+                            <li class="page-item @(pageNumber == Model.PageNumber ? "active" : "")">
+                                <a class="page-link" href="@BuildPageUrl(pageNumber)">
+                                    @pageNumber
+                                </a>
+                            </li>
+                        }
+
+                        <li class="page-item @(Model.PageNumber < Model.TotalPages ? "" : "disabled")">
+
+                            <a class="page-link"
+                               href="@BuildPageUrl(Model.PageNumber + 1)"
+                               aria-label="下一頁">
+
+                                <i class="bi bi-chevron-right"></i>
+                            </a>
+                        </li>
+
+                        <li class="page-item  @(Model.PageNumber < Model.TotalPages ? "" : "disabled")">
+
+                            <a class="page-link"
+                               href="@BuildPageUrl(Model.TotalPages)"
+                               aria-label="最後一頁">
+
+                                <i class="bi bi-chevron-double-right"></i>
+                            </a>
+                        </li>
+
+                    </ul>
+                </nav>
+            }
+        </div>
+    </div>
+}
+
+@functions {
+    private string BuildPageUrl(int page)
+    {
+        var routeValues = new Dictionary<string, string?>( Model.RouteValues)
+            {
+                ["area"] = Model.Area,
+                ["page"] = page.ToString(),
+                ["pageSize"] = Model.PageSize.ToString()
+            };
+
+        return Url.Action(
+            Model.Action,
+            Model.Controller,
+            routeValues
+        ) ?? "#";
+    }
+}

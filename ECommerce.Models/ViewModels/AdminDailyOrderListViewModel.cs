@@ -1,4 +1,6 @@
-﻿namespace ECommerce.Models.ViewModels
+﻿using ECommerce.Models.Common;
+
+namespace ECommerce.Models.ViewModels
 {
 	public class AdminDailyOrderListViewModel
 	{
@@ -8,12 +10,15 @@
 		public DateTime Date { get; set; }
 
 		/// <summary>
-		/// 該日期的訂單
+		/// 當日訂單分頁結果
 		/// </summary>
-		public IReadOnlyList<OrderHeader> Orders { get; set; } = new List<OrderHeader>();
+		public PagedResult<OrderHeader> PagedOrders { get; set; } = new();
 
-		public int TotalOrders => Orders.Count;
+		public int TotalOrders => PagedOrders.TotalCount;
 
-		public decimal TotalAmount => Orders.Sum(order => order.OrderTotal);
+		/// <summary>
+		/// 當日所有訂單總金額，不只是目前頁面
+		/// </summary>
+		public decimal TotalAmount { get; set; }
 	}
 }

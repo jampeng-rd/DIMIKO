@@ -1,4 +1,5 @@
 ﻿using ECommerce.Models;
+using ECommerce.Models.Common;
 using ECommerce.Models.ServiceResults;
 
 namespace ECommerce.Business.Services.IServices
@@ -21,10 +22,14 @@ namespace ECommerce.Business.Services.IServices
 		// 後台：取得指定月份每日的訂單數量
 		Task<IReadOnlyDictionary<int, int>> GetMonthlyOrderCountsAsync(int year, int month);
 
-		// 後台：取得指定日期的訂單
-		Task<IReadOnlyList<OrderHeader>> GetOrdersByDateAsync(DateTime taiwanDate);
+		// 後台：取得指定日期的 <分頁資料>
+		Task<PagedResult<OrderHeader>> GetOrdersByDateAsync(DateTime taiwanDate, int pageNumber, int pageSize);
 
-		// 後台：取得全部訂單
+		// 後台：計算當天全部訂單總額
+		Task<decimal> GetOrderTotalByDateAsync(DateTime taiwanDate);
+
+
+		// 後台：取得全部訂單 (未使用)
 		Task<IEnumerable<OrderHeader>> GetAllOrdersAsync();
 
 		// 後台：取得單筆完整訂單

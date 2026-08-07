@@ -1,6 +1,7 @@
 ﻿using ECommerce.Business.Services.IServices;
 using ECommerce.DataAccess.Data;
 using ECommerce.Models;
+using ECommerce.Models.Common;
 using ECommerce.Models.ServiceResults;
 using ECommerce.Utility;
 using ECommerce.Utility.Helpers;
@@ -207,8 +208,62 @@ namespace ECommerce.Business.Services
 			return dailyCounts;
 		}
 
-		// 後台：取得指定日期的訂單
-		public async Task<IReadOnlyList<OrderHeader>> GetOrdersByDateAsync(DateTime taiwanDate)
+		// 後台：取得指定日期的 <分頁資料>
+		public async Task<PagedResult<OrderHeader>> GetOrdersByDateAsync(
+			DateTime taiwanDate,
+			int pageNumber,
+			int pageSize)
+		{
+			pageNumber = PaginationSettings.NormalizePageNumber(pageNumber);
+			pageSize = PaginationSettings.NormalizePageSize(pageSize);
+
+			var date = taiwanDate.Date;
+
+			var dayStartTaiwan = DateTime.SpecifyKind(date, DateTimeKind.Unspecified);
+
+			var nextDayStartTaiwan = dayStartTaiwan.AddDays(1);
+
+			var dayStartUtc = TaiwanTimeHelper.ConvertTaiwanToUtc(dayStartTaiwan);
+			var nextDayStartUtc = TaiwanTimeHelper.ConvertTaiwanToUtc(nextDayStartTaiwan);
+
+			var query = _dbContext.OrderHeaders
+				.AsNoTracking()
+				.Where(order =>
+					order.OrderDate >= dayStartUtc &&
+					order.OrderDate < nextDayStartUtc);
+
+			var totalCount = await query.CountAsync();
+
+			var totalPages = totalCount == 0
+					? 0
+					: (int)Math.Ceiling(totalCount / (double)pageSize);
+
+			
+			// 使用者手動輸入超過總頁數的頁碼時，自動調整到最後一頁。	 	
+			if (totalPages > 0 && pageNumber > totalPages)
+			{
+				pageNumber = totalPages;
+			}
+
+			var items = await query
+				.Include(order => order.ApplicationUser)
+				.OrderByDescending(order => order.OrderDate)
+				.ThenByDescending(order => order.Id)
+				.Skip((pageNumber - 1) * pageSize)
+				.Take(pageSize)
+				.ToListAsync();
+
+			return new PagedResult<OrderHeader>
+			{
+				Items = items,
+				PageNumber = pageNumber,
+				PageSize = pageSize,
+				TotalCount = totalCount
+			};
+		}
+
+		// 後台：計算當天全部訂單總額
+		public async Task<decimal> GetOrderTotalByDateAsync(DateTime taiwanDate)
 		{
 			var date = taiwanDate.Date;
 
@@ -217,17 +272,14 @@ namespace ECommerce.Business.Services
 			var nextDayStartTaiwan = dayStartTaiwan.AddDays(1);
 
 			var dayStartUtc = TaiwanTimeHelper.ConvertTaiwanToUtc(dayStartTaiwan);
-
 			var nextDayStartUtc = TaiwanTimeHelper.ConvertTaiwanToUtc(nextDayStartTaiwan);
 
 			return await _dbContext.OrderHeaders
 				.AsNoTracking()
-				.Include(order => order.ApplicationUser)
 				.Where(order =>
 					order.OrderDate >= dayStartUtc &&
 					order.OrderDate < nextDayStartUtc)
-				.OrderByDescending(order => order.OrderDate)
-				.ToListAsync();
+				.SumAsync(order => (decimal?)order.OrderTotal) ?? 0m;
 		}
 
 

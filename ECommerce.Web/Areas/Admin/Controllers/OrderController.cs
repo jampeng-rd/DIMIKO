@@ -73,7 +73,10 @@ namespace ECommerce.Web.Areas.Admin.Controllers
 		}
 
 
-		public async Task<IActionResult> Daily(DateTime? date)
+		public async Task<IActionResult> Daily(
+			DateTime? date,
+			int page = PaginationSettings.DefaultPageNumber,
+			int pageSize = PaginationSettings.DefaultPageSize)
 		{
 			if (!date.HasValue)
 			{
@@ -87,19 +90,28 @@ namespace ECommerce.Web.Areas.Admin.Controllers
 				return BadRequest("日期超出允許範圍");
 			}
 
-			var orders = await _orderService.GetOrdersByDateAsync(selectedDate);
+			page = PaginationSettings.NormalizePageNumber(page);
+			pageSize = PaginationSettings.NormalizePageSize(pageSize);
+
+			var pagedOrders = await _orderService.GetOrdersByDateAsync(selectedDate, page, pageSize);
+			var totalAmount = await _orderService.GetOrderTotalByDateAsync(selectedDate);
 
 			var viewModel = new AdminDailyOrderListViewModel
-			{
-				Date = selectedDate,
-				Orders = orders
-			};
+				{
+					Date = selectedDate,
+					PagedOrders = pagedOrders,
+					TotalAmount = totalAmount
+				};
 
 			return View(viewModel);
 		}
 
 
-		public async Task<IActionResult> Details(int? id, DateTime? returnDate)
+		public async Task<IActionResult> Details(
+			int? id,
+			DateTime? returnDate,
+			int returnPage = PaginationSettings.DefaultPageNumber,
+			int returnPageSize = PaginationSettings.DefaultPageSize)
 		{
 			if (id is null or <= 0)
 			{
@@ -114,14 +126,16 @@ namespace ECommerce.Web.Areas.Admin.Controllers
 			}
 
 			var viewModel = new AdminOrderDetailsViewModel
-			{
-				Order = order,
-				ReturnDate = returnDate?.Date
-			};
+				{
+					Order = order,
+					ReturnDate = returnDate?.Date,
+					ReturnPage = PaginationSettings.NormalizePageNumber(returnPage),
+					ReturnPageSize = PaginationSettings.NormalizePageSize(returnPageSize)
+				};
 
 			return View(viewModel);
 		}
-
+		
 
 	}
 }
