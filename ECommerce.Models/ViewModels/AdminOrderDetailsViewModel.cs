@@ -6,6 +6,8 @@
 
 		public DateTime? ReturnDate { get; set; }
 
+		public string? ReturnStatus { get; set; }
+
 		public int ReturnPage { get; set; } = 1;
 
 		public int ReturnPageSize { get; set; } = 7;

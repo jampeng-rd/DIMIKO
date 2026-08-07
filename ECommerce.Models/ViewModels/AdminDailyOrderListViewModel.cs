@@ -10,6 +10,12 @@ namespace ECommerce.Models.ViewModels
 		public DateTime Date { get; set; }
 
 		/// <summary>
+		/// 目前選擇的訂單狀態
+		/// null 代表全部狀態
+		/// </summary>
+		public string? Status { get; set; }
+
+		/// <summary>
 		/// 當日訂單分頁結果
 		/// </summary>
 		public PagedResult<OrderHeader> PagedOrders { get; set; } = new();
@@ -17,7 +23,7 @@ namespace ECommerce.Models.ViewModels
 		public int TotalOrders => PagedOrders.TotalCount;
 
 		/// <summary>
-		/// 當日所有訂單總金額，不只是目前頁面
+		/// 目前篩選條件下的訂單總金額
 		/// </summary>
 		public decimal TotalAmount { get; set; }
 	}

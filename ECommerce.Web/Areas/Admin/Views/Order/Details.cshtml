@@ -8,7 +8,7 @@
 
     var orderStatusText = Model.Order.OrderStatus switch
     {
-        SD.OrderStatusPending => "待處理",
+        SD.OrderStatusPending => "待確認",
         SD.OrderStatusApproved => "已確認",
         SD.OrderStatusInProcess => "處理中",
         SD.OrderStatusShipped => "已出貨",
@@ -51,6 +51,7 @@
     {
         <a asp-area="Admin" asp-controller="Order" asp-action="Daily"
            asp-route-date="@Model.ReturnDate.Value.ToString("yyyy-MM-dd")"
+           asp-route-status="@Model.ReturnStatus"
            asp-route-page="@Model.ReturnPage"
            asp-route-pageSize="@Model.ReturnPageSize"
            class="text-decoration-none text-secondary small fw-medium d-inline-flex align-items-center gap-1 mb-3">

@@ -211,6 +211,7 @@ namespace ECommerce.Business.Services
 		// 後台：取得指定日期的 <分頁資料>
 		public async Task<PagedResult<OrderHeader>> GetOrdersByDateAsync(
 			DateTime taiwanDate,
+			string? status,
 			int pageNumber,
 			int pageSize)
 		{
@@ -231,6 +232,11 @@ namespace ECommerce.Business.Services
 				.Where(order =>
 					order.OrderDate >= dayStartUtc &&
 					order.OrderDate < nextDayStartUtc);
+
+			if (!string.IsNullOrWhiteSpace(status))
+			{
+				query = query.Where(order => order.OrderStatus == status);
+			}
 
 			var totalCount = await query.CountAsync();
 
@@ -263,7 +269,7 @@ namespace ECommerce.Business.Services
 		}
 
 		// 後台：計算當天全部訂單總額
-		public async Task<decimal> GetOrderTotalByDateAsync(DateTime taiwanDate)
+		public async Task<decimal> GetOrderTotalByDateAsync(DateTime taiwanDate, string? status)
 		{
 			var date = taiwanDate.Date;
 
@@ -274,12 +280,18 @@ namespace ECommerce.Business.Services
 			var dayStartUtc = TaiwanTimeHelper.ConvertTaiwanToUtc(dayStartTaiwan);
 			var nextDayStartUtc = TaiwanTimeHelper.ConvertTaiwanToUtc(nextDayStartTaiwan);
 
-			return await _dbContext.OrderHeaders
-				.AsNoTracking()
-				.Where(order =>
-					order.OrderDate >= dayStartUtc &&
-					order.OrderDate < nextDayStartUtc)
-				.SumAsync(order => (decimal?)order.OrderTotal) ?? 0m;
+			var query = _dbContext.OrderHeaders
+			   .AsNoTracking()
+			   .Where(order =>
+				   order.OrderDate >= dayStartUtc &&
+				   order.OrderDate < nextDayStartUtc);
+
+			if (!string.IsNullOrWhiteSpace(status))
+			{
+				query = query.Where(order => order.OrderStatus == status);
+			}
+
+			return await query.SumAsync(order => (decimal?)order.OrderTotal) ?? 0m;
 		}
 
 

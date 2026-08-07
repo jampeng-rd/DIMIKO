@@ -23,10 +23,14 @@ namespace ECommerce.Business.Services.IServices
 		Task<IReadOnlyDictionary<int, int>> GetMonthlyOrderCountsAsync(int year, int month);
 
 		// 後台：取得指定日期的 <分頁資料>
-		Task<PagedResult<OrderHeader>> GetOrdersByDateAsync(DateTime taiwanDate, int pageNumber, int pageSize);
+		Task<PagedResult<OrderHeader>> GetOrdersByDateAsync(
+			DateTime taiwanDate,
+			string? status,
+			int pageNumber,
+			int pageSize);
 
 		// 後台：計算當天全部訂單總額
-		Task<decimal> GetOrderTotalByDateAsync(DateTime taiwanDate);
+		Task<decimal> GetOrderTotalByDateAsync(DateTime taiwanDate, string? status);
 
 
 		// 後台：取得全部訂單 (未使用)

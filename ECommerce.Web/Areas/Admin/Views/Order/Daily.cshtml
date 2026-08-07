@@ -7,6 +7,26 @@
     ViewData["Title"] = "當日訂單";
 
     var dateTitle = Model.Date.ToString("yyyy 年 MM 月 dd 日");
+
+    var paginationModel = new PaginationViewModel
+    {
+        Area = "Admin",
+        Controller = "Order",
+        Action = "Daily",
+
+        PageNumber = Model.PagedOrders.PageNumber,
+        PageSize = Model.PagedOrders.PageSize,
+        TotalCount = Model.PagedOrders.TotalCount,
+        TotalPages = Model.PagedOrders.TotalPages,
+        FirstItemNumber = Model.PagedOrders.FirstItemNumber,
+        LastItemNumber = Model.PagedOrders.LastItemNumber,
+
+        RouteValues = new Dictionary<string, string?>
+        {
+            ["date"] = Model.Date.ToString("yyyy-MM-dd"),
+            ["status"] = Model.Status
+        }
+    };
 }
 
 <div class="container-fluid px-4 py-4">
@@ -54,6 +74,77 @@
             </div>
         </div>
 
+        <!-- 狀態篩選 -->
+        <div class="px-4 py-3 border-bottom bg-light">
+            <div class="d-flex flex-wrap gap-2">
+                <!-- 全部 -->
+                <a asp-area="Admin" asp-controller="Order" asp-action="Daily"
+                   asp-route-date="@Model.Date.ToString("yyyy-MM-dd")"
+                   asp-route-page="1"
+                   asp-route-pageSize="@Model.PagedOrders.PageSize"
+                   class="btn btn-sm @(string.IsNullOrWhiteSpace(Model.Status) ? "btn-dark" : "btn-outline-dark")">
+
+                    全部
+                </a>
+
+                <!-- 待確認 -->
+                <a asp-area="Admin" asp-controller="Order" asp-action="Daily"
+                   asp-route-date="@Model.Date.ToString("yyyy-MM-dd")"
+                   asp-route-status="@SD.OrderStatusPending"
+                   asp-route-page="1"
+                   asp-route-pageSize="@Model.PagedOrders.PageSize"
+                   class="btn btn-sm @(Model.Status == SD.OrderStatusPending ? "btn-warning" : "btn-outline-warning")">
+
+                    待確認
+                </a>
+
+                <!-- 已確認 -->
+                <a asp-area="Admin" asp-controller="Order" asp-action="Daily"
+                   asp-route-date="@Model.Date.ToString("yyyy-MM-dd")"
+                   asp-route-status="@SD.OrderStatusApproved"
+                   asp-route-page="1"
+                   asp-route-pageSize="@Model.PagedOrders.PageSize"
+                   class="btn btn-sm @(Model.Status == SD.OrderStatusApproved ? "btn-primary" : "btn-outline-primary")">
+
+                    已確認
+                </a>
+
+                <!-- 處理中 -->
+                <a asp-area="Admin" asp-controller="Order" asp-action="Daily"
+                   asp-route-date="@Model.Date.ToString("yyyy-MM-dd")"
+                   asp-route-status="@SD.OrderStatusInProcess"
+                   asp-route-page="1"
+                   asp-route-pageSize="@Model.PagedOrders.PageSize"
+                   class="btn btn-sm @(Model.Status == SD.OrderStatusInProcess ? "btn-info" : "btn-outline-info")">
+
+                    處理中
+                </a>
+
+                <!-- 已出貨 -->
+                <a asp-area="Admin" asp-controller="Order" asp-action="Daily"
+                   asp-route-date="@Model.Date.ToString("yyyy-MM-dd")"
+                   asp-route-status="@SD.OrderStatusShipped"
+                   asp-route-page="1"
+                   asp-route-pageSize="@Model.PagedOrders.PageSize"
+                   class="btn btn-sm @(Model.Status == SD.OrderStatusShipped ? "btn-success" : "btn-outline-success")">
+
+                    已出貨
+                </a>
+
+                <!-- 已取消 -->
+                <a asp-area="Admin" asp-controller="Order" asp-action="Daily"
+                   asp-route-date="@Model.Date.ToString("yyyy-MM-dd")"
+                   asp-route-status="@SD.OrderStatusCancelled"
+                   asp-route-page="1"
+                   asp-route-pageSize="@Model.PagedOrders.PageSize"
+                   class="btn btn-sm @(Model.Status == SD.OrderStatusCancelled ? "btn-danger" : "btn-outline-danger")">
+
+                    已取消
+                </a>
+            </div>
+        </div>
+
+        <!-- 訂單列表 -->
         @if (Model.TotalOrders == 0)
         {
             <div class="card-body text-center py-5">
@@ -61,11 +152,11 @@
                 <i class="bi bi-calendar-x display-3 text-secondary"></i>
 
                 <h5 class="fw-bold mt-3">
-                    當日沒有訂單
+                    沒有符合條件的訂單
                 </h5>
 
                 <p class="text-secondary mb-4">
-                    @dateTitle 沒有任何訂單紀錄。
+                    @dateTitle 目前沒有符合此篩選條件的訂單。
                 </p>
 
                 <a asp-area="Admin" asp-controller="Order" asp-action="Index" asp-route-year="@Model.Date.Year"
@@ -101,7 +192,7 @@
                         {
                             var orderStatusText = order.OrderStatus switch
                             {
-                                SD.OrderStatusPending => "待處理",
+                                SD.OrderStatusPending => "待確認",
                                 SD.OrderStatusApproved => "已確認",
                                 SD.OrderStatusInProcess => "處理中",
                                 SD.OrderStatusShipped => "已出貨",
@@ -179,6 +270,7 @@
                                 <td class="text-end">
                                     <a asp-area="Admin" asp-controller="Order" asp-action="Details" asp-route-id="@order.Id"
                                        asp-route-returnDate="@Model.Date.ToString("yyyy-MM-dd")"
+                                       asp-route-returnStatus="@Model.Status"
                                        asp-route-returnPage="@Model.PagedOrders.PageNumber"
                                        asp-route-returnPageSize="@Model.PagedOrders.PageSize"
                                        class="btn btn-sm btn-outline-primary text-nowrap">
@@ -195,31 +287,7 @@
             </div>
         }
 
-
-        @await Html.PartialAsync("_Pagination", new PaginationViewModel
-            {
-                Area = "Admin",
-                Controller = "Order",
-                Action = "Daily",
-
-                PageNumber = Model.PagedOrders.PageNumber,
-
-                PageSize = Model.PagedOrders.PageSize,
-
-                TotalCount = Model.PagedOrders.TotalCount,
-
-                TotalPages = Model.PagedOrders.TotalPages,
-
-                FirstItemNumber = Model.PagedOrders.FirstItemNumber,
-
-                LastItemNumber = Model.PagedOrders.LastItemNumber,
-
-                RouteValues = new Dictionary<string, string?>
-                    {
-                        ["date"] = Model.Date.ToString( "yyyy-MM-dd")
-                    }
-            }
-        )
+        <partial name="_Pagination" model="paginationModel" />
 
     </div>
 </div>

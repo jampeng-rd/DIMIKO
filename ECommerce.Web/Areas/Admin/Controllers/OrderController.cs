@@ -75,6 +75,7 @@ namespace ECommerce.Web.Areas.Admin.Controllers
 
 		public async Task<IActionResult> Daily(
 			DateTime? date,
+			string? status,
 			int page = PaginationSettings.DefaultPageNumber,
 			int pageSize = PaginationSettings.DefaultPageSize)
 		{
@@ -93,12 +94,13 @@ namespace ECommerce.Web.Areas.Admin.Controllers
 			page = PaginationSettings.NormalizePageNumber(page);
 			pageSize = PaginationSettings.NormalizePageSize(pageSize);
 
-			var pagedOrders = await _orderService.GetOrdersByDateAsync(selectedDate, page, pageSize);
-			var totalAmount = await _orderService.GetOrderTotalByDateAsync(selectedDate);
+			var pagedOrders = await _orderService.GetOrdersByDateAsync(selectedDate, status, page, pageSize);
+			var totalAmount = await _orderService.GetOrderTotalByDateAsync(selectedDate, status);
 
 			var viewModel = new AdminDailyOrderListViewModel
 				{
 					Date = selectedDate,
+					Status = status,
 					PagedOrders = pagedOrders,
 					TotalAmount = totalAmount
 				};
@@ -110,6 +112,7 @@ namespace ECommerce.Web.Areas.Admin.Controllers
 		public async Task<IActionResult> Details(
 			int? id,
 			DateTime? returnDate,
+			string? returnStatus,
 			int returnPage = PaginationSettings.DefaultPageNumber,
 			int returnPageSize = PaginationSettings.DefaultPageSize)
 		{
@@ -129,6 +132,7 @@ namespace ECommerce.Web.Areas.Admin.Controllers
 				{
 					Order = order,
 					ReturnDate = returnDate?.Date,
+					ReturnStatus = returnStatus,
 					ReturnPage = PaginationSettings.NormalizePageNumber(returnPage),
 					ReturnPageSize = PaginationSettings.NormalizePageSize(returnPageSize)
 				};
