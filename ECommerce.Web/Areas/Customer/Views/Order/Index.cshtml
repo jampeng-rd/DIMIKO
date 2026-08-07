@@ -1,4 +1,5 @@
-﻿@model IEnumerable<ECommerce.Models.OrderHeader>
+﻿@using ECommerce.Utility
+@model IEnumerable<ECommerce.Models.OrderHeader>
 
 @{
     ViewData["Title"] = "我的訂單";
@@ -71,21 +72,40 @@
                         {
                             var orderStatusText = order.OrderStatus switch
                             {
-                                "Pending" => "待處理",
-                                "Approved" => "已確認",
-                                "Processing" => "處理中",
-                                "Shipped" => "已出貨",
-                                "Cancelled" => "已取消",
+                                SD.OrderStatusPending => "待確認",
+                                SD.OrderStatusApproved => "已確認",
+                                SD.OrderStatusInProcess => "處理中",
+                                SD.OrderStatusShipped => "已出貨",
+                                SD.OrderStatusCancelled => "已取消",
                                 _ => order.OrderStatus
+                            };
+
+                            var orderStatusBadgeClass = order.OrderStatus switch
+                            {
+                                SD.OrderStatusPending => "bg-warning text-dark",
+                                SD.OrderStatusApproved => "bg-primary",
+                                SD.OrderStatusInProcess => "bg-info text-dark",
+                                SD.OrderStatusShipped => "bg-success",
+                                SD.OrderStatusCancelled => "bg-danger",
+                                _ => "bg-secondary"
                             };
 
                             var paymentStatusText = order.PaymentStatus switch
                             {
-                                "Pending" => "待付款",
-                                "Approved" => "已付款",
-                                "Rejected" => "付款失敗",
-                                "Refunded" => "已退款",
+                                SD.PaymentStatusPending => "待付款",
+                                SD.PaymentStatusApproved => "已付款",
+                                SD.PaymentStatusRejected => "付款失敗",
+                                SD.PaymentStatusRefunded => "已退款",
                                 _ => order.PaymentStatus
+                            };
+
+                            var paymentStatusClass = order.PaymentStatus switch
+                            {
+                                SD.PaymentStatusPending => "bg-secondary",
+                                SD.PaymentStatusApproved => "bg-success",
+                                SD.PaymentStatusRejected => "bg-danger",
+                                SD.PaymentStatusRefunded => "bg-info text-dark",
+                                _ => "bg-secondary"
                             };
 
                             <tr>
@@ -100,7 +120,7 @@
                                 </td>
 
                                 <td>
-                                    <span class="badge bg-warning text-dark">
+                                    <span class="badge @orderStatusBadgeClass">
                                         @orderStatusText
                                     </span>
                                 </td>

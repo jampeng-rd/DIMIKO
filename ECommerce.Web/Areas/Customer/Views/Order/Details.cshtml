@@ -1,25 +1,45 @@
-﻿@model ECommerce.Models.OrderHeader
+﻿@using ECommerce.Utility
+@model ECommerce.Models.OrderHeader
 
 @{
     ViewData["Title"] = "訂單明細";
 
     var orderStatusText = Model.OrderStatus switch
     {
-        "Pending" => "待處理",
-        "Approved" => "已確認",
-        "Processing" => "處理中",
-        "Shipped" => "已出貨",
-        "Cancelled" => "已取消",
+        SD.OrderStatusPending => "待確認",
+        SD.OrderStatusApproved => "已確認",
+        SD.OrderStatusInProcess => "處理中",
+        SD.OrderStatusShipped => "已出貨",
+        SD.OrderStatusCancelled => "已取消",
         _ => Model.OrderStatus
+    };
+
+    var orderStatusBadgeClass = Model.OrderStatus switch
+    {
+        SD.OrderStatusPending => "bg-warning text-dark",
+        SD.OrderStatusApproved => "bg-primary",
+        SD.OrderStatusInProcess => "bg-info text-dark",
+        SD.OrderStatusShipped => "bg-success",
+        SD.OrderStatusCancelled => "bg-danger",
+        _ => "bg-secondary"
     };
 
     var paymentStatusText = Model.PaymentStatus switch
     {
-        "Pending" => "待付款",
-        "Approved" => "已付款",
-        "Rejected" => "付款失敗",
-        "Refunded" => "已退款",
+        SD.PaymentStatusPending => "待付款",
+        SD.PaymentStatusApproved => "已付款",
+        SD.PaymentStatusRejected => "付款失敗",
+        SD.PaymentStatusRefunded => "已退款",
         _ => Model.PaymentStatus
+    };
+
+    var paymentStatusClass = Model.PaymentStatus switch
+    {
+        SD.PaymentStatusPending => "bg-secondary",
+        SD.PaymentStatusApproved => "bg-success",
+        SD.PaymentStatusRejected => "bg-danger",
+        SD.PaymentStatusRefunded => "bg-info text-dark",
+        _ => "bg-secondary"
     };
 }
 
@@ -52,7 +72,7 @@
                             </h5>
                         </div>
 
-                        <span class="badge bg-warning text-dark">
+                        <span class="badge @orderStatusBadgeClass">
                             @orderStatusText
                         </span>
                     </div>
@@ -137,12 +157,26 @@
                         </div>
                     </div>
 
+                    @* 已出貨會顯示 *@
+                    @if (Model.OrderStatus == SD.OrderStatusShipped && Model.ShippingDate.HasValue)
+                    {
+                        <div class="mb-3">
+                            <div class="text-secondary small mb-1">
+                                出貨時間
+                            </div>
+
+                            <div class="fw-medium">
+                                @(Model.ShippingDate.Value.ToLocalTime().ToString("yyyy/MM/dd HH:mm"))
+                            </div>
+                        </div>
+                    }
+
                     <div class="d-flex justify-content-between align-items-center mb-3">
                         <span class="text-secondary">
                             訂單狀態
                         </span>
 
-                        <span class="badge bg-warning text-dark">
+                        <span class="badge @orderStatusBadgeClass">
                             @orderStatusText
                         </span>
                     </div>
@@ -198,7 +232,39 @@
                         </span>
                     </p>
 
+                    @* 已出貨會顯示 *@
+                    @if (Model.OrderStatus == SD.OrderStatusShipped &&
+                         (!string.IsNullOrWhiteSpace(Model.Carrier) ||
+                          !string.IsNullOrWhiteSpace(Model.TrackingNumber)))
+                    {
+                        <hr />
+
+                        <div class="small">
+
+                            <div class="mb-2">
+                                <span class="text-secondary">
+                                    物流公司：
+                                </span>
+
+                                <span class="fw-medium">
+                                    @(Model.Carrier ?? "尚未提供")
+                                </span>
+                            </div>
+
+                            <div>
+                                <span class="text-secondary">
+                                    追蹤編號：
+                                </span>
+
+                                <span class="fw-medium">
+                                    @(Model.TrackingNumber ?? "尚未提供")
+                                </span>
+                            </div>
+                        </div>
+                    }
+
                 </div>
+
             </div>
         </div>
     </div>
