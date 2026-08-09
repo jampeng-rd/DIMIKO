@@ -1,4 +1,5 @@
 ﻿using ECommerce.Business.Services.IServices;
+using ECommerce.Utility;
 using ECommerce.Utility.Helpers;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -45,22 +46,15 @@ namespace ECommerce.Web.Areas.Customer.Controllers
 					return RedirectToAction("Index", "Order", new { area = "Customer" });
 				}
 
-				if (!string.Equals(response.Status, "SUCCESS", StringComparison.OrdinalIgnoreCase))
-				{
-					TempData["error"] = string.IsNullOrWhiteSpace(response.Message)
-							? "付款未完成"
-							: response.Message;
-
-					return RedirectToAction("Index", "Order", new { area = "Customer" });
-				}
-
-				var userId = User.FindFirstValue( ClaimTypes.NameIdentifier);
+				// 取得會員
+				var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
 				if (string.IsNullOrWhiteSpace(userId))
 				{
 					return RedirectToAction("Index", "Order", new { area = "Customer" });
 				}
 
+				// 取得訂單
 				var order = await _orderService.GetOrderByNumberAsync(response.Result.MerchantOrderNo, userId);
 
 				if (order == null)
@@ -68,6 +62,22 @@ namespace ECommerce.Web.Areas.Customer.Controllers
 					return NotFound();
 				}
 
+				// 付款未成功
+				if (!string.Equals(response.Status, "SUCCESS", StringComparison.OrdinalIgnoreCase))
+				{
+					TempData["error"] = string.IsNullOrWhiteSpace(response.Message)
+							? "付款未完成，您可以重新進行付款"
+							: $"付款未完成：{response.Message}";
+
+					return RedirectToAction("Details", "Order",
+							new
+							{
+								area = "Customer",
+								id = order.Id
+							});
+				}
+
+				// 付款成功
 				TempData["success"] = "付款完成，訂單付款結果確認中";
 
 				return RedirectToAction("OrderConfirmation", "Cart",
@@ -133,7 +143,6 @@ namespace ECommerce.Web.Areas.Customer.Controllers
 			}
 		}
 
-
 		private static DateTime? ParsePaymentDate(string payTime)
 		{
 			if (string.IsNullOrWhiteSpace(payTime))
@@ -155,6 +164,90 @@ namespace ECommerce.Web.Areas.Customer.Controllers
 
 			return TaiwanTimeHelper.ConvertTaiwanToUtc(taiwanPaymentDate);
 		}
+
+
+		// 重新付款
+		[HttpPost]
+		[Authorize]
+		[ValidateAntiForgeryToken]
+		public async Task<IActionResult> Retry(int orderId)
+		{
+			if (orderId <= 0)
+			{
+				return NotFound();
+			}
+
+			var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+			if (string.IsNullOrWhiteSpace(userId))
+			{
+				return Challenge();
+			}
+
+			if (!_newebPayService.IsConfigured())
+			{
+				TempData["error"] ="金流尚未設定完成，目前無法進行付款";
+
+				return RedirectToAction("Details", "Order",
+					new
+					{
+						area = "Customer",
+						id = orderId
+					});
+			}
+
+			var order = await _orderService.GetOrderByIdAsync(orderId, userId);
+
+			if (order == null)
+			{
+				return NotFound();
+			}
+
+			if (order.OrderStatus != SD.OrderStatusPending || order.PaymentStatus != SD.PaymentStatusPending)
+			{
+				TempData["error"] = "此訂單目前無法重新付款";
+
+				return RedirectToAction("Details", "Order",
+					new
+					{
+						area = "Customer",
+						id = orderId
+					});
+			}
+
+			if (order.PaymentExpireDate == null || order.PaymentExpireDate <= DateTime.UtcNow)
+			{
+				TempData["error"] = "此訂單已超過付款期限，無法重新付款";
+
+				return RedirectToAction("Details", "Order",
+					new
+					{
+						area = "Customer",
+						id = orderId
+					});
+			}
+
+			try
+			{
+				var paymentRequest = _newebPayService.CreatePaymentRequest(order);
+
+				return View(
+					"~/Areas/Customer/Views/Cart/Payment.cshtml",
+					paymentRequest);
+			}
+			catch
+			{
+				TempData["error"] = "建立付款資料時發生錯誤，請稍後再試";
+
+				return RedirectToAction("Details", "Order",
+					new
+					{
+						area = "Customer",
+						id = orderId
+					});
+			}
+		}
+
 
 	}
 }

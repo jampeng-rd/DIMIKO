@@ -1,4 +1,5 @@
 ﻿@using ECommerce.Utility
+@using ECommerce.Utility.Helpers
 @model ECommerce.Models.OrderHeader
 
 @{
@@ -41,6 +42,15 @@
         SD.PaymentStatusRefunded => "bg-info text-dark",
         _ => "bg-secondary"
     };
+
+    var isPendingOrder =
+        Model.OrderStatus == SD.OrderStatusPending &&
+        Model.PaymentStatus == SD.PaymentStatusPending;
+
+    var canRetryPayment =
+        isPendingOrder &&
+        Model.PaymentExpireDate.HasValue &&
+        Model.PaymentExpireDate.Value > DateTime.UtcNow;
 }
 
 <div class="container py-4" style="max-width: 1140px;">
@@ -186,10 +196,25 @@
                             付款狀態
                         </span>
 
-                        <span class="badge bg-secondary">
+                        <span class="badge @paymentStatusClass">
                             @paymentStatusText
                         </span>
                     </div>
+
+                    @if (Model.PaymentStatus == SD.PaymentStatusPending && Model.PaymentExpireDate.HasValue)
+                    {
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <span class="text-secondary">
+                                付款期限
+                            </span>
+
+                            <span class="fw-medium">
+                                @(TaiwanTimeHelper
+                                    .ConvertUtcToTaiwan(Model.PaymentExpireDate.Value)
+                                    .ToString("yyyy/MM/dd HH:mm"))
+                            </span>
+                        </div>
+                    }
 
                     <hr />
 
@@ -199,6 +224,47 @@
                             @Model.OrderTotal.ToString("C0")
                         </span>
                     </div>
+
+                    @if (isPendingOrder)
+                    {
+                        <hr />
+                        <div class="d-grid gap-2">
+
+                            @if (canRetryPayment)
+                            {
+                                <form asp-area="Customer" asp-controller="Payment" asp-action="Retry"
+                                      method="post">
+
+                                    <input type="hidden" name="orderId" value="@Model.Id" />
+
+                                    <button type="submit" class="btn btn-success w-100">
+                                        <i class="bi bi-credit-card me-1"></i>
+                                        重新付款
+                                    </button>
+                                </form>
+                            }
+                            else
+                            {
+                                <div class="alert alert-warning mb-0">
+                                    此訂單已超過付款期限。
+                                </div>
+                            }
+
+                            <form asp-area="Customer" asp-controller="Order" asp-action="Cancel"
+                                  method="post"
+                                  onsubmit="return confirm('確定要取消這筆訂單嗎？取消後將無法繼續付款。');">
+
+                                <input type="hidden" name="id" value="@Model.Id" />
+
+                                <button type="submit" class="btn btn-outline-danger w-100">
+                                    <i class="bi bi-x-circle me-1"></i>
+                                    取消訂單
+                                </button>
+                            </form>
+                        </div>
+                        
+                    }
+
                 </div>
             </div>
 

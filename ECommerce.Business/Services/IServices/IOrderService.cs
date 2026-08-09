@@ -29,6 +29,13 @@ namespace ECommerce.Business.Services.IServices
 		// 前台
 		Task<OrderHeader?> GetUserOrderDetailsAsync(int orderId, string userId);
 
+		// 前台：使用者取消自己的未付款訂單
+		Task<bool> CancelUserOrderAsync(int orderId, string userId);
+
+		// 系統：取消逾期未付款訂單並恢復庫存
+		Task<int> CancelExpiredOrdersAsync();
+
+
 
 		// 後台：取得指定月份每日的訂單數量
 		Task<IReadOnlyDictionary<int, int>> GetMonthlyOrderCountsAsync(int year, int month);

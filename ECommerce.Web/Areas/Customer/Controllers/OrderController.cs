@@ -54,6 +54,46 @@ namespace ECommerce.Web.Areas.Customer.Controllers
 			return View(order);
 		}
 
+		[HttpPost]
+		[ValidateAntiForgeryToken]
+		public async Task<IActionResult> Cancel(int id)
+		{
+			if (id <= 0)
+			{
+				return NotFound();
+			}
+
+			var userId = GetCurrentUserId();
+
+			if (userId == null)
+			{
+				return Challenge();
+			}
+
+			try
+			{
+				var cancelled = await _orderService.CancelUserOrderAsync(id, userId);
+
+				if (!cancelled)
+				{
+					TempData["error"] = "此訂單目前無法取消";
+
+					return RedirectToAction(nameof(Details), new { id });
+				}
+
+				TempData["success"] = "訂單已取消，商品庫存已恢復";
+
+				return RedirectToAction(nameof(Details), new { id });
+			}
+			catch
+			{
+				TempData["error"] = "取消訂單時發生錯誤，請稍後再試";
+
+				return RedirectToAction(nameof(Details), new { id });
+			}
+		}
+
+
 		private string? GetCurrentUserId()
 		{
 			return User.FindFirstValue(

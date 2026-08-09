@@ -159,7 +159,10 @@ namespace ECommerce.Business.Services
 				["ItemDesc"] = "DIMIKO 商品訂單",
 
 				["ReturnURL"] = _settings.ReturnUrl,
-				["NotifyURL"] = _settings.NotifyUrl
+				["NotifyURL"] = _settings.NotifyUrl,
+
+				// 只啟用信用卡一次付清
+				["CREDIT"] = "1"
 			};
 
 			return string.Join(

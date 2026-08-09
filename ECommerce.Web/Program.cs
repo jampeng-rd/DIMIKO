@@ -4,6 +4,7 @@ using ECommerce.DataAccess.Data;
 using ECommerce.Models;
 using ECommerce.Utility.Identity;
 using ECommerce.Utility.Settings;
+using ECommerce.Web.BackgroundServices;
 using ECommerce.Web.DataInitialization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -46,6 +47,8 @@ builder.Services.AddScoped<IShoppingCartService, ShoppingCartService>();
 builder.Services.AddScoped<IOrderService, OrderService>();
 // Register NewebPay service
 builder.Services.AddScoped<INewebPayService, NewebPayService>();
+
+builder.Services.AddHostedService<ExpiredOrderCleanupService>();
 
 // Register Session
 builder.Services.AddDistributedMemoryCache();

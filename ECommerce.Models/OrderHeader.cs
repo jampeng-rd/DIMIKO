@@ -25,6 +25,9 @@ namespace ECommerce.Models
 
 		public DateTime OrderDate { get; set; }
 
+		// 付款期限
+		public DateTime? PaymentExpireDate { get; set; }
+
 		public DateTime? ShippingDate { get; set; }
 
 		[Column(TypeName = "decimal(18,2)")]

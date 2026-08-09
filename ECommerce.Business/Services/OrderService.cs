@@ -6,6 +6,7 @@ using ECommerce.Models.ServiceResults;
 using ECommerce.Utility;
 using ECommerce.Utility.Helpers;
 using Microsoft.EntityFrameworkCore;
+using System.Data;
 
 namespace ECommerce.Business.Services
 {
@@ -64,9 +65,16 @@ namespace ECommerce.Business.Services
 					orderTotal += cartItem.Price * cartItem.Count;
 				}
 
+
+				var now = DateTime.UtcNow;
+
 				orderHeader.OrderNumber = OrderNumberGenerator.Generate();
 				orderHeader.ApplicationUserId = userId;
-				orderHeader.OrderDate = DateTime.UtcNow;
+				orderHeader.OrderDate = now;
+
+				// 建立訂單後 1 小時內完成付款
+				orderHeader.PaymentExpireDate = now.AddHours(1);
+
 				orderHeader.OrderTotal = orderTotal;
 				orderHeader.OrderStatus = SD.OrderStatusPending;
 				orderHeader.PaymentStatus = SD.PaymentStatusPending;
@@ -159,6 +167,18 @@ namespace ECommerce.Business.Services
 				return false;
 			}
 
+			// 實際付款時間已超過付款期限
+			if (order.PaymentExpireDate.HasValue && paymentDate > order.PaymentExpireDate.Value)
+			{
+				return false;
+			}
+
+			// 已取消的訂單不能再更新為付款成功
+			if (order.OrderStatus == SD.OrderStatusCancelled)
+			{
+				return false;
+			}
+
 			// NotifyURL 可能被藍新重送，已付款的訂單不要重複更新。
 			if (order.PaymentStatus == SD.PaymentStatusApproved)
 			{
@@ -198,8 +218,7 @@ namespace ECommerce.Business.Services
 					order.ApplicationUserId == userId);
 		}
 
-
-		// 前台：取使用者訂單
+		// 前台：取得使用者訂單
 		public async Task<IEnumerable<OrderHeader>> GetUserOrdersAsync(string userId)
 		{
 			if (string.IsNullOrWhiteSpace(userId))
@@ -227,6 +246,110 @@ namespace ECommerce.Business.Services
 					.ThenInclude(detail => detail.Product)
 					.ThenInclude(product => product.ProductImages)
 				.FirstOrDefaultAsync(order => order.Id == orderId && order.ApplicationUserId == userId);
+		}
+
+		// 前台：使用者取消自己的未付款訂單
+		public async Task<bool> CancelUserOrderAsync(int orderId, string userId)
+		{
+			if (orderId <= 0 || string.IsNullOrWhiteSpace(userId))
+			{
+				return false;
+			}
+
+			await using var transaction = await _dbContext.Database.BeginTransactionAsync();
+
+			try
+			{
+				var order = await _dbContext.OrderHeaders
+					.Include(order => order.OrderDetails)
+					.ThenInclude(detail => detail.Product)
+					.FirstOrDefaultAsync(order =>
+						order.Id == orderId &&
+						order.ApplicationUserId == userId);
+
+				if (order == null)
+				{
+					return false;
+				}
+
+				// 前台只能取消「尚未付款、尚未處理」的訂單
+				if (order.OrderStatus != SD.OrderStatusPending || order.PaymentStatus != SD.PaymentStatusPending)
+				{
+					return false;
+				}
+
+				// 恢復庫存
+				foreach (var detail in order.OrderDetails)
+				{
+					detail.Product.StockQuantity += detail.Count;
+				}
+
+				order.OrderStatus = SD.OrderStatusCancelled;
+
+				await _dbContext.SaveChangesAsync();
+
+				await transaction.CommitAsync();
+
+				return true;
+			}
+			catch
+			{
+				await transaction.RollbackAsync();
+				throw;
+			}
+		}
+
+		// 系統：取消逾期未付款訂單並恢復庫存
+		public async Task<int> CancelExpiredOrdersAsync()
+		{
+			var now = DateTime.UtcNow;
+
+			await using var transaction = await _dbContext.Database.BeginTransactionAsync(IsolationLevel.Serializable);
+
+			try
+			{
+				var expiredOrders =
+					await _dbContext.OrderHeaders
+						.Include(order => order.OrderDetails)
+						.ThenInclude(detail => detail.Product)
+						.Where(order =>
+							order.OrderStatus == SD.OrderStatusPending &&
+							order.PaymentStatus == SD.PaymentStatusPending &&
+							order.PaymentExpireDate.HasValue &&
+							order.PaymentExpireDate.Value <= now)
+						.ToListAsync();
+
+				if (expiredOrders.Count == 0)
+				{
+					await transaction.CommitAsync();
+
+					return 0;
+				}
+
+				foreach (var order in expiredOrders)
+				{
+					// 恢復這張訂單原本保留的庫存
+					foreach (var detail in order.OrderDetails)
+					{
+						detail.Product.StockQuantity += detail.Count;
+					}
+
+					// 訂單已逾期，改為取消
+					order.OrderStatus = SD.OrderStatusCancelled;
+				}
+
+				await _dbContext.SaveChangesAsync();
+
+				await transaction.CommitAsync();
+
+				return expiredOrders.Count;
+			}
+			catch
+			{
+				await transaction.RollbackAsync();
+
+				throw;
+			}
 		}
 
 
