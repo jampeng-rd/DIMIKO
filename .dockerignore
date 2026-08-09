@@ -1,0 +1,45 @@
+# Git
+.git
+.gitignore
+
+# GitHub Actions
+.github
+
+# Visual Studio
+.vs
+.vscode
+.idea
+
+# Build output
+**/bin
+**/obj
+
+# User-specific files
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Logs
+*.log
+logs
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Docker files not needed inside build context
+docker-compose*
+*.dcproj
+
+# Local secrets / environment files
+secrets.json
+.env
+.env.*
+
+# Publish output
+publish
+**/publish
+
+# Misc
+README.md
