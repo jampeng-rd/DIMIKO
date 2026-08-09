@@ -538,7 +538,8 @@ namespace ECommerce.Business.Services
 				return false;
 			}
 
-			if (order.OrderStatus != SD.OrderStatusPending)
+			// 只有「訂單待確認 + 已付款」才能確認訂單
+			if (order.OrderStatus != SD.OrderStatusPending || order.PaymentStatus != SD.PaymentStatusApproved)
 			{
 				return false;
 			}
@@ -663,7 +664,6 @@ namespace ECommerce.Business.Services
 				throw;
 			}
 		}
-
 
 	}
 }

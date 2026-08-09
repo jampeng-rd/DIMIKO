@@ -154,7 +154,7 @@ namespace ECommerce.Web.Areas.Admin.Controllers
 
 			if (!success)
 			{
-				TempData["error"] = "訂單確認失敗，訂單可能不存在或目前狀態無法確認";
+				TempData["error"] = "訂單確認失敗，請確認訂單已完成付款且目前仍為待確認狀態";
 			}
 			else
 			{

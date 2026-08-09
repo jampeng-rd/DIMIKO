@@ -173,20 +173,12 @@ namespace ECommerce.Web.Areas.Customer.Controllers
 
 				UpdateCartSession(0);
 
-				// 接藍新金流
-				var orderHeader = await _orderService.GetOrderByIdAsync(result.OrderId.Value, userId);
-
-				if (orderHeader == null)
-				{
-					throw new InvalidOperationException("找不到剛建立的訂單");
-				}
-
-				var paymentRequest = _newebPayService.CreatePaymentRequest(orderHeader);
-
-				return View("Payment", paymentRequest);
-
-				// 沒有接藍新金流時的回傳資料
-				//return RedirectToAction(nameof(OrderConfirmation), new { orderId = result.OrderId.Value });
+				return RedirectToAction("Checkout", "Payment",
+					new
+					{
+						area = "Customer",
+						orderId = result.OrderId.Value
+					});
 			}
 			catch
 			{
@@ -220,7 +212,6 @@ namespace ECommerce.Web.Areas.Customer.Controllers
 
 			return View(orderHeader);
 		}
-
 
 
 		[HttpPost]

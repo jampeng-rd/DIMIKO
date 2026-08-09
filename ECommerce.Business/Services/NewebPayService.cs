@@ -141,7 +141,7 @@ namespace ECommerce.Business.Services
 		}
 
 
-
+		// 建立原始付款資料
 		private string BuildTradeInfo(OrderHeader orderHeader)
 		{
 			var timeStamp = DateTimeOffset.UtcNow.ToUnixTimeSeconds();

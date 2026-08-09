@@ -184,18 +184,6 @@ namespace ECommerce.Web.Areas.Customer.Controllers
 				return Challenge();
 			}
 
-			if (!_newebPayService.IsConfigured())
-			{
-				TempData["error"] ="金流尚未設定完成，目前無法進行付款";
-
-				return RedirectToAction("Details", "Order",
-					new
-					{
-						area = "Customer",
-						id = orderId
-					});
-			}
-
 			var order = await _orderService.GetOrderByIdAsync(orderId, userId);
 
 			if (order == null)
@@ -218,6 +206,75 @@ namespace ECommerce.Web.Areas.Customer.Controllers
 			if (order.PaymentExpireDate == null || order.PaymentExpireDate <= DateTime.UtcNow)
 			{
 				TempData["error"] = "此訂單已超過付款期限，無法重新付款";
+
+				return RedirectToAction("Details", "Order",
+					new
+					{
+						area = "Customer",
+						id = orderId
+					});
+			}
+
+			return RedirectToAction(nameof(Checkout),
+				new
+				{
+					orderId
+				});
+		}
+
+
+		[HttpGet]
+		[Authorize]
+		public async Task<IActionResult> Checkout(int orderId)
+		{
+			if (orderId <= 0)
+			{
+				return NotFound();
+			}
+
+			var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+			if (string.IsNullOrWhiteSpace(userId))
+			{
+				return Challenge();
+			}
+
+			if (!_newebPayService.IsConfigured())
+			{
+				TempData["error"] = "金流尚未設定完成，目前無法進行付款";
+
+				return RedirectToAction("Details", "Order",
+					new
+					{
+						area = "Customer",
+						id = orderId
+					});
+			}
+
+			var order = await _orderService.GetOrderByIdAsync(orderId, userId);
+
+			if (order == null)
+			{
+				return NotFound();
+			}
+
+			// 只有待付款訂單才能進入付款頁
+			if (order.OrderStatus != SD.OrderStatusPending || order.PaymentStatus != SD.PaymentStatusPending)
+			{
+				TempData["error"] = "此訂單目前無法進行付款";
+
+				return RedirectToAction("Details", "Order",
+					new
+					{
+						area = "Customer",
+						id = orderId
+					});
+			}
+
+			// 已超過付款期限
+			if (order.PaymentExpireDate == null || order.PaymentExpireDate <= DateTime.UtcNow)
+			{
+				TempData["error"] = "此訂單已超過付款期限，無法進行付款";
 
 				return RedirectToAction("Details", "Order",
 					new
