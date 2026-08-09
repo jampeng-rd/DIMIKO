@@ -42,11 +42,17 @@ namespace ECommerce.Models
 		public string? Carrier { get; set; }
 
 
-		[StringLength(255)]
-		public string? SessionId { get; set; }
+		// 藍新交易編號
+		[StringLength(100)]
+		public string? NewebPayTradeNo { get; set; }
 
-		[StringLength(255)]
-		public string? PaymentIntentId { get; set; }
+		// 付款方式
+		[StringLength(50)]
+		public string? PaymentType { get; set; }
+
+		// 實際付款時間
+		public DateTime? PaymentDate { get; set; }
+
 
 		[ValidateNever]
 		[Required]

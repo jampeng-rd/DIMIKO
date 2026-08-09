@@ -16,15 +16,18 @@ namespace ECommerce.Web.Areas.Customer.Controllers
 		private readonly IShoppingCartService _shoppingCartService;
 		private readonly UserManager<ApplicationUser> _userManager;
 		private readonly IOrderService _orderService;
+		private readonly INewebPayService _newebPayService;
 
 		public CartController(
 			IShoppingCartService shoppingCartService,
 			UserManager<ApplicationUser> userManager,
-			IOrderService orderService)
+			IOrderService orderService,
+			INewebPayService newebPayService)
 		{
 			_shoppingCartService = shoppingCartService;
 			_userManager = userManager;
 			_orderService = orderService;
+			_newebPayService = newebPayService;
 		}
 
 		public async Task<IActionResult> Index()
@@ -135,6 +138,13 @@ namespace ECommerce.Web.Areas.Customer.Controllers
 				return View(viewModel);
 			}
 
+			if (!_newebPayService.IsConfigured())
+			{
+				ModelState.AddModelError(string.Empty, "金流尚未設定完成，目前無法進行付款");
+
+				return View(viewModel);
+			}
+
 			// 清除使用者輸入資料前後可能存在的空白
 			viewModel.OrderHeader.Name = viewModel.OrderHeader.Name.Trim();
 			viewModel.OrderHeader.PhoneNumber = viewModel.OrderHeader.PhoneNumber.Trim();
@@ -163,7 +173,20 @@ namespace ECommerce.Web.Areas.Customer.Controllers
 
 				UpdateCartSession(0);
 
-				return RedirectToAction(nameof(OrderConfirmation), new { orderId = result.OrderId.Value });
+				// 接藍新金流
+				var orderHeader = await _orderService.GetOrderByIdAsync(result.OrderId.Value, userId);
+
+				if (orderHeader == null)
+				{
+					throw new InvalidOperationException("找不到剛建立的訂單");
+				}
+
+				var paymentRequest = _newebPayService.CreatePaymentRequest(orderHeader);
+
+				return View("Payment", paymentRequest);
+
+				// 沒有接藍新金流時的回傳資料
+				//return RedirectToAction(nameof(OrderConfirmation), new { orderId = result.OrderId.Value });
 			}
 			catch
 			{

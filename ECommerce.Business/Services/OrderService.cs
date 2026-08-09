@@ -122,6 +122,83 @@ namespace ECommerce.Business.Services
 					order.ApplicationUserId == userId);
 		}
 
+		// 前台：藍新付款成功後更新訂單付款資訊
+		public async Task<bool> MarkPaymentAsApprovedAsync(
+			string merchantOrderNo,
+			int amount,
+			string tradeNo,
+			string paymentType,
+			DateTime paymentDate)
+		{
+			if (string.IsNullOrWhiteSpace(merchantOrderNo))
+			{
+				return false;
+			}
+
+			if (amount <= 0)
+			{
+				return false;
+			}
+
+			if (string.IsNullOrWhiteSpace(tradeNo))
+			{
+				return false;
+			}
+
+			var order = await _dbContext.OrderHeaders.FirstOrDefaultAsync(order => order.OrderNumber == merchantOrderNo);
+
+			if (order == null)
+			{
+				return false;
+			}
+
+			var orderAmount = decimal.ToInt32(order.OrderTotal);
+
+			if (orderAmount != amount)
+			{
+				return false;
+			}
+
+			// NotifyURL 可能被藍新重送，已付款的訂單不要重複更新。
+			if (order.PaymentStatus == SD.PaymentStatusApproved)
+			{
+				return string.Equals(
+					order.NewebPayTradeNo,
+					tradeNo,
+					StringComparison.Ordinal);
+			}
+
+			order.PaymentStatus = SD.PaymentStatusApproved;
+
+			order.NewebPayTradeNo = tradeNo.Trim();
+
+			order.PaymentType = string.IsNullOrWhiteSpace(paymentType)
+					? null
+					: paymentType.Trim();
+
+			order.PaymentDate = paymentDate;
+
+			await _dbContext.SaveChangesAsync();
+
+			return true;
+		}
+
+		// 依訂單編號找訂單
+		public async Task<OrderHeader?> GetOrderByNumberAsync(string orderNumber, string userId)
+		{
+			if (string.IsNullOrWhiteSpace(orderNumber) || string.IsNullOrWhiteSpace(userId))
+			{
+				return null;
+			}
+
+			return await _dbContext.OrderHeaders
+				.AsNoTracking()
+				.FirstOrDefaultAsync(order =>
+					order.OrderNumber == orderNumber &&
+					order.ApplicationUserId == userId);
+		}
+
+
 		// 前台：取使用者訂單
 		public async Task<IEnumerable<OrderHeader>> GetUserOrdersAsync(string userId)
 		{
@@ -151,6 +228,7 @@ namespace ECommerce.Business.Services
 					.ThenInclude(product => product.ProductImages)
 				.FirstOrDefaultAsync(order => order.Id == orderId && order.ApplicationUserId == userId);
 		}
+
 
 
 		// 後台：取得指定月份每日的訂單數量

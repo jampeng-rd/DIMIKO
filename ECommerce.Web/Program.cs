@@ -3,6 +3,7 @@ using ECommerce.Business.Services.IServices;
 using ECommerce.DataAccess.Data;
 using ECommerce.Models;
 using ECommerce.Utility.Identity;
+using ECommerce.Utility.Settings;
 using ECommerce.Web.DataInitialization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -18,6 +19,8 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 	options.UseSqlServer(builder.Configuration.GetConnectionString("SQLConnection"));
 });
 
+// Register NewebPay settings (註冊藍新金流設定)
+builder.Services.Configure<NewebPaySettings>(builder.Configuration.GetSection("NewebPay"));
 
 // Register Identity
 builder.Services
@@ -41,6 +44,8 @@ builder.Services.AddScoped<IProductService, ProductService>();
 builder.Services.AddScoped<IProductImageFileService, ProductImageFileService>();
 builder.Services.AddScoped<IShoppingCartService, ShoppingCartService>();
 builder.Services.AddScoped<IOrderService, OrderService>();
+// Register NewebPay service
+builder.Services.AddScoped<INewebPayService, NewebPayService>();
 
 // Register Session
 builder.Services.AddDistributedMemoryCache();

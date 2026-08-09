@@ -12,6 +12,17 @@ namespace ECommerce.Business.Services.IServices
 		// 前台：取得單筆訂單
 		Task<OrderHeader?> GetOrderByIdAsync(int orderId, string userId);
 
+		// 前台：藍新付款成功後更新訂單付款資訊
+		Task<bool> MarkPaymentAsApprovedAsync(
+			string merchantOrderNo,
+			int amount,
+			string tradeNo,
+			string paymentType,
+			DateTime paymentDate);
+
+		// 依訂單編號找訂單
+		Task<OrderHeader?> GetOrderByNumberAsync(string orderNumber, string userId);
+
 		// 前台
 		Task<IEnumerable<OrderHeader>> GetUserOrdersAsync(string userId);
 
