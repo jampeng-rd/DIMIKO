@@ -10,7 +10,7 @@ namespace ECommerce.Utility.Helpers
 		{
 			var randomPart = GenerateRandomPart(6);
 
-			return $"DMK-{DateTime.UtcNow:yyyyMMdd}-{randomPart}";
+			return $"DMK_{DateTime.UtcNow:yyyyMMdd}_{randomPart}";
 		}
 
 		private static string GenerateRandomPart(int length)
@@ -19,8 +19,7 @@ namespace ECommerce.Utility.Helpers
 
 			for (var index = 0; index < length; index++)
 			{
-				var randomIndex =
-					RandomNumberGenerator.GetInt32(Characters.Length);
+				var randomIndex = RandomNumberGenerator.GetInt32(Characters.Length);
 
 				characters[index] = Characters[randomIndex];
 			}
