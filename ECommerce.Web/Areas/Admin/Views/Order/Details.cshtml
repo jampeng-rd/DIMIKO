@@ -1,4 +1,4 @@
-﻿@using ECommerce.Models
+﻿@using ECommerce.Utility.Helpers
 @using ECommerce.Utility
 @using ECommerce.Models.ViewModels
 @model AdminOrderDetailsViewModel
@@ -203,7 +203,7 @@
                         </div>
 
                         <div class="fw-medium">
-                            @(Model.Order.OrderDate.ToLocalTime().ToString("yyyy/MM/dd HH:mm"))
+                            @TaiwanTimeHelper.ConvertUtcToTaiwan(Model.Order.OrderDate).ToString("yyyy/MM/dd HH:mm")
                         </div>
                     </div>
 
@@ -228,6 +228,48 @@
                         </span>
                     </div>
 
+                    @if (Model.Order.PaymentStatus == SD.PaymentStatusApproved)
+                    {
+                        <hr />
+
+                        <div class="mb-3">
+                            <div class="text-secondary small mb-1">
+                                藍新交易編號
+                            </div>
+
+                            <div class="fw-medium text-break">
+                                @(string.IsNullOrWhiteSpace(Model.Order.NewebPayTradeNo)
+                                    ? "尚無交易編號"
+                                    : Model.Order.NewebPayTradeNo)
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <div class="text-secondary small mb-1">
+                                付款方式
+                            </div>
+
+                            <div class="fw-medium">
+                                @(string.IsNullOrWhiteSpace(Model.Order.PaymentType)
+                                    ? "尚無付款方式"
+                                    : Model.Order.PaymentType)
+                            </div>
+                        </div>
+
+                        <div class="mb-0">
+                            <div class="text-secondary small mb-1">
+                                付款時間
+                            </div>
+
+                            <div class="fw-medium">
+                                @(Model.Order.PaymentDate.HasValue
+                                    ? TaiwanTimeHelper.ConvertUtcToTaiwan(Model.Order.PaymentDate.Value).ToString("yyyy/MM/dd HH:mm:ss")
+                                    : "尚無付款時間")
+                            </div>
+                        </div>
+                    }
+
+
                     @if (Model.Order.ShippingDate.HasValue)
                     {
                         <hr />
@@ -237,7 +279,7 @@
                             </div>
 
                             <div class="fw-medium">
-                                @(Model.Order.ShippingDate.Value.ToLocalTime().ToString("yyyy/MM/dd HH:mm"))
+                                @TaiwanTimeHelper.ConvertUtcToTaiwan(Model.Order.ShippingDate.Value).ToString("yyyy/MM/dd HH:mm")
                             </div>
                         </div>
                     }

@@ -163,7 +163,8 @@
                             購買時間
                         </div>
                         <div class="fw-medium">
-                            @(Model.OrderDate.ToLocalTime().ToString("yyyy/MM/dd HH:mm"))
+                            @* @(Model.OrderDate.ToLocalTime().ToString("yyyy/MM/dd HH:mm")) *@
+                            @TaiwanTimeHelper.ConvertUtcToTaiwan(Model.OrderDate).ToString("yyyy/MM/dd HH:mm")
                         </div>
                     </div>
 
@@ -176,7 +177,8 @@
                             </div>
 
                             <div class="fw-medium">
-                                @(Model.ShippingDate.Value.ToLocalTime().ToString("yyyy/MM/dd HH:mm"))
+                                @* @(Model.ShippingDate.Value.ToLocalTime().ToString("yyyy/MM/dd HH:mm")) *@
+                                @TaiwanTimeHelper.ConvertUtcToTaiwan(Model.ShippingDate.Value).ToString("yyyy/MM/dd HH:mm")
                             </div>
                         </div>
                     }
@@ -200,6 +202,34 @@
                             @paymentStatusText
                         </span>
                     </div>
+
+                    @if (Model.PaymentStatus == SD.PaymentStatusApproved)
+                    {
+                        <div class="mb-3">
+                            <div class="text-secondary small mb-1">
+                                付款方式
+                            </div>
+
+                            <div class="fw-medium">
+                                @(string.IsNullOrWhiteSpace(Model.PaymentType)
+                                    ? "尚無付款方式"
+                                    : Model.PaymentType)
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <div class="text-secondary small mb-1">
+                                付款時間
+                            </div>
+
+                            <div class="fw-medium">
+                                @(Model.PaymentDate.HasValue
+                                    ? TaiwanTimeHelper.ConvertUtcToTaiwan(Model.PaymentDate.Value).ToString("yyyy/MM/dd HH:mm")
+                                    : "尚無付款時間")
+                            </div>
+                        </div>
+                    }
+
 
                     @if (Model.PaymentStatus == SD.PaymentStatusPending && Model.PaymentExpireDate.HasValue)
                     {
