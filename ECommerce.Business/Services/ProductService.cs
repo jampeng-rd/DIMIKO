@@ -16,6 +16,86 @@ namespace ECommerce.Business.Services
 			_dbContext = dbContext;
 		}
 
+
+		// 前台 : 首頁取 n 筆商品
+		public async Task<IReadOnlyList<Product>> GetLatestActiveProductsAsync(
+			int count,
+			bool includeCategory = false,
+			bool includeImages = false)
+		{
+			if (count <= 0)
+			{
+				return [];
+			}
+
+			IQueryable<Product> query = _dbContext.Products.AsNoTracking().Where(product => product.IsActive);
+
+			if (includeCategory)
+			{
+				query = query.Include(product => product.Category);
+			}
+
+			if (includeImages)
+			{
+				query = query.Include(product => product.ProductImages);
+			}
+
+			return await query
+				.OrderByDescending(product => product.Id)
+				.Take(count)
+				.ToListAsync();
+		}
+
+
+		// 前台 : 產品頁
+		public async Task<PagedResult<Product>> GetPagedActiveProductsAsync(
+			int pageNumber,
+			int pageSize,
+			bool includeCategory = false,
+			bool includeImages = false)
+		{
+			pageNumber = PaginationSettings.NormalizePageNumber(pageNumber);
+			pageSize = PaginationSettings.NormalizePageSize(pageSize);
+
+			IQueryable<Product> query = _dbContext.Products
+				.AsNoTracking()
+				.Where(product => product.IsActive);
+
+			if (includeCategory)
+			{
+				query = query.Include(product => product.Category);
+			}
+
+			if (includeImages)
+			{
+				query = query.Include(product => product.ProductImages);
+			}
+
+			var totalCount = await query.CountAsync();
+
+			var totalPages = totalCount == 0 ? 0 : (int)Math.Ceiling(totalCount / (double)pageSize);
+
+			if (totalPages > 0 && pageNumber > totalPages)
+			{
+				pageNumber = totalPages;
+			}
+
+			var items = await query
+				.OrderByDescending(product => product.Id)
+				.Skip((pageNumber - 1) * pageSize)
+				.Take(pageSize)
+				.ToListAsync();
+
+			return new PagedResult<Product>
+			{
+				Items = items,
+				PageNumber = pageNumber,
+				PageSize = pageSize,
+				TotalCount = totalCount
+			};
+		}
+
+
 		public async Task<IEnumerable<Product>> GetAllProductsAsync(bool includeCategory = false, bool includeImages = false)
 		{
 			IQueryable<Product> query = _dbContext.Products;
@@ -35,7 +115,8 @@ namespace ECommerce.Business.Services
 				.ToListAsync();
 		}
 
-		// 根據分頁取所有商品
+
+		// 後台 : 根據分頁取所有商品
 		public async Task<PagedResult<Product>> GetPagedProductsAsync(
 			int pageNumber,
 			int pageSize,
@@ -284,6 +365,7 @@ namespace ECommerce.Business.Services
 
 			return true;
 		}
+
 
 	}
 }

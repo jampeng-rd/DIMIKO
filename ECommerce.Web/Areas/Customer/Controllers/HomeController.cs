@@ -22,16 +22,37 @@ namespace ECommerce.Web.Areas.Customer.Controllers
 			_shoppingCartService = shoppingCartService;
 		}
 
+
 		public async Task<IActionResult> Index()
 		{
-			var products = await _productService.GetAllProductsAsync(includeCategory: true, includeImages: true);
+			// 首頁取所有商品顯示
+			//var products = await _productService.GetAllProductsAsync(includeCategory: true, includeImages: true);
+			//var activeProducts = products.Where(product => product.IsActive).ToList();
+			//return View(activeProducts);
 
-			var activeProducts = products
-				.Where(product => product.IsActive)
-				.ToList();
+			// 首頁取 6 筆商品顯示
+			var activeProducts = await _productService.GetLatestActiveProductsAsync(
+				6,
+				includeCategory: true,
+				includeImages: true);
 
-			return View(activeProducts);
+			return View(activeProducts.ToList());
 		}
+
+		// 產品分頁
+		public async Task<IActionResult> Products(
+			int page = PaginationSettings.DefaultPageNumber,
+			int pageSize = PaginationSettings.DefaultPageSize)
+		{
+			var products = await _productService.GetPagedActiveProductsAsync(
+				page,
+				pageSize,
+				includeCategory: true,
+				includeImages: true);
+
+			return View(products);
+		}
+
 
 		public async Task<IActionResult> Detail(int? id)
 		{
