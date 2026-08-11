@@ -12,6 +12,7 @@ namespace ECommerce.Business.Services.IServices
 		Task<PagedResult<Product>> GetPagedActiveProductsAsync(
 			int pageNumber,
 			int pageSize,
+			int? categoryId = null,
 			bool includeCategory = false,
 			bool includeImages = false);
 

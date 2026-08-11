@@ -1,8 +1,6 @@
-﻿@using ECommerce.Models
-@using ECommerce.Models.Common
-@using ECommerce.Models.ViewModels
+﻿@using ECommerce.Models.ViewModels
 
-@model PagedResult<Product>
+@model ProductListViewModel
 
 @{
     ViewData["Title"] = "所有商品";
@@ -13,151 +11,231 @@
         Controller = "Home",
         Action = "Products",
 
-        PageNumber = Model.PageNumber,
-        PageSize = Model.PageSize,
-        TotalCount = Model.TotalCount,
-        TotalPages = Model.TotalPages,
-        FirstItemNumber = Model.FirstItemNumber,
-        LastItemNumber = Model.LastItemNumber
+        PageNumber = Model.Products.PageNumber,
+        PageSize = Model.Products.PageSize,
+        TotalCount = Model.Products.TotalCount,
+        TotalPages = Model.Products.TotalPages,
+        FirstItemNumber = Model.Products.FirstItemNumber,
+        LastItemNumber = Model.Products.LastItemNumber,
+
+        RouteValues = new Dictionary<string, string?>
+        {
+            ["categoryId"] = Model.SelectedCategoryId?.ToString()
+        }
     };
 }
 
 <div class="container py-5">
 
-    <div class="mb-4">
-        <p class="text-uppercase small fw-semibold mb-2"
-           style="color: #17A34A; letter-spacing: 0.15em;">
-            Outdoor Essentials
-        </p>
+    <div class="row g-4">
 
-        <h2 class="fw-bold mb-1">
-            所有商品
-        </h2>
+        <!-- 左側分類 -->
+        <div class="col-lg-3">
 
-        <p class="text-secondary mb-0">
-            探索所有露營與戶外用品
-        </p>
-    </div>
+            <div class="card border shadow-sm">
 
-    <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-3 g-4">
+                <div class="card-header bg-white py-3">
+                    <h5 class="fw-bold mb-0 fs-5">
+                        <i class="bi bi-grid me-2"></i>
+                        商品分類
+                    </h5>
+                </div>
 
-        @if (Model.Items.Any())
-        {
-            @foreach (var product in Model.Items)
-            {
-                <div class="col">
+                <div class="list-group list-group-flush category-list">
 
-                    @{
-                        var primaryImage =
-                            product.ProductImages.FirstOrDefault(image => image.IsPrimary)
-                            ?? product.ProductImages
-                                .OrderBy(image => image.SortOrder)
-                                .FirstOrDefault();
+                    <!-- 全部 -->
+                    <a asp-area="Customer" asp-controller="Home" asp-action="Products"
+                       asp-route-pageSize="@Model.Products.PageSize"
+                       class="list-group-item list-group-item-action
+                        @(Model.SelectedCategoryId == null ? "active" : "")">
+
+                        全部
+                    </a>
+
+                    @foreach (var category in Model.Categories)
+                    {
+                        <a asp-area="Customer" asp-controller="Home" asp-action="Products"
+                           asp-route-categoryId="@category.Id"
+                           asp-route-pageSize="@Model.Products.PageSize"
+                           class="list-group-item list-group-item-action
+                            @(Model.SelectedCategoryId == category.Id ? "active" : "")">
+
+                            @category.Name
+                        </a>
                     }
 
-                    <div class="card h-100 border shadow-sm product-card">
+                </div>
 
-                        <a asp-area="Customer" asp-controller="Home" asp-action="Detail" asp-route-id="@product.Id"
-                           class="text-decoration-none">
+            </div>
 
-                            <div style="aspect-ratio: 1/1; overflow: hidden;">
+        </div>
 
-                                @if (primaryImage != null)
-                                {
-                                    <img src="@primaryImage.ImageUrl"
-                                         alt="@product.Title"
-                                         class="w-100 h-100"
-                                         style="object-fit: cover;" />
-                                }
-                                else
-                                {
-                                    <div class="w-100 h-100 d-flex align-items-center justify-content-center bg-light">
-                                        <i class="bi bi-image display-3 text-secondary"></i>
-                                    </div>
-                                }
+        <!-- 右側商品 -->
+        <div class="col-lg-9">
+            <!-- 標題 -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
 
-                            </div>
+                <div>
+                    <h4 class="fw-bold mb-1 fs-4">
+                        @Model.SelectedCategoryName
+                    </h4>
 
-                        </a>
+                    <p class="text-secondary mb-0">
+                        共 @Model.Products.TotalCount 項商品
+                    </p>
+                </div>
 
-                        <div class="card-body d-flex flex-column">
+            </div>
 
-                            <span class="badge align-self-start mb-2"
-                                  style="background: rgba(23,163,74,0.1); color: #17A34A;">
-                                @(product.Category?.Name ?? "未分類")
-                            </span>
+            @if (!Model.Products.Items.Any())
+            {
+                <div class="card border shadow-sm">
 
-                            <h6 class="card-title fw-semibold mb-2"
-                                style="min-height: 2.5rem;">
+                    <div class="card-body text-center py-5">
 
-                                <a asp-area="Customer" asp-controller="Home" asp-action="Detail" asp-route-id="@product.Id"
-                                   class="text-decoration-none text-dark">
+                        <i class="bi bi-box-seam display-4 text-secondary"></i>
 
-                                    @product.Title
-                                </a>
+                        <h5 class="fw-bold mt-3">
+                            目前沒有商品
+                        </h5>
 
-                            </h6>
-
-                            <p class="text-secondary small mb-3">
-                                @product.Description
-                            </p>
-
-                            <div class="d-flex justify-content-between align-items-center mt-auto">
-
-                                <div>
-
-                                    <span class="fw-bold text-success">
-                                        NT$@product.Price.ToString("N0")
-                                    </span>
-
-                                    @if (product.ListPrice > product.Price)
-                                    {
-                                        <small class="text-decoration-line-through text-muted ms-1">
-                                            NT$@product.ListPrice.ToString("N0")
-                                        </small>
-                                    }
-
-                                </div>
-
-                                <a asp-area="Customer" asp-controller="Home" asp-action="Detail" asp-route-id="@product.Id"
-                                   class="btn btn-sm btn-outline-dark">
-
-                                    查看商品
-                                </a>
-
-                            </div>
-
-                        </div>
+                        <p class="text-secondary mb-0">
+                            此分類目前沒有上架中的商品。
+                        </p>
 
                     </div>
 
                 </div>
             }
-        }
-        else
-        {
-            <div class="col-12">
+            else
+            {
+                <div class="row row-cols-1 row-cols-sm-2 row-cols-xl-3 g-4">
 
-                <div class="text-center py-5 bg-light rounded">
+                    @foreach (var product in Model.Products.Items)
+                    {
+                        <div class="col">
 
-                    <i class="bi bi-box-seam display-4 text-secondary"></i>
+                            @{
+                                var primaryImage =
+                                    product.ProductImages.FirstOrDefault(image => image.IsPrimary)
+                                    ?? product.ProductImages
+                                        .OrderBy(image => image.SortOrder)
+                                        .FirstOrDefault();
+                            }
 
-                    <p class="text-secondary mt-3 mb-0">
-                        目前沒有可顯示的商品
-                    </p>
+                            <div class="card h-100 border shadow-sm product-card">
+
+                                <a asp-area="Customer" asp-controller="Home" asp-action="Detail" asp-route-id="@product.Id"
+                                   class="text-decoration-none">
+
+                                    <div style="aspect-ratio: 1/1; overflow: hidden;">
+
+                                        @if (primaryImage != null)
+                                        {
+                                            <img src="@primaryImage.ImageUrl"
+                                                 alt="@product.Title"
+                                                 class="w-100 h-100"
+                                                 style="object-fit: cover;" />
+                                        }
+                                        else
+                                        {
+                                            <div class="w-100 h-100 d-flex align-items-center justify-content-center bg-light">
+                                                <i class="bi bi-image display-3 text-secondary"></i>
+                                            </div>
+                                        }
+
+                                    </div>
+
+                                </a>
+
+                                <div class="card-body d-flex flex-column">
+
+                                    <span class="badge align-self-start mb-2"
+                                          style="background: rgba(23,163,74,0.1); color: #17A34A;">
+                                        @(product.Category?.Name ?? "未分類")
+                                    </span>
+
+                                    <h6 class="card-title fw-semibold mb-2"
+                                        style="min-height: 2.5rem;">
+
+                                        <a asp-area="Customer" asp-controller="Home" asp-action="Detail" asp-route-id="@product.Id"
+                                           class="text-decoration-none text-dark">
+
+                                            @product.Title
+                                        </a>
+
+                                    </h6>
+
+                                    <p class="text-secondary small mb-3">
+                                        @product.Description
+                                    </p>
+
+                                    <div class="d-flex justify-content-between align-items-end gap-3 mt-auto">
+
+                                        <!-- 價格 -->
+                                        <div class="d-flex flex-column">
+
+                                            <span class="fw-bold text-success fs-5">
+                                                NT$@product.Price.ToString("N0")
+                                            </span>
+
+                                            @if (product.ListPrice > product.Price)
+                                            {
+                                                <small class="text-decoration-line-through text-muted">
+                                                    NT$@product.ListPrice.ToString("N0")
+                                                </small>
+                                            }
+
+                                        </div>
+
+
+                                        <a asp-area="Customer" asp-controller="Home" asp-action="Detail" asp-route-id="@product.Id"
+                                           class="btn btn-sm btn-outline-dark flex-shrink-0">
+
+                                            查看商品
+                                        </a>
+
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    }
 
                 </div>
 
-            </div>
-        }
+
+                <div class="mt-4">
+
+                    <partial name="_Pagination" model="paginationModel" />
+
+                </div>
+            }
+
+        </div>
 
     </div>
 
-    @if (Model.Items.Any())
-    {
-        <div class="mt-4">
-            <partial name="_Pagination" model="paginationModel" />
-        </div>
+</div>
+
+<style>
+    .category-list .list-group-item.active {
+        background-color: #17A34A;
+        border-color: #17A34A;
+        color: #fff;
     }
 
-</div>
+    .category-list .list-group-item.active:hover {
+        background-color: #15803d;
+        border-color: #15803d;
+        color: #fff;
+    }
+
+    .category-list .list-group-item:not(.active):hover {
+        background-color: #f0fdf4;
+        color: #15803d;
+    }
+</style>

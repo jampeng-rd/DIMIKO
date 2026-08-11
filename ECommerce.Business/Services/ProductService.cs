@@ -51,6 +51,7 @@ namespace ECommerce.Business.Services
 		public async Task<PagedResult<Product>> GetPagedActiveProductsAsync(
 			int pageNumber,
 			int pageSize,
+			int? categoryId = null,
 			bool includeCategory = false,
 			bool includeImages = false)
 		{
@@ -60,6 +61,11 @@ namespace ECommerce.Business.Services
 			IQueryable<Product> query = _dbContext.Products
 				.AsNoTracking()
 				.Where(product => product.IsActive);
+
+			if (categoryId.HasValue)
+			{
+				query = query.Where(product => product.CategoryId == categoryId.Value);
+			}
 
 			if (includeCategory)
 			{

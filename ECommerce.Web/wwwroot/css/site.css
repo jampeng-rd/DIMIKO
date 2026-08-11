@@ -692,12 +692,14 @@
 /*==========================================================*/
 /* Admin 的 Create、Update、Delete、Index 上方 header */
 .admin-card-header {
-    background: linear-gradient(to right, #025A93, #282828, #191414);
+    /* background: linear-gradient(to right, #025A93, #282828, #191414); */
+    background: linear-gradient(to right, #065f46, #282828, #191414);
 }
 
 /* Admin 的商品 Create 與 Update 圖片預覽 */
 .admin-card-subtitle {
-    color: #0B9BFE;
+    /* color: #0B9BFE; */
+    color: #1DB954;
 }
 
 .product-image-preview {

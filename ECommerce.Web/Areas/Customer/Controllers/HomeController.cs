@@ -13,13 +13,16 @@ namespace ECommerce.Web.Areas.Customer.Controllers
 	{
 		private readonly IProductService _productService;
 		private readonly IShoppingCartService _shoppingCartService;
+		private readonly ICategoryService _categoryService;
 
 		public HomeController(
 			IProductService productService,
-			IShoppingCartService shoppingCartService)
+			IShoppingCartService shoppingCartService,
+			ICategoryService categoryService)
 		{
 			_productService = productService;
 			_shoppingCartService = shoppingCartService;
+			_categoryService = categoryService;
 		}
 
 
@@ -39,18 +42,46 @@ namespace ECommerce.Web.Areas.Customer.Controllers
 			return View(activeProducts.ToList());
 		}
 
+
 		// 產品分頁
 		public async Task<IActionResult> Products(
+			int? categoryId,
 			int page = PaginationSettings.DefaultPageNumber,
 			int pageSize = PaginationSettings.DefaultPageSize)
 		{
+			var categories = (await _categoryService.GetAllCategoriesAsync())
+				.OrderBy(category => category.DisplayOrder)
+				.ThenBy(category => category.Id)
+				.ToList();
+
+			Category? selectedCategory = null;
+
+			if (categoryId.HasValue)
+			{
+				selectedCategory = categories.FirstOrDefault(category => category.Id == categoryId.Value);
+
+				if (selectedCategory == null)
+				{
+					return NotFound();
+				}
+			}
+
 			var products = await _productService.GetPagedActiveProductsAsync(
 				page,
 				pageSize,
+				categoryId,
 				includeCategory: true,
 				includeImages: true);
 
-			return View(products);
+			var viewModel = new ProductListViewModel
+			{
+				Categories = categories,
+				Products = products,
+				SelectedCategoryId = categoryId,
+				SelectedCategoryName = selectedCategory?.Name ?? "全部"
+			};
+
+			return View(viewModel);
 		}
 
 
@@ -80,6 +111,7 @@ namespace ECommerce.Web.Areas.Customer.Controllers
 
 			return View(viewModel);
 		}
+
 
 		[HttpPost]
 		[ValidateAntiForgeryToken]
