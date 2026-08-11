@@ -17,18 +17,22 @@ namespace ECommerce.Web.Areas.Admin.Controllers
 			_categoryService = categoryService;
 		}
 
-		public async Task<IActionResult> Index()
+		public async Task<IActionResult> Index(
+			int page = PaginationSettings.DefaultPageNumber,
+			int pageSize = PaginationSettings.DefaultPageSize)
 		{
-			var categories = await _categoryService.GetAllCategoriesAsync();
+			var categories = await _categoryService.GetPagedCategoriesAsync(page, pageSize);
 
 			return View(categories);
 		}
+
 
 		[Authorize(Roles = SD.RoleAdmin)]
 		public IActionResult Create()
 		{
 			return View();
 		}
+
 
 		[HttpPost]
 		[ValidateAntiForgeryToken]
@@ -61,6 +65,7 @@ namespace ECommerce.Web.Areas.Admin.Controllers
 			return RedirectToAction(nameof(Index));
 		}
 
+
 		[Authorize(Roles = SD.RoleAdmin)]
 		public async Task<IActionResult> Update(int? id)
 		{
@@ -79,6 +84,7 @@ namespace ECommerce.Web.Areas.Admin.Controllers
 
 			return View(category);
 		}
+
 
 		[HttpPost]
 		[ValidateAntiForgeryToken]
@@ -116,6 +122,7 @@ namespace ECommerce.Web.Areas.Admin.Controllers
 			return RedirectToAction(nameof(Index));
 		}
 
+
 		[Authorize(Roles = SD.RoleAdmin)]
 		public async Task<IActionResult> Delete(int? id)
 		{
@@ -133,6 +140,7 @@ namespace ECommerce.Web.Areas.Admin.Controllers
 
 			return View(category);
 		}
+
 
 		[HttpPost]
 		[ValidateAntiForgeryToken]

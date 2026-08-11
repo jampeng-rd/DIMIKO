@@ -1,4 +1,5 @@
 ﻿using ECommerce.Models;
+using ECommerce.Models.Common;
 
 namespace ECommerce.Business.Services.IServices
 {
@@ -7,6 +8,9 @@ namespace ECommerce.Business.Services.IServices
 		Task<Category> CreateCategoryAsync(Category category);
 
 		Task<IEnumerable<Category>> GetAllCategoriesAsync();
+
+		// 根據分頁取所有類型
+		Task<PagedResult<Category>> GetPagedCategoriesAsync(int pageNumber, int pageSize);
 
 		Task<Category?> GetCategoryByIdAsync(int id);
 

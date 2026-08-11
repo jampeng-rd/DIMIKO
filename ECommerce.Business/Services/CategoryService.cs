@@ -1,6 +1,8 @@
 ﻿using ECommerce.Business.Services.IServices;
 using ECommerce.DataAccess.Data;
 using ECommerce.Models;
+using ECommerce.Models.Common;
+using ECommerce.Utility;
 using Microsoft.EntityFrameworkCore;
 
 namespace ECommerce.Business.Services
@@ -26,6 +28,41 @@ namespace ECommerce.Business.Services
 		{
 			return await _dbContext.Categories.ToListAsync();
 		}
+
+		public async Task<PagedResult<Category>> GetPagedCategoriesAsync(int pageNumber, int pageSize)
+		{
+			pageNumber = PaginationSettings.NormalizePageNumber(pageNumber);
+			pageSize = PaginationSettings.NormalizePageSize(pageSize);
+
+			var query = _dbContext.Categories.AsNoTracking();
+
+			var totalCount = await query.CountAsync();
+
+			var totalPages = totalCount == 0
+				? 0
+				: (int)Math.Ceiling(totalCount / (double)pageSize);
+
+			if (totalPages > 0 && pageNumber > totalPages)
+			{
+				pageNumber = totalPages;
+			}
+
+			var items = await query
+				.OrderBy(category => category.DisplayOrder)
+				.ThenBy(category => category.Id)
+				.Skip((pageNumber - 1) * pageSize)
+				.Take(pageSize)
+				.ToListAsync();
+
+			return new PagedResult<Category>
+			{
+				Items = items,
+				PageNumber = pageNumber,
+				PageSize = pageSize,
+				TotalCount = totalCount
+			};
+		}
+
 
 		public async Task<Category?> GetCategoryByIdAsync(int id)
 		{

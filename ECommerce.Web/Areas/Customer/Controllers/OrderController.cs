@@ -1,4 +1,5 @@
 ﻿using ECommerce.Business.Services.IServices;
+using ECommerce.Utility;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
@@ -16,7 +17,10 @@ namespace ECommerce.Web.Areas.Customer.Controllers
 			_orderService = orderService;
 		}
 
-		public async Task<IActionResult> Index()
+
+		public async Task<IActionResult> Index(
+			int page = PaginationSettings.DefaultPageNumber,
+			int pageSize = PaginationSettings.DefaultPageSize)
 		{
 			var userId = GetCurrentUserId();
 
@@ -25,10 +29,11 @@ namespace ECommerce.Web.Areas.Customer.Controllers
 				return Challenge();
 			}
 
-			var orders = await _orderService.GetUserOrdersAsync(userId);
+			var orders = await _orderService.GetUserOrdersAsync(userId, page, pageSize);
 
 			return View(orders);
 		}
+
 
 		public async Task<IActionResult> Details(int? id)
 		{
@@ -53,6 +58,7 @@ namespace ECommerce.Web.Areas.Customer.Controllers
 
 			return View(order);
 		}
+
 
 		[HttpPost]
 		[ValidateAntiForgeryToken]

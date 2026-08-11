@@ -1,10 +1,27 @@
 ﻿@using ECommerce.Utility
 @using ECommerce.Utility.Helpers
-@model IEnumerable<ECommerce.Models.OrderHeader>
+@using ECommerce.Models
+@using ECommerce.Models.Common
+@using ECommerce.Models.ViewModels
+@* @model IEnumerable<ECommerce.Models.OrderHeader> *@
+@model PagedResult<OrderHeader>
 
 @{
     ViewData["Title"] = "我的訂單";
 
+    var paginationModel = new PaginationViewModel
+    {
+        Area = "Customer",
+        Controller = "Order",
+        Action = "Index",
+
+        PageNumber = Model.PageNumber,
+        PageSize = Model.PageSize,
+        TotalCount = Model.TotalCount,
+        TotalPages = Model.TotalPages,
+        FirstItemNumber = Model.FirstItemNumber,
+        LastItemNumber = Model.LastItemNumber
+    };
 }
 
 <div class="container py-4" style="max-width: 1140px;">
@@ -26,11 +43,11 @@
             </h5>
 
             <span class="badge rounded-pill bg-white bg-opacity-25">
-                @Model.Count()
+                @Model.TotalCount
             </span>
         </div>
 
-        @if (!Model.Any())
+        @if (!Model.Items.Any())
         {
             <div class="card-body text-center py-5">
 
@@ -69,7 +86,7 @@
                     </thead>
 
                     <tbody>
-                        @foreach (var order in Model)
+                        @foreach (var order in Model.Items)
                         {
                             var orderStatusText = order.OrderStatus switch
                             {
@@ -151,6 +168,8 @@
 
                 </table>
             </div>
+
+            <partial name="_Pagination" model="paginationModel" />
         }
     </div>
 </div>

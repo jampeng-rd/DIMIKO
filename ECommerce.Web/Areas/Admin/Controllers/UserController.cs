@@ -1,4 +1,5 @@
 ﻿using ECommerce.Models;
+using ECommerce.Models.Common;
 using ECommerce.Models.ViewModels;
 using ECommerce.Utility;
 using Microsoft.AspNetCore.Authorization;
@@ -20,12 +21,59 @@ namespace ECommerce.Web.Areas.Admin.Controllers
 			_userManager = userManager;
 		}
 
-		public async Task<IActionResult> Index()
+
+		//public async Task<IActionResult> Index()
+		//{
+		//	var users = await _userManager.Users
+		//		.AsNoTracking()
+		//		.OrderBy(user => user.Name)
+		//		.ThenBy(user => user.Email)
+		//		.ToListAsync();
+
+		//	var userViewModels = new List<UserListViewModel>();
+
+		//	foreach (var user in users)
+		//	{
+		//		var roles = await _userManager.GetRolesAsync(user);
+		//		var isLockedOut = await _userManager.IsLockedOutAsync(user);
+
+		//		userViewModels.Add(new UserListViewModel
+		//		{
+		//			Id = user.Id,
+		//			Name = user.Name,
+		//			Email = user.Email ?? string.Empty,
+		//			PhoneNumber = user.PhoneNumber,
+		//			Roles = roles.Count == 0 ? "尚未設定" : string.Join("、", roles),
+		//			IsLockedOut = isLockedOut
+		//		});
+		//	}
+
+		//	return View(userViewModels);
+		//}
+
+
+		public async Task<IActionResult> Index(
+			int page = PaginationSettings.DefaultPageNumber,
+			int pageSize = PaginationSettings.DefaultPageSize)
 		{
-			var users = await _userManager.Users
-				.AsNoTracking()
+			page = PaginationSettings.NormalizePageNumber(page);
+			pageSize = PaginationSettings.NormalizePageSize(pageSize);
+
+			var query = _userManager.Users.AsNoTracking();
+
+			var totalCount = await query.CountAsync();
+			var totalPages = totalCount == 0 ? 0 : (int)Math.Ceiling(totalCount / (double)pageSize);
+
+			if (totalPages > 0 && page > totalPages)
+			{
+				page = totalPages;
+			}
+
+			var users = await query
 				.OrderBy(user => user.Name)
 				.ThenBy(user => user.Email)
+				.Skip((page - 1) * pageSize)
+				.Take(pageSize)
 				.ToListAsync();
 
 			var userViewModels = new List<UserListViewModel>();
@@ -46,8 +94,17 @@ namespace ECommerce.Web.Areas.Admin.Controllers
 				});
 			}
 
-			return View(userViewModels);
+			var result = new PagedResult<UserListViewModel>
+			{
+				Items = userViewModels,
+				PageNumber = page,
+				PageSize = pageSize,
+				TotalCount = totalCount
+			};
+
+			return View(result);
 		}
+
 
 		public async Task<IActionResult> EditRole(string? id)
 		{
@@ -76,6 +133,7 @@ namespace ECommerce.Web.Areas.Admin.Controllers
 
 			return View(model);
 		}
+
 
 		// 更新流程要先移除再加入
 		[HttpPost]
@@ -172,6 +230,7 @@ namespace ECommerce.Web.Areas.Admin.Controllers
 			return RedirectToAction(nameof(Index));
 		}
 
+
 		// 帳號停用
 		[HttpPost]
 		[ValidateAntiForgeryToken]
@@ -231,6 +290,7 @@ namespace ECommerce.Web.Areas.Admin.Controllers
 
 			return RedirectToAction(nameof(Index));
 		}
+
 
 		// 帳號啟用
 		[HttpPost]

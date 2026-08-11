@@ -26,12 +26,19 @@ namespace ECommerce.Web.Areas.Admin.Controllers
 			_productImageFileService = productImageFileService;
 		}
 
-		public async Task<IActionResult> Index()
+		public async Task<IActionResult> Index(
+			int page = PaginationSettings.DefaultPageNumber,
+			int pageSize = PaginationSettings.DefaultPageSize)
 		{
-			var products = await _productService.GetAllProductsAsync(includeCategory: true, includeImages: true);
+			var products = await _productService.GetPagedProductsAsync(
+				page,
+				pageSize,
+				includeCategory: true,
+				includeImages: true);
 
 			return View(products);
 		}
+
 
 		[Authorize(Roles = SD.RoleAdmin)]
 		public async Task<IActionResult> Create()
@@ -40,6 +47,7 @@ namespace ECommerce.Web.Areas.Admin.Controllers
 
 			return View(new ProductCreateViewModel());
 		}
+
 
 		[HttpPost]
 		[ValidateAntiForgeryToken]
@@ -117,6 +125,7 @@ namespace ECommerce.Web.Areas.Admin.Controllers
 			return RedirectToAction(nameof(Index));
 		}
 
+
 		[Authorize(Roles = SD.RoleAdmin)]
 		public async Task<IActionResult> Update(int? id)
 		{
@@ -144,6 +153,7 @@ namespace ECommerce.Web.Areas.Admin.Controllers
 
 			return View(viewModel);
 		}
+
 
 		[HttpPost]
 		[ValidateAntiForgeryToken]
@@ -216,6 +226,7 @@ namespace ECommerce.Web.Areas.Admin.Controllers
 			return RedirectToAction(nameof(Index));
 		}
 
+
 		[Authorize(Roles = SD.RoleAdmin)]
 		public async Task<IActionResult> Delete(int? id)
 		{
@@ -233,6 +244,7 @@ namespace ECommerce.Web.Areas.Admin.Controllers
 
 			return View(product);
 		}
+
 
 		[HttpPost]
 		[ValidateAntiForgeryToken]
@@ -284,6 +296,7 @@ namespace ECommerce.Web.Areas.Admin.Controllers
 
 			return RedirectToAction(nameof(Update), new { id = productId });
 		}
+
 
 		// 設定首圖
 		[HttpPost]

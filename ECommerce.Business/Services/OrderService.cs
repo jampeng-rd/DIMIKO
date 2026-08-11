@@ -218,20 +218,69 @@ namespace ECommerce.Business.Services
 					order.ApplicationUserId == userId);
 		}
 
-		// 前台：取得使用者訂單
-		public async Task<IEnumerable<OrderHeader>> GetUserOrdersAsync(string userId)
+
+		// 前台：取使用者所有訂單資料
+		//public async Task<IEnumerable<OrderHeader>> GetUserOrdersAsync(string userId)
+		//{
+		//	if (string.IsNullOrWhiteSpace(userId))
+		//	{
+		//		return new List<OrderHeader>();
+		//	}
+
+		//	return await _dbContext.OrderHeaders
+		//		.AsNoTracking()
+		//		.Where(order => order.ApplicationUserId == userId)
+		//		.OrderByDescending(order => order.OrderDate)
+		//		.ToListAsync();
+		//}
+
+
+		// 前台：取得使用者訂單分頁資料
+		public async Task<PagedResult<OrderHeader>> GetUserOrdersAsync(string userId, int pageNumber, int pageSize)
 		{
+			pageNumber = PaginationSettings.NormalizePageNumber(pageNumber);
+			pageSize = PaginationSettings.NormalizePageSize(pageSize);
+
 			if (string.IsNullOrWhiteSpace(userId))
 			{
-				return new List<OrderHeader>();
+				return new PagedResult<OrderHeader>
+				{
+					PageNumber = pageNumber,
+					PageSize = pageSize
+				};
 			}
 
-			return await _dbContext.OrderHeaders
+			var query = _dbContext.OrderHeaders
 				.AsNoTracking()
-				.Where(order => order.ApplicationUserId == userId)
+				.Where(order => order.ApplicationUserId == userId);
+
+			var totalCount = await query.CountAsync();
+
+			var totalPages = totalCount == 0
+				? 0
+				: (int)Math.Ceiling(totalCount / (double)pageSize);
+
+			if (totalPages > 0 && pageNumber > totalPages)
+			{
+				pageNumber = totalPages;
+			}
+
+			var items = await query
 				.OrderByDescending(order => order.OrderDate)
+				.ThenByDescending(order => order.Id)
+				.Skip((pageNumber - 1) * pageSize)
+				.Take(pageSize)
 				.ToListAsync();
+
+			return new PagedResult<OrderHeader>
+			{
+				Items = items,
+				PageNumber = pageNumber,
+				PageSize = pageSize,
+				TotalCount = totalCount
+			};
 		}
+
 
 		public async Task<OrderHeader?> GetUserOrderDetailsAsync(int orderId, string userId)
 		{
@@ -247,6 +296,7 @@ namespace ECommerce.Business.Services
 					.ThenInclude(product => product.ProductImages)
 				.FirstOrDefaultAsync(order => order.Id == orderId && order.ApplicationUserId == userId);
 		}
+
 
 		// 前台：使用者取消自己的未付款訂單
 		public async Task<bool> CancelUserOrderAsync(int orderId, string userId)
@@ -298,6 +348,7 @@ namespace ECommerce.Business.Services
 				throw;
 			}
 		}
+
 
 		// 系統：取消逾期未付款訂單並恢復庫存
 		public async Task<int> CancelExpiredOrdersAsync()

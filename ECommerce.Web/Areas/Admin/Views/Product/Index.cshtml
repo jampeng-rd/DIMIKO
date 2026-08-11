@@ -1,9 +1,25 @@
 ﻿@using ECommerce.Utility
 @using ECommerce.Models
-@model List<Product>
+@using ECommerce.Models.Common
+@using ECommerce.Models.ViewModels
+@model PagedResult<Product>
 
 @{
     ViewData["Title"] = "商品資訊";
+
+    var paginationModel = new PaginationViewModel
+    {
+        Area = "Admin",
+        Controller = "Product",
+        Action = "Index",
+
+        PageNumber = Model.PageNumber,
+        PageSize = Model.PageSize,
+        TotalCount = Model.TotalCount,
+        TotalPages = Model.TotalPages,
+        FirstItemNumber = Model.FirstItemNumber,
+        LastItemNumber = Model.LastItemNumber
+    };
 }
 
 <div class="container-fluid py-4 px-4">
@@ -29,6 +45,7 @@
                 </div>
             }
         </div>
+
         <div class="table-responsive">
             <table class="table-styled">
                 <thead>
@@ -46,7 +63,7 @@
                 </thead>
 
                 <tbody>
-                    @foreach (var product in Model)
+                    @foreach (var product in Model.Items)
                     {
                         <tr>
                             @{
@@ -89,6 +106,9 @@
                 </tbody>
             </table>
         </div>
+
+        <partial name="_Pagination" model="paginationModel" />
+
     </div>
 
 </div>

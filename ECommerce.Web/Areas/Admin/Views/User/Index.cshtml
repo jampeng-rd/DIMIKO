@@ -1,13 +1,29 @@
 ﻿@using ECommerce.Models.ViewModels
+@using ECommerce.Models.Common
 @using ECommerce.Models
 @using Microsoft.AspNetCore.Identity
 @inject UserManager<ApplicationUser> UserManager
-@model IEnumerable<UserListViewModel>
+@* @model IEnumerable<UserListViewModel> *@
+@model PagedResult<UserListViewModel>
 
 @{
     ViewData["Title"] = "使用者列表";
 
     var currentUserId = UserManager.GetUserId(User);
+
+    var paginationModel = new PaginationViewModel
+    {
+        Area = "Admin",
+        Controller = "User",
+        Action = "Index",
+
+        PageNumber = Model.PageNumber,
+        PageSize = Model.PageSize,
+        TotalCount = Model.TotalCount,
+        TotalPages = Model.TotalPages,
+        FirstItemNumber = Model.FirstItemNumber,
+        LastItemNumber = Model.LastItemNumber
+    };
 }
 
 <div class="container-fluid py-4 px-4">
@@ -24,38 +40,44 @@
             </a> *@
 
         </div>
+
         <div class="table-responsive">
             <table class="table-styled">
                 <thead>
                     <tr>
                         <th class="px-4 py-3">
-                            @Html.DisplayNameFor(model => model.Name)
+                            @* @Html.DisplayNameFor(model => model.Name) *@
+                            姓名
                         </th>
 
                         <th class="py-3">
-                            @Html.DisplayNameFor(model => model.Email)
+                            @* @Html.DisplayNameFor(model => model.Email) *@
+                            電子郵件
                         </th>
 
                         <th class="py-3">
-                            @Html.DisplayNameFor(model => model.PhoneNumber)
+                            @* @Html.DisplayNameFor(model => model.PhoneNumber) *@
+                            聯絡電話
                         </th>
 
                         <th class="py-3">
-                            @Html.DisplayNameFor(model => model.Roles)
+                            @* @Html.DisplayNameFor(model => model.Roles) *@
+                            角色
                         </th>
 
                         <th class="py-3">
-                            @Html.DisplayNameFor(model => model.IsLockedOut)
+                            @* @Html.DisplayNameFor(model => model.IsLockedOut) *@
+                            帳號狀態
                         </th>
 
                         <th class="text-end px-4 py-3">
-                            操作
+                            @* 操作 *@
                         </th>
                     </tr>
                 </thead>
 
                 <tbody>
-                    @if (!Model.Any())
+                    @if (!Model.Items.Any())
                     {
                         <tr>
                             <td colspan="6" class="text-center text-secondary py-5">
@@ -65,7 +87,7 @@
                     }
                     else
                     {
-                        @foreach (var user in Model)
+                        @foreach (var user in Model.Items)
                         {
                             <tr>
                                 <td class="px-4 py-3 fw-semibold">@user.Name</td>
@@ -73,9 +95,7 @@
                                 <td class="py-3">@user.Email</td>
 
                                 <td class="py-3">
-                                    @(string.IsNullOrWhiteSpace(user.PhoneNumber)
-                                        ? "未提供"
-                                        : user.PhoneNumber)
+                                    @(string.IsNullOrWhiteSpace(user.PhoneNumber) ? "未提供" : user.PhoneNumber)
                                 </td>
 
                                 <td class="py-3">
@@ -136,6 +156,9 @@
                 </tbody>
             </table>
         </div>
+
+        <partial name="_Pagination" model="paginationModel" />
+
     </div>
 </div>
 

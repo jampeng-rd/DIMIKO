@@ -23,10 +23,13 @@ namespace ECommerce.Business.Services.IServices
 		// 依訂單編號找訂單
 		Task<OrderHeader?> GetOrderByNumberAsync(string orderNumber, string userId);
 
-		// 前台
-		Task<IEnumerable<OrderHeader>> GetUserOrdersAsync(string userId);
+		// 前台：取使用者所有訂單資料
+		//Task<IEnumerable<OrderHeader>> GetUserOrdersAsync(string userId);
 
-		// 前台
+		// 前台：取得使用者訂單分頁資料
+		Task<PagedResult<OrderHeader>> GetUserOrdersAsync(string userId, int pageNumber, int pageSize);
+
+		// 前台：訂單詳細資料
 		Task<OrderHeader?> GetUserOrderDetailsAsync(int orderId, string userId);
 
 		// 前台：使用者取消自己的未付款訂單

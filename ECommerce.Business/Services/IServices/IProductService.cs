@@ -1,10 +1,16 @@
 ﻿using ECommerce.Models;
+using ECommerce.Models.Common;
 
 namespace ECommerce.Business.Services.IServices
 {
 	public interface IProductService
 	{
-		Task<IEnumerable<Product>> GetAllProductsAsync(
+		Task<IEnumerable<Product>> GetAllProductsAsync(bool includeCategory = false, bool includeImages = false);
+
+		// 根據分頁取所有商品
+		Task<PagedResult<Product>> GetPagedProductsAsync(
+			int pageNumber,
+			int pageSize,
 			bool includeCategory = false,
 			bool includeImages = false);
 
