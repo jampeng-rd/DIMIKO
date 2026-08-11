@@ -67,7 +67,8 @@
                     @if (Model.TotalOrders > 0)
                     {
                         <span class="badge rounded-pill bg-success">
-                            @Model.TotalAmount.ToString("C0")
+                            @* @Model.TotalAmount.ToString("C0") *@
+                            NT$ @Model.TotalAmount.ToString("N0")
                         </span>
                     }
                 </div>
@@ -264,7 +265,8 @@
                                 </td>
 
                                 <td class="text-end fw-semibold">
-                                    @order.OrderTotal.ToString("C0")
+                                    @* @order.OrderTotal.ToString("C0") *@
+                                    NT$@order.OrderTotal.ToString("N0")
                                 </td>
 
                                 <td class="text-end">

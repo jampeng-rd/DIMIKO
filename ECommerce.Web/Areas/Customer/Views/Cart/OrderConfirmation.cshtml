@@ -1,4 +1,5 @@
-﻿@model ECommerce.Models.OrderHeader
+﻿@using ECommerce.Utility.Helpers
+@model ECommerce.Models.OrderHeader
 
 @{
     ViewData["Title"] = "成功建立訂單";
@@ -37,7 +38,8 @@
 
             <p class="text-secondary small mb-4">
                 建立時間：
-                @Model.OrderDate.ToLocalTime().ToString("yyyy/MM/dd HH:mm")
+                @* @Model.OrderDate.ToLocalTime().ToString("yyyy/MM/dd HH:mm") *@
+                @TaiwanTimeHelper.ConvertUtcToTaiwan(@Model.OrderDate).ToString("yyyy/MM/dd HH:mm")
             </p>
 
             <div class="d-flex flex-column flex-sm-row justify-content-center gap-2">

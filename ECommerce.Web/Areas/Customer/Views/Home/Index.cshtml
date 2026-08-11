@@ -78,13 +78,15 @@
                             <div class="d-flex justify-content-between align-items-center mt-auto">
                                 <div>
                                     <span class="fw-bold text-success">
-                                        @product.Price.ToString("C0")
+                                        @* @product.Price.ToString("C0") *@
+                                        NT$@product.Price.ToString("N0")
                                     </span>
 
                                     @if (product.ListPrice > product.Price)
                                     {
                                         <small class="text-decoration-line-through text-muted ms-1">
-                                            @product.ListPrice.ToString("C0")
+                                            @* @product.ListPrice.ToString("C0") *@
+                                            NT$@product.ListPrice.ToString("N0")
                                         </small>
                                     }
                                 </div>

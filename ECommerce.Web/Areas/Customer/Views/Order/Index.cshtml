@@ -134,7 +134,8 @@
                                 </td>
 
                                 <td class="text-end fw-semibold">
-                                    @order.OrderTotal.ToString("C0")
+                                    @* @order.OrderTotal.ToString("C0") *@
+                                    NT$@order.OrderTotal.ToString("N0")
                                 </td>
 
                                 <td class="px-4 text-end">

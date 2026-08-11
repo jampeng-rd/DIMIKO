@@ -97,7 +97,8 @@
                                     </a>
 
                                     <p class="text-secondary mb-2" style="font-size: 0.75rem;">
-                                        單價：@item.Price.ToString("C0")
+                                        @* 單價：@item.Price.ToString("C0") *@
+                                        單價：NT$@item.Price.ToString("N0")
                                     </p>
 
                                     <div class="d-flex align-items-center gap-2">
@@ -153,7 +154,8 @@
                                 <div class="text-end flex-shrink-0 d-flex flex-column justify-content-between align-self-stretch">
 
                                     <span class="fw-bold" style="font-size: 0.95rem;">
-                                        @((item.Price * item.Count).ToString("C0"))
+                                        @* @((item.Price * item.Count).ToString("C0")) *@
+                                        NT$@((item.Price * item.Count).ToString("N0"))
                                     </span>
 
                                     <form method="post" asp-action="Remove">
@@ -208,7 +210,8 @@
                                     </span>
 
                                     <span class="fw-medium flex-shrink-0">
-                                        @((item.Price * item.Count).ToString("C0"))
+                                        @* @((item.Price * item.Count).ToString("C0")) *@
+                                        NT$@((item.Price * item.Count).ToString("N0"))
                                     </span>
                                 </div>
                             }
@@ -245,7 +248,8 @@
                             </span>
 
                             <span class="fw-bold fs-5">
-                                @Model.OrderTotal.ToString("C0")
+                                @* @Model.OrderTotal.ToString("C0") *@
+                                NT$@Model.OrderTotal.ToString("N0")
                             </span>
                         </div>
 

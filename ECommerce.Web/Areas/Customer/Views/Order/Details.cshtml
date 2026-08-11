@@ -129,14 +129,14 @@
                                 </small>
 
                                 <small class="text-secondary">
-                                    @detail.Price.ToString("C0")
-                                    ×
-                                    @detail.Count
+                                    @* @detail.Price.ToString("C0") × @detail.Count *@
+                                    NT$@detail.Price.ToString("N0") × @detail.Count
                                 </small>
                             </div>
 
                             <div class="fw-bold flex-shrink-0">
-                                @((detail.Price * detail.Count).ToString("C0"))
+                                @* @((detail.Price * detail.Count).ToString("C0")) *@
+                                NT$@((detail.Price * detail.Count).ToString("N0"))
                             </div>
                         </div>
                     }
@@ -251,7 +251,8 @@
                     <div class="d-flex justify-content-between align-items-center">
                         <span class="fw-semibold">訂單總額</span>
                         <span class="fw-bold fs-5 text-success">
-                            @Model.OrderTotal.ToString("C0")
+                            @* @Model.OrderTotal.ToString("C0") *@
+                            NT$@Model.OrderTotal.ToString("N0")
                         </span>
                     </div>
 

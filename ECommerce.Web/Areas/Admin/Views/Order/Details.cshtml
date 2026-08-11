@@ -147,14 +147,16 @@
 
                                 <small class="text-secondary">
                                     單價：
-                                    @detail.Price.ToString("C0") × @detail.Count
+                                    @* @detail.Price.ToString("C0") × @detail.Count *@
+                                    NT$@detail.Price.ToString("N0") × @detail.Count
                                 </small>
                             </div>
 
                             <div class="text-end flex-shrink-0">
 
                                 <div class="fw-bold">
-                                    @((detail.Price * detail.Count).ToString("C0"))
+                                    @* @((detail.Price * detail.Count).ToString("C0")) *@
+                                    NT$@((detail.Price * detail.Count).ToString("N0"))
                                 </div>
 
                                 <small class="text-secondary">
@@ -175,7 +177,8 @@
                         </span>
 
                         <span class="fw-bold fs-5 text-success">
-                            @Model.Order.OrderTotal.ToString("C0")
+                            @* @Model.Order.OrderTotal.ToString("C0") *@
+                            NT$@Model.Order.OrderTotal.ToString("N0")
                         </span>
                     </div>
                 </div>

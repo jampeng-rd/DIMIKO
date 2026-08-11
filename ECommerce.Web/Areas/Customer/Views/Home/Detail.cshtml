@@ -96,13 +96,15 @@
                     <div class="d-flex align-items-baseline gap-2 mb-4">
 
                         <span class="h3 fw-bold mb-0" style="color: #17A34A;">
-                            @Model.Product.Price.ToString("C0")
+                            @* @Model.Product.Price.ToString("C0") *@
+                            NT$@Model.Product.Price.ToString("N0")
                         </span>
 
                         @if (Model.Product.ListPrice > Model.Product.Price)
                         {
                             <span class="text-decoration-line-through text-secondary">
-                                @Model.Product.ListPrice.ToString("C0")
+                                @* @Model.Product.ListPrice.ToString("C0") *@
+                                NT$@Model.Product.ListPrice.ToString("N0")
                             </span>
                         }
 
@@ -126,7 +128,8 @@
                                     </p>
 
                                     <p class="fw-bold mb-0" style="color: #17A34A;">
-                                        @Model.Product.Price.ToString("C0")
+                                        @* @Model.Product.Price.ToString("C0") *@
+                                        NT$@Model.Product.Price.ToString("N0")
                                     </p>
                                 </div>
                             </div>
@@ -140,7 +143,8 @@
                                     </p>
 
                                     <p class="fw-bold mb-0" style="color: #17A34A;">
-                                        @(Model.Product.Price5?.ToString("C0") ?? "尚未設定")
+                                        @* @(Model.Product.Price5?.ToString("C0") ?? "尚未設定") *@
+                                        NT$@(Model.Product.Price5?.ToString("N0") ?? "尚未設定")
                                     </p>
                                     
                                     <span class="badge mt-1" style="font-size: 0.55rem; background: rgba(23,163,74,0.1); color: #17A34A;">
@@ -158,7 +162,8 @@
                                     </p>
 
                                     <p class="fw-bold mb-0" style="color: #17A34A;">
-                                        @(Model.Product.Price10?.ToString("C0") ?? "尚未設定")
+                                        @* @(Model.Product.Price10?.ToString("C0") ?? "尚未設定") *@
+                                        NT$@(Model.Product.Price10?.ToString("N0") ?? "尚未設定")
                                     </p>
                                    
                                     <span class="badge text-white mt-1" style="font-size: 0.55rem; background: #17A34A;">
