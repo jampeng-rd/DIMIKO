@@ -1,1 +1,353 @@
-﻿Hello
+﻿@model ECommerce.Models.ViewModels.DashboardViewModel
+
+@{
+    ViewData["Title"] = "Dashboard";
+}
+
+<div class="container-fluid">
+
+    <!-- 標題 -->
+    <div class="mb-4">
+        <h2 class="fw-bold mb-1">
+            Dashboard
+        </h2>
+
+        <p class="text-secondary mb-0">
+            查看商店營運概況
+        </p>
+    </div>
+
+
+    <!-- 月份選擇 -->
+    <div class="card border shadow-sm mb-4">
+
+        <div class="card-body">
+
+            <form asp-area="Admin" asp-controller="Dashboard" asp-action="Index"
+                  method="get">
+
+                <div class="row g-3 align-items-end">
+
+                    <!-- 年 -->
+                    <div class="col-md-3">
+                        <label class="form-label fw-semibold">
+                            年份
+                        </label>
+
+                        <select name="year" class="form-select">
+                            @for (var year = DateTime.Now.Year; year >= 2020; year--)
+                            {
+                                <option value="@year"
+                                        selected="@(year == Model.SelectedYear)">
+                                    @year 年
+                                </option>
+                            }
+                        </select>
+                    </div>
+
+                    <!-- 月 -->
+                    <div class="col-md-3">
+                        <label class="form-label fw-semibold">
+                            月份
+                        </label>
+
+                        <select name="month" class="form-select">
+
+                            @for (var month = 1; month <= 12; month++)
+                            {
+                                <option value="@month" 
+                                    selected="@(month == Model.SelectedMonth)">
+                                    @month 月
+                                </option>
+                            }
+
+                        </select>
+                    </div>
+
+                    <div class="col-md-auto">
+                        <button type="submit" class="btn btn-success">
+                            <i class="bi bi-search me-1"></i>
+                            查詢
+                        </button>
+                    </div>
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
+
+
+    <!-- 統計卡 -->
+    <div class="row g-3 mb-4">
+
+        <!-- 營收 -->
+        <div class="col-sm-6 col-xl-3">
+
+            <div class="card border shadow-sm h-100">
+
+                <div class="card-body">
+
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+
+                        <div class="rounded d-flex align-items-center justify-content-center"
+                             style="width: 42px; height: 42px; background-color: #dcfce7;">
+
+                            <i class="bi bi-currency-dollar fs-5" style="color: #17A34A;"></i>
+                        </div>
+
+                        <span class="text-secondary small">
+                            @Model.SelectedMonth 月營收
+                        </span>
+
+                    </div>
+
+
+                    <h4 class="fw-bold mb-1">
+
+                        NT$@Model.MonthlyRevenue.ToString("N0")
+
+                    </h4>
+
+                    <p class="text-secondary small mb-0">
+                        已付款訂單
+                    </p>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- 訂單 -->
+        <div class="col-sm-6 col-xl-3">
+
+            <div class="card border shadow-sm h-100">
+
+                <div class="card-body">
+
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+
+                        <div class="rounded d-flex align-items-center justify-content-center"
+                             style="width: 42px; height: 42px; background-color: #dbeafe;">
+
+                            <i class="bi bi-receipt fs-5 text-primary"></i>
+
+                        </div>
+
+                        <span class="text-secondary small">
+                            @Model.SelectedMonth 月訂單
+                        </span>
+
+                    </div>
+
+
+                    <h4 class="fw-bold mb-1">
+                        @Model.MonthlyOrders
+                    </h4>
+
+                    <p class="text-secondary small mb-0">
+                        當月建立的訂單
+                    </p>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- 商品 -->
+        <div class="col-sm-6 col-xl-3">
+
+            <a asp-area="Admin" asp-controller="Product" asp-action="Index"
+               class="card border shadow-sm h-100 text-decoration-none">
+
+                <div class="card-body">
+
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+
+                        <div class="rounded d-flex align-items-center justify-content-center"
+                             style="width: 42px; height: 42px; background-color: #f3e8ff;">
+
+                            <i class="bi bi-box-seam fs-5"
+                               style="color: #8b5cf6;">
+                            </i>
+
+                        </div>
+
+                        <span class="text-secondary small">
+                            商品總數
+                        </span>
+
+                    </div>
+
+
+                    <h4 class="fw-bold text-dark mb-1">
+                        @Model.TotalProducts
+                    </h4>
+
+                    <p class="text-secondary small mb-0">
+                        查看商品管理 →
+                    </p>
+
+                </div>
+
+            </a>
+
+        </div>
+
+
+        <!-- 使用者 -->
+        <div class="col-sm-6 col-xl-3">
+
+            <a asp-area="Admin" asp-controller="User" asp-action="Index"
+               class="card border shadow-sm h-100 text-decoration-none">
+
+                <div class="card-body">
+
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+
+                        <div class="rounded d-flex align-items-center justify-content-center"
+                             style="width: 42px; height: 42px; background-color: #fef3c7;">
+
+                            <i class="bi bi-people fs-5" style="color: #f59e0b;"></i>
+
+                        </div>
+
+                        <span class="text-secondary small">
+                            會員總數
+                        </span>
+
+                    </div>
+
+
+                    <h4 class="fw-bold text-dark mb-1">
+                        @Model.TotalUsers
+                    </h4>
+
+                    <p class="text-secondary small mb-0">
+                        查看使用者管理 →
+                    </p>
+
+                </div>
+
+            </a>
+
+        </div>
+
+    </div>
+
+    <!-- 圖表 -->
+    <div class="row g-3 mb-4">
+
+        <!-- 每日營收 -->
+        <div class="col-lg-6">
+            <div class="card border shadow-sm h-100">
+
+                <div class="card-body">
+
+                    <h5 class="fw-semibold mb-3">
+                        <i class="bi bi-graph-up me-1 text-success"></i>
+                        @Model.SelectedMonth 月每日營收
+                    </h5>
+
+                    <div style="height: 300px;">
+                        <canvas id="dailyRevenueChart"></canvas>
+                    </div>
+
+                </div>
+
+            </div>
+        </div>
+
+        <!-- 每日訂單 -->
+        <div class="col-lg-6">
+            <div class="card border shadow-sm h-100">
+
+                <div class="card-body">
+
+                    <h5 class="fw-semibold mb-3">
+                        <i class="bi bi-bar-chart me-1 text-primary"></i>
+                        @Model.SelectedMonth 月每日訂單
+                    </h5>
+
+                    <div style="height: 300px;">
+                        <canvas id="dailyOrdersChart"></canvas>
+                    </div>
+
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+
+    <!-- 圖表 -->
+    <div class="row g-3 mb-4">
+
+        <!-- 訂單狀態 -->
+        <div class="col-lg-6">
+
+            <div class="card border shadow-sm h-100">
+                <div class="card-body">
+                    <h5 class="fw-semibold mb-3">
+                        <i class="bi bi-pie-chart me-1" style="color: #f59e0b;"></i>
+
+                        @Model.SelectedMonth 月訂單狀態
+                    </h5>
+
+                    <div style="height: 280px;" class="d-flex align-items-center justify-content-center">
+
+                        <canvas id="orderStatusChart"></canvas>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 商品分類 -->
+        <div class="col-lg-6">
+            <div class="card border shadow-sm h-100">
+                <div class="card-body">
+                    <h5 class="fw-semibold mb-3">
+                        <i class="bi bi-tags me-1" style="color: #8b5cf6;"></i>
+
+                        各分類商品數量
+                    </h5>
+
+                    <div style="height: 280px;">
+
+                        <canvas id="categoryProductChart"></canvas>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+</div>
+
+@section Scripts {
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <script>
+        window.dashboardData = {
+
+            dailyRevenue: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.DailyRevenue)),
+
+            dailyOrders: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.DailyOrders)),
+
+            orderStatusBreakdown: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.OrderStatusBreakdown)),
+
+            productsPerCategory: @Html.Raw(System.Text.Json.JsonSerializer.Serialize( Model.ProductsPerCategory))
+        };
+    </script>
+
+    <script src="~/js/dashboard.js" asp-append-version="true"></script>
+}
