@@ -27,7 +27,7 @@ namespace ECommerce.Web.Areas.Customer.Controllers
 		[HttpPost]
 		[AllowAnonymous]
 		[IgnoreAntiforgeryToken]
-		public async Task<IActionResult> Return(int orderId)
+		public IActionResult Return(int orderId)
 		{
 			if (orderId <= 0)
 			{
@@ -36,34 +36,13 @@ namespace ECommerce.Web.Areas.Customer.Controllers
 				return RedirectToAction("Index", "Home", new { area = "Customer" });
 			}
 
-			var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-
-			if (string.IsNullOrWhiteSpace(userId))
-			{
-				return Challenge();
-			}
-
-			var order = await _orderService.GetOrderByIdAsync(orderId, userId);
-
-			if (order == null)
-			{
-				return NotFound();
-			}
-
-			if (order.PaymentStatus == SD.PaymentStatusApproved)
-			{
-				TempData["success"] = "付款已完成";
-			}
-			else
-			{
-				TempData["success"] = "付款流程已完成，付款結果正在確認中";
-			}
+			TempData["success"] = "付款流程已完成";
 
 			return RedirectToAction("OrderConfirmation", "Cart",
 				new
 				{
 					area = "Customer",
-					orderId = order.Id
+					orderId
 				});
 		}
 
