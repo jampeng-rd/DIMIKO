@@ -216,7 +216,11 @@ namespace ECommerce.Business.Services
 			aes.IV = Encoding.UTF8.GetBytes(_settings.HashIV);
 
 			aes.Mode = CipherMode.CBC;
-			aes.Padding = PaddingMode.PKCS7;
+
+			//aes.Padding = PaddingMode.PKCS7;
+
+			// 不讓 .NET 自動處理 padding
+			aes.Padding = PaddingMode.None;
 
 			using var decryptor = aes.CreateDecryptor();
 
@@ -228,7 +232,51 @@ namespace ECommerce.Business.Services
 					0,
 					encryptedBytes.Length);
 
+			// 手動移除 PKCS7 padding
+			var unpaddedBytes = RemovePkcs7Padding(decryptedBytes);
+
 			return Encoding.UTF8.GetString(decryptedBytes);
+		}
+
+
+		// 手動移除 PKCS7 padding
+		private static byte[] RemovePkcs7Padding(byte[] data)
+		{
+			if (data.Length == 0)
+			{
+				throw new CryptographicException("解密資料為空");
+			}
+
+			var paddingLength = data[^1];
+
+			if (paddingLength < 1 || paddingLength > 16)
+			{
+				throw new CryptographicException("無效的 PKCS7 Padding");
+			}
+
+			if (paddingLength > data.Length)
+			{
+				throw new CryptographicException("Padding 長度不正確");
+			}
+
+			for (var i = data.Length - paddingLength; i < data.Length; i++)
+			{
+				if (data[i] != paddingLength)
+				{
+					throw new CryptographicException("PKCS7 Padding 驗證失敗");
+				}
+			}
+
+			var result = new byte[data.Length - paddingLength];
+
+			Buffer.BlockCopy(
+				data,
+				0,
+				result,
+				0,
+				result.Length);
+
+			return result;
 		}
 
 
