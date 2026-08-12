@@ -5,6 +5,9 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Globalization;
 using System.Security.Claims;
+using System.Security.Cryptography;
+using System.Text.Json;
+
 
 namespace ECommerce.Web.Areas.Customer.Controllers
 {
@@ -56,11 +59,6 @@ namespace ECommerce.Web.Areas.Customer.Controllers
 					return RedirectToAction("Index", "Home", new { area = "Customer" });
 				}
 
-				if (order == null)
-				{
-					return NotFound();
-				}
-
 				// 付款未成功
 				if (!string.Equals(response.Status, "SUCCESS", StringComparison.OrdinalIgnoreCase))
 				{
@@ -86,9 +84,28 @@ namespace ECommerce.Web.Areas.Customer.Controllers
 						orderId = order.Id
 					});
 			}
+			catch (InvalidOperationException exception)
+			{
+				TempData["error"] = $"付款回傳處理失敗：{exception.Message}";
+
+				return RedirectToAction("Index", "Order", new { area = "Customer" });
+			}
+			catch (CryptographicException)
+			{
+				TempData["error"] = "付款回傳處理失敗：TradeInfo 解密失敗";
+
+				return RedirectToAction("Index", "Order", new { area = "Customer" });
+			}
+			catch (JsonException)
+			{
+				TempData["error"] = "付款回傳處理失敗：藍新回傳 JSON 解析失敗";
+
+				return RedirectToAction("Index", "Order", new { area = "Customer" });
+			}
 			catch
 			{
-				TempData["error"] = "處理付款結果時發生錯誤，請至我訂單確認付款狀態";
+				//TempData["error"] = "處理付款結果時發生錯誤，請至我訂單確認付款狀態";
+				TempData["error"] = "付款回傳處理失敗：發生其他未預期錯誤";
 
 				return RedirectToAction("Index", "Order", new { area = "Customer" });
 			}
