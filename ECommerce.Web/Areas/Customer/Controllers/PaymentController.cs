@@ -38,6 +38,8 @@ namespace ECommerce.Web.Areas.Customer.Controllers
 				return RedirectToAction("Index", "Order", new { area = "Customer" });
 			}
 
+			TempData["debug"] = $"TradeInfo 長度：{TradeInfo.Length}，是否為偶數：{TradeInfo.Length % 2 == 0}";
+
 			try
 			{
 				var response = _newebPayService.ValidateAndDecryptPaymentResponse(TradeInfo, TradeSha);
@@ -90,9 +92,10 @@ namespace ECommerce.Web.Areas.Customer.Controllers
 
 				return RedirectToAction("Index", "Order", new { area = "Customer" });
 			}
-			catch (CryptographicException)
+			catch (CryptographicException exception)
 			{
-				TempData["error"] = "付款回傳處理失敗：TradeInfo 解密失敗";
+				//TempData["error"] = "付款回傳處理失敗：TradeInfo 解密失敗";
+				TempData["error"] = $"付款回傳處理失敗：{exception.Message}";
 
 				return RedirectToAction("Index", "Order", new { area = "Customer" });
 			}
