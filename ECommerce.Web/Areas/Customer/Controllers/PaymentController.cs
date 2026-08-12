@@ -5,8 +5,6 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Globalization;
 using System.Security.Claims;
-using System.Security.Cryptography;
-using System.Text.Json;
 
 
 namespace ECommerce.Web.Areas.Customer.Controllers
@@ -29,89 +27,44 @@ namespace ECommerce.Web.Areas.Customer.Controllers
 		[HttpPost]
 		[AllowAnonymous]
 		[IgnoreAntiforgeryToken]
-		public async Task<IActionResult> Return(string TradeInfo, string TradeSha)
+		public async Task<IActionResult> Return(int orderId)
 		{
-			if (string.IsNullOrWhiteSpace(TradeInfo) || string.IsNullOrWhiteSpace(TradeSha))
+			if (orderId <= 0)
 			{
-				TempData["error"] = "付款結果資料不完整";
+				TempData["error"] = "無法取得付款訂單資訊";
 
-				return RedirectToAction("Index", "Order", new { area = "Customer" });
+				return RedirectToAction("Index", "Home", new { area = "Customer" });
 			}
 
-			TempData["debug"] = $"TradeInfo 長度：{TradeInfo.Length}，是否為偶數：{TradeInfo.Length % 2 == 0}";
+			var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
-			try
+			if (string.IsNullOrWhiteSpace(userId))
 			{
-				var response = _newebPayService.ValidateAndDecryptPaymentResponse(TradeInfo, TradeSha);
+				return Challenge();
+			}
 
-				if (response.Result == null)
-				{
-					TempData["error"] = "無法取得付款結果";
+			var order = await _orderService.GetOrderByIdAsync(orderId, userId);
 
-					return RedirectToAction("Index", "Order", new { area = "Customer" });
-				}
+			if (order == null)
+			{
+				return NotFound();
+			}
 
-				// 依藍新回傳的訂單編號取得訂單
-				var order = await _orderService.GetOrderByNumberAsync(response.Result.MerchantOrderNo);
-
-				if (order == null)
-				{
-					TempData["error"] = "找不到付款對應的訂單";
-
-					return RedirectToAction("Index", "Home", new { area = "Customer" });
-				}
-
-				// 付款未成功
-				if (!string.Equals(response.Status, "SUCCESS", StringComparison.OrdinalIgnoreCase))
-				{
-					TempData["error"] = string.IsNullOrWhiteSpace(response.Message)
-							? "付款未完成，您可以重新進行付款"
-							: $"付款未完成：{response.Message}";
-
-					return RedirectToAction("Details", "Order",
-							new
-							{
-								area = "Customer",
-								id = order.Id
-							});
-				}
-
-				// 付款成功
+			if (order.PaymentStatus == SD.PaymentStatusApproved)
+			{
 				TempData["success"] = "付款已完成";
-
-				return RedirectToAction("OrderConfirmation", "Cart",
-					new
-					{
-						area = "Customer",
-						orderId = order.Id
-					});
 			}
-			catch (InvalidOperationException exception)
+			else
 			{
-				TempData["error"] = $"付款回傳處理失敗：{exception.Message}";
-
-				return RedirectToAction("Index", "Order", new { area = "Customer" });
+				TempData["success"] = "付款流程已完成，付款結果正在確認中";
 			}
-			catch (CryptographicException exception)
-			{
-				//TempData["error"] = "付款回傳處理失敗：TradeInfo 解密失敗";
-				TempData["error"] = $"付款回傳處理失敗：{exception.Message}";
 
-				return RedirectToAction("Index", "Order", new { area = "Customer" });
-			}
-			catch (JsonException)
-			{
-				TempData["error"] = "付款回傳處理失敗：藍新回傳 JSON 解析失敗";
-
-				return RedirectToAction("Index", "Order", new { area = "Customer" });
-			}
-			catch
-			{
-				//TempData["error"] = "處理付款結果時發生錯誤，請至我訂單確認付款狀態";
-				TempData["error"] = "付款回傳處理失敗：發生其他未預期錯誤";
-
-				return RedirectToAction("Index", "Order", new { area = "Customer" });
-			}
+			return RedirectToAction("OrderConfirmation", "Cart",
+				new
+				{
+					area = "Customer",
+					orderId = order.Id
+				});
 		}
 
 

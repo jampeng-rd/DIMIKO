@@ -148,6 +148,9 @@ namespace ECommerce.Business.Services
 
 			var amount = decimal.ToInt32(orderHeader.OrderTotal);
 
+			var returnUrlSeparator = _settings.ReturnUrl.Contains('?') ? "&" : "?";
+			var returnUrl = $"{_settings.ReturnUrl}{returnUrlSeparator}orderId={orderHeader.Id}";
+
 			var parameters = new Dictionary<string, string>
 			{
 				["MerchantID"] = _settings.MerchantId,
@@ -158,7 +161,7 @@ namespace ECommerce.Business.Services
 				["Amt"] = amount.ToString(),
 				["ItemDesc"] = "DIMIKO 商品訂單",
 
-				["ReturnURL"] = _settings.ReturnUrl,
+				["ReturnURL"] = returnUrl,
 				["NotifyURL"] = _settings.NotifyUrl,
 
 				// 只啟用信用卡一次付清
