@@ -1,0 +1,118 @@
+﻿@using ECommerce.Models
+@model HeroBanner
+
+@{
+    ViewData["Title"] = "刪除輪播圖";
+}
+
+<div class="container-fluid px-4">
+
+    <a asp-action="Index"
+       class="text-decoration-none text-secondary small fw-medium d-inline-flex align-items-center gap-1 my-2">
+        <i class="bi bi-arrow-left"></i>
+        返回輪播管理
+    </a>
+
+    <div class="card border-0 shadow-sm overflow-hidden">
+
+        <div class="card-header admin-card-header text-white py-3 px-4">
+
+            <h5 class="mb-0 fw-bold">
+                <i class="bi bi-trash me-2"></i>
+                刪除首頁輪播
+            </h5>
+
+            <p class="admin-card-subtitle mb-0 small">
+                此操作無法復原，請確認是否刪除此輪播圖片
+            </p>
+
+        </div>
+
+        <div class="card-body p-4">
+
+            
+
+            <div class="mb-4">
+
+                <label class="form-label fw-semibold">
+                    輪播圖片
+                </label>
+
+                <div>
+                    <img src="@Model.ImageUrl"
+                         alt="@Model.Title"
+                         style="width: 100%; max-width: 520px; aspect-ratio: 17 / 9; object-fit: cover;
+                                border-radius: 0.5rem;" />
+                </div>
+
+            </div>
+
+            <div class="row g-3 mb-4">
+
+                <div class="col-md-6">
+                    <div class="small text-secondary">標題</div>
+
+                    <div class="fw-medium">
+                        @(string.IsNullOrWhiteSpace(Model.Title) ? "未設定" : Model.Title)
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="small text-secondary">排序</div>
+
+                    <div class="fw-medium">
+                        @Model.DisplayOrder
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="small text-secondary">狀態</div>
+
+                    <div>
+                        @if (Model.IsActive)
+                        {
+                            <span class="badge bg-success">
+                                啟用
+                            </span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-secondary">
+                                停用
+                            </span>
+                        }
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="alert alert-warning">
+                <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                刪除後無法復原，輪播圖片檔案也會一併刪除。
+            </div>
+
+            <form asp-action="Delete"
+                  method="post">
+
+                <input asp-for="Id" type="hidden" />
+
+                <div class="d-flex gap-2">
+
+                    <button type="submit" class="btn btn-danger fw-semibold">
+                        <!-- <i class="bi bi-trash me-1"></i> -->
+                        確認刪除
+                    </button>
+
+                    <a asp-action="Index" class="btn btn-light fw-medium">
+                        取消
+                    </a>
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
+
+</div>

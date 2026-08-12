@@ -178,77 +178,48 @@
 }
 
 /* ============================================
-   Home Page — Hero & Filter Animations
+   Home Page — Hero
    ============================================ */
-
-/* Hero product fan layout */
-.hero-product-main {
-    transition: transform 0.4s ease;
-    display: block;
+.hero-carousel-section {
+    background: #191414;
 }
 
-.hero-product-main:hover {
-    transform: translateY(-8px);
+.hero-carousel-image {
+    width: 100%;
+    object-fit: cover;
+
+    aspect-ratio: 17 / 9;
+    /* 完全不裁切圖片*/
+    /* height: auto;*/
 }
 
-.hero-product-side a {
-    transition: all 0.4s ease;
+.hero-carousel-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient( 90deg, rgba(0, 0, 0, 0.7) 0%, rgba(0, 0, 0, 0.35) 50%, rgba(0, 0, 0, 0.1) 100% );
 }
 
-.hero-product-side:hover a {
-    opacity: 1 !important;
-    transform: scale(1.05);
+.hero-carousel-caption {
+    top: 50%;
+    bottom: auto;
+    transform: translateY(-50%);
+    text-align: left;
+    max-width: 650px;
 }
 
-@keyframes heroFadeUp {
-    from {
-        opacity: 0;
-        transform: translateY(24px);
+@media (max-width: 767.98px) {
+    .hero-carousel-image {
+        aspect-ratio: 4 / 3;
+
+        /* 完全不裁切圖片*/
+        /* height: auto;*/
     }
 
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-@keyframes heroPulse {
-    0%, 100% {
-        transform: scale(1);
-    }
-
-    50% {
-        transform: scale(1.08);
+    .hero-carousel-caption {
+        text-align: center;
     }
 }
 
-.hero-animate {
-    animation: heroFadeUp 0.7s ease-out both;
-}
-
-.hero-delay-1 {
-    animation-delay: 0.12s;
-}
-
-.hero-delay-2 {
-    animation-delay: 0.24s;
-}
-
-.hero-delay-3 {
-    animation-delay: 0.36s;
-}
-
-.hero-delay-4 {
-    animation-delay: 0.5s;
-}
-
-.animate-hero-pulse {
-    animation: heroPulse 3s ease-in-out infinite;
-}
-
-.counter {
-    font-variant-numeric: tabular-nums;
-}
 
 /* Filter panel */
 #filters {

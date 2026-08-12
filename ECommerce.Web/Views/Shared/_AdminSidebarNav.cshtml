@@ -34,8 +34,21 @@
         <a asp-area="Admin" asp-controller="Category" asp-action="Index" 
            class="nav-link d-flex align-items-center gap-2
            @(currentArea == "Admin" && currentController == "Category" ? "active" : "")">
-            <i class="bi bi-tags"></i> 類型管理
+            <i class="bi bi-tags"></i> 類別管理
         </a>
+
+
+        <!-- 首頁輪播圖 -->
+        <p class="nav-section mb-1">Website</p>
+
+        <a asp-area="Admin" asp-controller="HeroBanner" asp-action="Index"
+           class="nav-link d-flex align-items-center gap-2
+            @(currentArea == "Admin" && currentController == "HeroBanner" ? "active" : "")">
+
+            <i class="bi bi-images"></i>
+            輪播圖設定
+        </a>
+
 
         @if (User.IsInRole(SD.RoleAdmin))
         {

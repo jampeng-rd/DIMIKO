@@ -1,12 +1,12 @@
 ﻿@using ECommerce.Models
-@model List<Product>
+@model HomeIndexViewModel
 
 @{
     ViewData["Title"] = "首頁";
 }
 
 <!-- _Hero.cshtml Section -->
-<partial name="_Hero" />
+<partial name="_Hero" model="Model.HeroBanners" />
 
 <!-- Catalog Section -->
 <div class="container py-5" id="catalog">
@@ -25,9 +25,9 @@
     <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-3 g-4">
 
         <!-- 商品卡片範例 -->
-        @if (Model.Any())
+        @if (Model.Products.Any())
         {
-            @foreach (var product in Model)
+            @foreach (var product in Model.Products)
             {
  
                 <div class="col">

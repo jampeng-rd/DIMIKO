@@ -1,0 +1,131 @@
+﻿@using ECommerce.Models
+@model List<HeroBanner>
+
+@{
+    ViewData["Title"] = "輪播圖列表";
+}
+
+<div class="container-fluid py-4 px-4">
+
+    <div class="card border-0 shadow-sm">
+
+        <div class="card-header admin-card-header text-white py-3 px-4 d-flex align-items-center justify-content-between">
+            
+            <div>
+                <h5 class="mb-0 fw-bold">
+                    <i class="bi bi-grid me-2"></i>首頁輪播管理
+                </h5>
+                <p class="admin-card-subtitle mb-0 small">管理首頁輪播圖片與顯示順序</p>
+            </div>
+
+            <a asp-action="Create" class="btn btn-sm btn-outline-light fw-semibold d-inline-flex align-items-center gap-1">
+                <i class="bi bi-plus-lg"></i> 新增輪播
+            </a>
+
+        </div>
+
+        <div class="card-body p-0">
+
+            @if (Model.Any())
+            {
+                <div class="table-responsive">
+
+                    <table class="table-styled mb-0">
+
+                        <thead>
+                            <tr>
+                                <th>圖片</th>
+                                <th>標題</th>
+                                <th>排序</th>
+                                <th>狀態</th>
+                                <th class="text-end">
+                                    <!-- 操作 -->
+                                </th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+
+                            @foreach (var banner in Model)
+                            {
+                                <tr>
+
+                                    <td>
+                                        <img src="@banner.ImageUrl"
+                                             alt="@banner.Title"
+                                             style="width: 140px; height: 70px; object-fit: cover; border-radius: 0.375rem;" />
+                                    </td>
+
+                                    <td>
+                                        @if (!string.IsNullOrWhiteSpace(banner.Title))
+                                        {
+                                            <span class="fw-medium">
+                                                @banner.Title
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-secondary">
+                                                未設定
+                                            </span>
+                                        }
+                                    </td>
+
+                                    <td>
+                                        @banner.DisplayOrder
+                                    </td>
+
+                                    <td>
+                                        @if (banner.IsActive)
+                                        {
+                                            <span class="badge bg-success">
+                                                啟用
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-secondary">
+                                                停用
+                                            </span>
+                                        }
+                                    </td>
+
+                                    <td class="text-end">
+
+                                        <a asp-action="Update" asp-route-id="@banner.Id" class="btn btn-sm btn-outline-success">
+                                            <i class="bi bi-pencil-square me-1"></i>
+                                            編輯 
+                                        </a>
+
+                                        <a asp-action="Delete" asp-route-id="@banner.Id" class="btn btn-sm btn-outline-danger">
+                                            <i class="bi bi-trash me-1"></i>
+                                            刪除
+                                        </a>
+
+                                    </td>
+
+                                </tr>
+                            }
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+            }
+            else
+            {
+                <div class="text-center py-5 text-secondary">
+
+                    <i class="bi bi-images fs-1 d-block mb-2"></i>
+
+                    尚未建立任何首頁輪播圖
+
+                </div>
+            }
+
+        </div>
+
+    </div>
+
+</div>

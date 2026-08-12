@@ -14,15 +14,18 @@ namespace ECommerce.Web.Areas.Customer.Controllers
 		private readonly IProductService _productService;
 		private readonly IShoppingCartService _shoppingCartService;
 		private readonly ICategoryService _categoryService;
+		private readonly IHeroBannerService _heroBannerService;
 
 		public HomeController(
 			IProductService productService,
 			IShoppingCartService shoppingCartService,
-			ICategoryService categoryService)
+			ICategoryService categoryService,
+			IHeroBannerService heroBannerService)
 		{
 			_productService = productService;
 			_shoppingCartService = shoppingCartService;
 			_categoryService = categoryService;
+			_heroBannerService = heroBannerService;
 		}
 
 
@@ -39,7 +42,18 @@ namespace ECommerce.Web.Areas.Customer.Controllers
 				includeCategory: true,
 				includeImages: true);
 
-			return View(activeProducts.ToList());
+			//return View(activeProducts.ToList());
+
+			// 輪播圖
+			var heroBanners = await _heroBannerService.GetActiveHeroBannersAsync();
+
+			var viewModel = new HomeIndexViewModel
+			{
+				Products = activeProducts.ToList(),
+				HeroBanners = heroBanners.ToList()
+			};
+	
+			return View(viewModel);
 		}
 
 

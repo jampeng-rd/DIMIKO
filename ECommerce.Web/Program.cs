@@ -46,6 +46,7 @@ builder.Services.AddScoped<IProductImageFileService, ProductImageFileService>();
 builder.Services.AddScoped<IShoppingCartService, ShoppingCartService>();
 builder.Services.AddScoped<IOrderService, OrderService>();
 builder.Services.AddScoped<IDashboardService, DashboardService>();
+builder.Services.AddScoped<IHeroBannerService, HeroBannerService>();
 // Register NewebPay service
 builder.Services.AddScoped<INewebPayService, NewebPayService>();
 

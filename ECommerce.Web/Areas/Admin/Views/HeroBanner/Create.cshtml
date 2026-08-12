@@ -1,0 +1,117 @@
+﻿@using ECommerce.Models.ViewModels
+@model HeroBannerCreateViewModel
+
+@{
+    ViewData["Title"] = "新增輪播圖";
+}
+
+<div class="container-fluid px-4">
+
+    <a asp-action="Index" 
+       class="text-decoration-none text-secondary small fw-medium d-inline-flex align-items-center gap-1 my-2">
+        <i class="bi bi-arrow-left"></i> 返回輪播管理
+    </a>
+
+    <div class="card border-0 shadow-sm overflow-hidden">
+
+        <div class="card-header admin-card-header text-white py-3 px-4">
+            <h5 class="mb-0 fw-bold">
+                <i class="bi bi-plus-lg me-2"></i>新增首頁輪播
+            </h5>
+            <p class="admin-card-subtitle mb-0 small">建立首頁 Hero Carousel 圖片</p>
+        </div>
+
+
+        <div class="card-body p-4">
+
+            <form asp-action="Create"
+                  method="post"
+                  enctype="multipart/form-data">
+
+                <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                <div class="mb-3">
+                    <div class="d-flex">
+                        <label asp-for="ImageFile" class="form-label fw-medium pe-2"></label>
+                        <h6 class="badge text-bg-secondary">
+                            建議圖片比例約 17 : 9，例如 1700 × 900 px。
+                            支援 JPG、PNG、WEBP，最大 5 MB。
+                        </h6>
+                    </div>
+
+                    <input asp-for="ImageFile" type="file"
+                           class="form-control"
+                           accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp" />
+
+                    <span asp-validation-for="ImageFile" class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <div class="d-flex">
+                        <label asp-for="Title" class="form-label pe-2"></label>
+                        <h6 class="badge text-bg-secondary">顯示於輪播圖片上的主要標題，可留空</h6>
+                    </div>
+                    <input asp-for="Title" class="form-control" placeholder="例如：夏季露營祭" />
+                </div>
+
+                <div class="mb-3">
+                    <div class="d-flex">
+                        <label asp-for="Description" class="form-label pe-2"></label>
+                        <h6 class="badge text-bg-secondary">顯示於標題下方的補充說明，可留空</h6>
+                    </div>
+
+                    <textarea asp-for="Description" class="form-control" rows="3" 
+                        placeholder="例如：精選帳篷、睡袋與戶外用品">
+                    <!-- placeholder="例如：精選戶外裝備，準備下一場露營旅程" -->
+                    </textarea>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <div class="d-flex">
+                            <label asp-for="ButtonText" class="form-label pe-2"></label>
+                            <h6 class="badge text-bg-secondary">輪播圖上的按鈕文字，可留空</h6>
+                        </div>
+                        <input asp-for="ButtonText" class="form-control" placeholder="例如：立即選購" />
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <div class="d-flex">
+                            <label asp-for="LinkUrl" class="form-label pe-2"></label>
+                            <h6 class="badge text-bg-secondary">按下輪播按鈕後前往的網址，需搭配按鈕文字使用</h6>
+                        </div>
+                        <input asp-for="LinkUrl" class="form-control" placeholder="/Customer/Home/Products" />                      
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <div class="d-flex">
+                            <label asp-for="DisplayOrder" class="form-label pe-2"></label>
+                            <h6 class="badge text-bg-secondary">數字越小越優先顯示，例如 1、2、3</h6>
+                        </div>
+                        <input asp-for="DisplayOrder" type="number" class="form-control" min="0" />                    
+                    </div>
+
+                    <div class="col-md-6 mb-3 d-flex align-items-end">
+                        <div class="form-check form-switch mb-2">
+                            <input asp-for="IsActive" class="form-check-input" />
+                            <label asp-for="IsActive" class="form-check-label"></label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="d-flex gap-2 mt-4">
+                    <button type="submit" class="btn btn-accent fw-semibold">
+                        <!-- <i class="bi bi-check-lg me-1"></i> -->
+                        確認新增
+                    </button>
+                    <a asp-action="Index" class="btn btn-light fw-medium">取消</a>
+                </div>
+            </form>
+
+        </div>
+
+    </div>
+
+</div>
