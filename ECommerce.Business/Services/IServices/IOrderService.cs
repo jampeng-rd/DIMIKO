@@ -9,8 +9,10 @@ namespace ECommerce.Business.Services.IServices
 		// 前台：建立訂單
 		Task<CreateOrderResult> CreateOrderAsync(OrderHeader orderHeader, string userId);
 
+
 		// 前台：取得單筆訂單
 		Task<OrderHeader?> GetOrderByIdAsync(int orderId, string userId);
+
 
 		// 前台：藍新付款成功後更新訂單付款資訊
 		Task<bool> MarkPaymentAsApprovedAsync(
@@ -20,8 +22,14 @@ namespace ECommerce.Business.Services.IServices
 			string paymentType,
 			DateTime paymentDate);
 
+
+		// 金流回傳：依訂單編號取得訂單
+		Task<OrderHeader?> GetOrderByNumberAsync(string orderNumber);
+
+
 		// 依訂單編號找訂單
 		Task<OrderHeader?> GetOrderByNumberAsync(string orderNumber, string userId);
+
 
 		// 前台：取使用者所有訂單資料
 		//Task<IEnumerable<OrderHeader>> GetUserOrdersAsync(string userId);
@@ -29,15 +37,17 @@ namespace ECommerce.Business.Services.IServices
 		// 前台：取得使用者訂單分頁資料
 		Task<PagedResult<OrderHeader>> GetUserOrdersAsync(string userId, int pageNumber, int pageSize);
 
+
 		// 前台：訂單詳細資料
 		Task<OrderHeader?> GetUserOrderDetailsAsync(int orderId, string userId);
+
 
 		// 前台：使用者取消自己的未付款訂單
 		Task<bool> CancelUserOrderAsync(int orderId, string userId);
 
+
 		// 系統：取消逾期未付款訂單並恢復庫存
 		Task<int> CancelExpiredOrdersAsync();
-
 
 
 		// 後台：取得指定月份每日的訂單數量

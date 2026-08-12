@@ -203,7 +203,23 @@ namespace ECommerce.Business.Services
 			return true;
 		}
 
-		// 依訂單編號找訂單
+
+		// 金流回傳(藍新 Return / Notify)：依訂單編號取得訂單
+		public async Task<OrderHeader?> GetOrderByNumberAsync(string orderNumber)
+		{
+			if (string.IsNullOrWhiteSpace(orderNumber))
+			{
+				return null;
+			}
+
+			return await _dbContext.OrderHeaders
+				.AsNoTracking()
+				.FirstOrDefaultAsync(order =>
+					order.OrderNumber == orderNumber);
+		}
+
+
+		// 前台：使用者依訂單編號找訂單
 		public async Task<OrderHeader?> GetOrderByNumberAsync(string orderNumber, string userId)
 		{
 			if (string.IsNullOrWhiteSpace(orderNumber) || string.IsNullOrWhiteSpace(userId))

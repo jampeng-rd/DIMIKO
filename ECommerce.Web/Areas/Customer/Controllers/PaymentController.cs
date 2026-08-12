@@ -46,16 +46,15 @@ namespace ECommerce.Web.Areas.Customer.Controllers
 					return RedirectToAction("Index", "Order", new { area = "Customer" });
 				}
 
-				// 取得會員
-				var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+				// 依藍新回傳的訂單編號取得訂單
+				var order = await _orderService.GetOrderByNumberAsync(response.Result.MerchantOrderNo);
 
-				if (string.IsNullOrWhiteSpace(userId))
+				if (order == null)
 				{
-					return RedirectToAction("Index", "Order", new { area = "Customer" });
-				}
+					TempData["error"] = "找不到付款對應的訂單";
 
-				// 取得訂單
-				var order = await _orderService.GetOrderByNumberAsync(response.Result.MerchantOrderNo, userId);
+					return RedirectToAction("Index", "Home", new { area = "Customer" });
+				}
 
 				if (order == null)
 				{
@@ -78,7 +77,7 @@ namespace ECommerce.Web.Areas.Customer.Controllers
 				}
 
 				// 付款成功
-				TempData["success"] = "付款完成，訂單付款結果確認中";
+				TempData["success"] = "付款已完成";
 
 				return RedirectToAction("OrderConfirmation", "Cart",
 					new
@@ -89,7 +88,7 @@ namespace ECommerce.Web.Areas.Customer.Controllers
 			}
 			catch
 			{
-				TempData["error"] = "付款結果驗證失敗";
+				TempData["error"] = "處理付款結果時發生錯誤，請至我訂單確認付款狀態";
 
 				return RedirectToAction("Index", "Order", new { area = "Customer" });
 			}
