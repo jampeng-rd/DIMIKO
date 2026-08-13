@@ -4,17 +4,15 @@
 @if (Model.Any())
 {
     <section class="hero-carousel-section">
-        <div id="heroCarousel"
-             class="carousel slide carousel-fade"
-             data-bs-ride="carousel"
-             data-bs-interval="5000">
+        <div id="heroCarousel" class="carousel slide carousel-fade"
+             data-bs-ride="carousel" data-bs-interval="4000">
 
             @if (Model.Count > 1)
             {
                 <div class="carousel-indicators">
                     @for (var i = 0; i < Model.Count; i++)
                     {
-                        <button type="button"
+                        <button type="button" 
                                 data-bs-target="#heroCarousel"
                                 data-bs-slide-to="@i"
                                 class="@(i == 0 ? "active" : "")">
@@ -75,8 +73,7 @@
 
             @if (Model.Count > 1)
             {
-                <button class="carousel-control-prev"
-                        type="button"
+                <button class="carousel-control-prev" type="button"
                         data-bs-target="#heroCarousel"
                         data-bs-slide="prev">
 
@@ -84,8 +81,7 @@
                     <span class="visually-hidden">上一張</span>
                 </button>
 
-                <button class="carousel-control-next"
-                        type="button"
+                <button class="carousel-control-next" type="button"
                         data-bs-target="#heroCarousel"
                         data-bs-slide="next">
 
@@ -97,3 +93,122 @@
         </div>
     </section>
 }
+
+
+<style>
+.hero-carousel-section {
+    background: #191414;
+}
+
+.hero-carousel-section .carousel-item {
+    position: relative;
+}
+
+/* Banner 圖片 */
+.hero-carousel-image {
+    width: 100%;
+    object-fit: cover;
+    object-position: center;
+
+    aspect-ratio: 17 / 9;
+}
+
+/* 黑色漸層遮罩 */
+.hero-carousel-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient( 90deg, rgba(0, 0, 0, 0.72) 0%, rgba(0, 0, 0, 0.42) 45%, rgba(0, 0, 0, 0.08) 100% );
+}
+
+/* Banner 文字區 */
+.hero-carousel-caption {
+    top: 50%;
+    bottom: auto;
+    left: 10%;
+    right: auto;
+    transform: translateY(-50%);
+    width: 45%;
+    max-width: 650px;
+    text-align: left;
+}
+
+/* 標題 */
+.hero-carousel-caption h2 {
+    margin-bottom: 1rem;
+}
+
+/* 說明 */
+.hero-carousel-caption .lead {
+    margin-bottom: 1.5rem;
+}
+
+
+/* ============================================
+    Hero Carousel - Mobile
+    ============================================ */
+
+@@media (max-width: 767.98px) {
+    .hero-carousel-image {
+        aspect-ratio: 4 / 5;
+        object-fit: cover;
+
+        /*
+        * 手機畫面較窄，
+        * 預設先以圖片中央為主要裁切位置
+        */
+        object-position: center;
+    }
+
+    .hero-carousel-overlay {
+        background: linear-gradient( 0deg, rgba(0, 0, 0, 0.78) 0%, rgba(0, 0, 0, 0.48) 48%, rgba(0, 0, 0, 0.12) 100% );
+    }
+
+    .hero-carousel-caption {
+        top: auto;
+        bottom: 3.5rem;
+        left: 1.5rem;
+        right: 1.5rem;
+        transform: none;
+        width: auto;
+        max-width: none;
+        text-align: left;
+    }
+
+    .hero-carousel-caption h2 {
+        margin-bottom: 0.5rem;
+        font-size: 1.75rem;
+        line-height: 1.2;
+    }
+
+
+    .hero-carousel-caption .lead {
+        margin-bottom: 1rem;
+        font-size: 0.95rem;
+        line-height: 1.5;
+    }
+
+
+    .hero-carousel-caption .btn {
+        padding: 0.5rem 1rem !important;
+        font-size: 0.9rem;
+    }
+
+    /* 手機左右箭頭縮小 */
+    .hero-carousel-section .carousel-control-prev,
+    .hero-carousel-section .carousel-control-next {
+        width: 10%;
+    }
+
+    .hero-carousel-section .carousel-control-prev-icon,
+    .hero-carousel-section .carousel-control-next-icon {
+        width: 1.5rem;
+        height: 1.5rem;
+    }
+
+    /* 指示點稍微往下 */
+    .hero-carousel-section .carousel-indicators {
+        margin-bottom: 0.75rem;
+    }
+}
+
+</style>

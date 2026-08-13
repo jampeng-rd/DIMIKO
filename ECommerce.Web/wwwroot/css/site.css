@@ -180,45 +180,11 @@
 /* ============================================
    Home Page — Hero
    ============================================ */
-.hero-carousel-section {
-    background: #191414;
-}
 
-.hero-carousel-image {
-    width: 100%;
-    object-fit: cover;
 
-    aspect-ratio: 17 / 9;
-    /* 完全不裁切圖片*/
-    /* height: auto;*/
-}
-
-.hero-carousel-overlay {
-    position: absolute;
-    inset: 0;
-    background: linear-gradient( 90deg, rgba(0, 0, 0, 0.7) 0%, rgba(0, 0, 0, 0.35) 50%, rgba(0, 0, 0, 0.1) 100% );
-}
-
-.hero-carousel-caption {
-    top: 50%;
-    bottom: auto;
-    transform: translateY(-50%);
-    text-align: left;
-    max-width: 650px;
-}
-
-@media (max-width: 767.98px) {
-    .hero-carousel-image {
-        aspect-ratio: 4 / 3;
-
-        /* 完全不裁切圖片*/
-        /* height: auto;*/
-    }
-
-    .hero-carousel-caption {
-        text-align: center;
-    }
-}
+/* ============================================
+    Home Catalog Carousel
+    ============================================ */
 
 
 /* Filter panel */

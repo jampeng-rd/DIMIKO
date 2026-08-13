@@ -1,0 +1,382 @@
+﻿@using ECommerce.Models
+@model List<Product>
+
+<div class="container py-5" id="catalog">
+
+    <div class="mb-4">
+        <p class="text-uppercase small fw-semibold mb-2"
+           style="color: #17A34A; letter-spacing: 0.15em;">
+            Outdoor Essentials
+        </p>
+
+        <h2 class="fw-bold mb-1">
+            精選露營用品
+        </h2>
+
+        <p class="text-secondary mb-0">
+            探索適合各種戶外旅程的實用裝備
+        </p>
+    </div>
+
+    @if (Model.Any())
+    {
+        var productCount = Model.Count;
+        var visibleCount = Math.Min(3, productCount);
+
+        <!-- =========================
+             桌面版：一次 3 張
+             ========================= -->
+        <div class="catalog-carousel-wrapper d-none d-md-block">
+
+            <div id="catalogCarouselDesktop" class="carousel slide" data-bs-ride="carousel" data-bs-interval="4000"
+                 data-bs-wrap="true"
+                 data-bs-pause="hover">
+
+                <div class="carousel-inner">
+
+                    @for (var startIndex = 0; startIndex < productCount; startIndex++)
+                    {
+                        <div class="carousel-item @(startIndex == 0 ? "active" : "")">
+
+                            <div class="row g-4">
+
+                                @for (var offset = 0; offset < visibleCount; offset++)
+                                {
+                                    var productIndex = (startIndex + offset) % productCount;
+                                    var product = Model[productIndex];
+
+                                    var primaryImage =
+                                        product.ProductImages.FirstOrDefault(image => image.IsPrimary)
+                                        ?? product.ProductImages.OrderBy(image => image.SortOrder).FirstOrDefault();
+
+                                    <div class="col">
+
+                                        <div class="card h-100 border shadow-sm product-card">
+
+                                            <a asp-area="Customer" asp-controller="Home" asp-action="Detail"
+                                               asp-route-id="@product.Id"
+                                               class="text-decoration-none catalog-product-image-link">
+
+                                                <div class="catalog-product-image-container">
+                                                    @if (primaryImage != null)
+                                                    {
+                                                        <img src="@primaryImage.ImageUrl"
+                                                             alt="@product.Title"
+                                                             class="catalog-product-image" />
+                                                    }
+                                                    else
+                                                    {
+                                                        <div class="catalog-product-placeholder">
+                                                            <i class="bi bi-image display-3 text-secondary"></i>
+                                                        </div>
+                                                    }
+                                                </div>
+                                            </a>
+
+                                            <div class="card-body d-flex flex-column">
+
+                                                <span class="badge align-self-start mb-2"
+                                                      style="background: rgba(23,163,74,0.1); color: #17A34A;">
+                                                    @(product.Category?.Name ?? "未分類")
+                                                </span>
+
+                                                <h6 class="card-title fw-semibold mb-2"
+                                                    style="min-height: 2.5rem;">
+                                                    @product.Title
+                                                </h6>
+
+                                                <p class="text-secondary small mb-3 catalog-product-description">
+                                                    @product.Description
+                                                </p>
+
+                                                <div class="mt-auto">
+                                                    <span class="fw-bold text-success">
+                                                        NT$@product.Price.ToString("N0")
+                                                    </span>
+
+                                                    @if (product.ListPrice > product.Price)
+                                                    {
+                                                        <small class="text-decoration-line-through text-muted ms-1">
+                                                            NT$@product.ListPrice.ToString("N0")
+                                                        </small>
+                                                    }
+                                                </div>
+
+                                            </div>
+
+                                        </div>
+
+                                    </div>
+                                }
+
+                            </div>
+
+                        </div>
+                    }
+
+                </div>
+
+                @if (productCount > 1)
+                {
+                    <button class="carousel-control-prev catalog-carousel-control catalog-carousel-prev"
+                            type="button"
+                            data-bs-target="#catalogCarouselDesktop"
+                            data-bs-slide="prev">
+                        <span class="catalog-carousel-control-icon">
+                            <i class="bi bi-chevron-left"></i>
+                        </span>
+                        <span class="visually-hidden">上一組商品</span>
+                    </button>
+
+                    <button class="carousel-control-next catalog-carousel-control catalog-carousel-next"
+                            type="button"
+                            data-bs-target="#catalogCarouselDesktop"
+                            data-bs-slide="next">
+                        <span class="catalog-carousel-control-icon">
+                            <i class="bi bi-chevron-right"></i>
+                        </span>
+                        <span class="visually-hidden">下一組商品</span>
+                    </button>
+                }
+
+            </div>
+
+        </div>
+
+
+        <!-- =========================
+             手機版：一次 1 張
+             ========================= -->
+        <div class="catalog-carousel-wrapper-mobile d-block d-md-none">
+
+            <div id="catalogCarouselMobile" class="carousel slide" data-bs-ride="carousel" data-bs-interval="4000"
+                 data-bs-wrap="true"
+                 data-bs-pause="hover">
+
+                <div class="carousel-inner">
+
+                    @for (var i = 0; i < productCount; i++)
+                    {
+                        var product = Model[i];
+
+                        var primaryImage =
+                            product.ProductImages.FirstOrDefault(image => image.IsPrimary)
+                            ?? product.ProductImages.OrderBy(image => image.SortOrder).FirstOrDefault();
+
+                        <div class="carousel-item @(i == 0 ? "active" : "")">
+
+                            <div class="card h-100 border shadow-sm product-card">
+
+                                <a asp-area="Customer" asp-controller="Home" asp-action="Detail"
+                                   asp-route-id="@product.Id"
+                                   class="text-decoration-none catalog-product-image-link">
+
+                                    <div class="catalog-product-image-container">
+                                        @if (primaryImage != null)
+                                        {
+                                            <img src="@primaryImage.ImageUrl"
+                                                 alt="@product.Title"
+                                                 class="catalog-product-image" />
+                                        }
+                                        else
+                                        {
+                                            <div class="catalog-product-placeholder">
+                                                <i class="bi bi-image display-3 text-secondary"></i>
+                                            </div>
+                                        }
+                                    </div>
+
+                                </a>
+
+                                <div class="card-body d-flex flex-column">
+
+                                    <span class="badge align-self-start mb-2"
+                                          style="background: rgba(23,163,74,0.1); color: #17A34A;">
+                                        @(product.Category?.Name ?? "未分類")
+                                    </span>
+
+                                    <h6 class="card-title fw-semibold mb-2">
+                                        @product.Title
+                                    </h6>
+
+                                    <p class="text-secondary small mb-3 catalog-product-description-mobile">
+                                        @product.Description
+                                    </p>
+
+                                    <div class="mt-auto">
+                                        <span class="fw-bold text-success">
+                                            NT$@product.Price.ToString("N0")
+                                        </span>
+
+                                        @if (product.ListPrice > product.Price)
+                                        {
+                                            <small class="text-decoration-line-through text-muted ms-1">
+                                                NT$@product.ListPrice.ToString("N0")
+                                            </small>
+                                        }
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+                    }
+
+                </div>
+
+                @if (productCount > 1)
+                {
+                    <button class="carousel-control-prev catalog-carousel-control catalog-carousel-prev"
+                            type="button"
+                            data-bs-target="#catalogCarouselMobile"
+                            data-bs-slide="prev">
+                        <span class="catalog-carousel-control-icon">
+                            <i class="bi bi-chevron-left"></i>
+                        </span>
+                        <span class="visually-hidden">上一個商品</span>
+                    </button>
+
+                    <button class="carousel-control-next catalog-carousel-control catalog-carousel-next"
+                            type="button"
+                            data-bs-target="#catalogCarouselMobile"
+                            data-bs-slide="next">
+                        <span class="catalog-carousel-control-icon">
+                            <i class="bi bi-chevron-right"></i>
+                        </span>
+                        <span class="visually-hidden">下一個商品</span>
+                    </button>
+                }
+
+            </div>
+
+        </div>
+    }
+    else
+    {
+        <div class="text-center py-5 bg-light rounded">
+            <i class="bi bi-box-seam display-4 text-secondary"></i>
+            <p class="text-secondary mt-3 mb-0">
+                目前沒有可顯示的商品
+            </p>
+        </div>
+    }
+
+</div>
+
+
+<style>
+/* ============================================
+    Home Catalog Carousel - PC 瀏覽器格式
+    ============================================ */
+
+.catalog-carousel-wrapper {
+    position: relative;
+    padding: 0 2.5rem;
+}
+
+
+/* 商品圖片 */
+.catalog-product-image-container {
+    aspect-ratio: 1 / 1;
+    overflow: hidden;
+    background: #f8fafc;
+}
+
+.catalog-product-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.35s ease;
+}
+
+.catalog-product-image-link:hover .catalog-product-image {
+    transform: scale(1.05);
+}
+
+
+/* 沒有商品圖片 */
+.catalog-product-placeholder {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #f8fafc;
+}
+
+
+/* 商品說明不要因為文字長短讓卡片差太多 */
+.catalog-product-description {
+    display: -webkit-box;
+    overflow: hidden;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+}
+
+
+/* 左右控制按鈕 */
+.catalog-carousel-control {
+    width: 2.5rem;
+    opacity: 1;
+}
+
+.catalog-carousel-prev {
+    left: -0.5rem;
+}
+
+.catalog-carousel-next {
+    right: -0.5rem;
+}
+
+.catalog-carousel-control-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.5rem;
+    height: 2.5rem;
+    color: #ffffff;
+    font-size: 1.25rem;
+    background: #191414;
+    border-radius: 50%;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.18);
+    transition: background-color 0.2s ease, transform 0.2s ease;
+}
+
+.catalog-carousel-control:hover .catalog-carousel-control-icon {
+    background: #17A34A;
+    transform: scale(1.08);
+}
+
+
+/* ============================================
+    Home Catalog Carousel - 手機格式
+    ============================================ */
+
+.catalog-carousel-wrapper-mobile {
+    position: relative;
+    padding: 0 2.25rem;
+}
+
+.catalog-product-description-mobile {
+    display: -webkit-box;
+    overflow: hidden;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 3;
+}
+
+@@media (max-width: 767.98px) {
+    .catalog-carousel-wrapper-mobile .card {
+        margin: 0 auto;
+    }
+
+    .catalog-carousel-wrapper-mobile .catalog-product-image-container {
+        aspect-ratio: 1 / 1;
+    }
+
+    .catalog-carousel-wrapper-mobile .card-body {
+        padding: 1rem;
+    }
+}
+
+</style>
