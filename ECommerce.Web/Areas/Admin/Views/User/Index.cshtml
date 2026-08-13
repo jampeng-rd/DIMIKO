@@ -121,9 +121,20 @@
                                 </td>
 
                                 <td class="text-end">
-                                    <a asp-action="EditRole" asp-route-id="@user.Id" class="btn btn-sm btn-outline-success me-1">
-                                        <i class="bi bi-pencil-square me-1"></i>更新
-                                    </a>
+                                    @if (!user.IsProtected)
+                                    {
+	                                    <a asp-action="EditRole" asp-route-id="@user.Id"
+	                                       class="btn btn-sm btn-outline-success me-1">
+		                                    <i class="bi bi-pencil-square me-1"></i>編輯
+	                                    </a>
+                                    }
+                                    else
+                                    {
+	                                    <span class="badge text-bg-primary me-1">
+		                                    <i class="bi bi-shield-lock me-1"></i>預設管理員
+	                                    </span>
+                                    }
+
                                     
                                     @if (user.IsLockedOut)
                                     {

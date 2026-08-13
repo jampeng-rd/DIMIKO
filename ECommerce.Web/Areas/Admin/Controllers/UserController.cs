@@ -15,10 +15,14 @@ namespace ECommerce.Web.Areas.Admin.Controllers
 	public class UserController : Controller
 	{
 		private readonly UserManager<ApplicationUser> _userManager;
+		private readonly IConfiguration _configuration;
 
-		public UserController(UserManager<ApplicationUser> userManager)
+		public UserController(
+			UserManager<ApplicationUser> userManager,
+			IConfiguration configuration)
 		{
 			_userManager = userManager;
+			_configuration = configuration;
 		}
 
 
@@ -90,7 +94,8 @@ namespace ECommerce.Web.Areas.Admin.Controllers
 					Email = user.Email ?? string.Empty,
 					PhoneNumber = user.PhoneNumber,
 					Roles = roles.Count == 0 ? "尚未設定" : string.Join("、", roles),
-					IsLockedOut = isLockedOut
+					IsLockedOut = isLockedOut,
+					IsProtected = IsInitialAdmin(user)
 				});
 			}
 
@@ -118,6 +123,13 @@ namespace ECommerce.Web.Areas.Admin.Controllers
 			if (user == null)
 			{
 				return NotFound();
+			}
+
+			if (IsInitialAdmin(user))
+			{
+				TempData["error"] = "預設系統管理員的角色不能修改";
+
+				return RedirectToAction(nameof(Index));
 			}
 
 			var currentRoles = await _userManager.GetRolesAsync(user);
@@ -166,6 +178,14 @@ namespace ECommerce.Web.Areas.Admin.Controllers
 			if (user == null)
 			{
 				return NotFound();
+			}
+
+			// 初始系統管理員永遠不能被其他管理員修改角色
+			if (IsInitialAdmin(user))
+			{
+				ModelState.AddModelError(string.Empty, "預設系統管理員的角色不能修改");
+
+				return View(model);
 			}
 
 			var currentUserId = _userManager.GetUserId(User);
@@ -248,8 +268,17 @@ namespace ECommerce.Web.Areas.Admin.Controllers
 				return NotFound();
 			}
 
+			// 防止停用預設的管理員帳號
+			if (IsInitialAdmin(user))
+			{
+				TempData["error"] = "預設系統管理員帳號不能停用";
+
+				return RedirectToAction(nameof(Index));
+			}
+
 			// 防止管理員停用自己
 			var currentUserId = _userManager.GetUserId(User);
+
 			if (user.Id == currentUserId)
 			{
 				TempData["error"] = "不能停用目前的管理員帳號";
@@ -353,6 +382,19 @@ namespace ECommerce.Web.Areas.Admin.Controllers
 					Value = SD.RoleAdmin
 				}
 			];
+		}
+
+
+		//判斷「是否為初始管理員」
+		private bool IsInitialAdmin(ApplicationUser user)
+		{
+			var initialAdminEmail = _configuration["InitialAdmin:Email"];
+
+			return !string.IsNullOrWhiteSpace(initialAdminEmail)
+				&& string.Equals(
+					user.Email,
+					initialAdminEmail,
+					StringComparison.OrdinalIgnoreCase);
 		}
 
 	}

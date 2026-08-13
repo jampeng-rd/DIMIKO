@@ -20,5 +20,8 @@ namespace ECommerce.Models.ViewModels
 
 		[Display(Name = "帳號狀態")]
 		public bool IsLockedOut { get; set; }
+
+		// 保護預設系統管理員帳號
+		public bool IsProtected { get; set; }
 	}
 }
