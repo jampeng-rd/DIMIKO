@@ -10,7 +10,8 @@
         <i class="bi bi-person-circle me-1"></i> @UserManager.GetUserName(User)
     </a>  -->
 
-    <a href="#" class="navbar-user" aria-label="使用者資料" title="使用者資料">
+    <a asp-area="Customer" asp-controller="Profile" asp-action="Index"
+       class="navbar-user" aria-label="我的帳戶" title="我的帳戶">
         <i class="bi bi-person"></i>
     </a>
 
