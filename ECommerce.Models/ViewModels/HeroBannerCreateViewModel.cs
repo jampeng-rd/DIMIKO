@@ -5,9 +5,13 @@ namespace ECommerce.Models.ViewModels
 {
 	public class HeroBannerCreateViewModel
 	{
-		[Required(ErrorMessage = "請選擇輪播圖片")]
-		[Display(Name = "輪播圖片")]
+		[Required(ErrorMessage = "請選擇桌面版輪播圖片")]
+		[Display(Name = "桌面版輪播圖片")]
 		public IFormFile? ImageFile { get; set; }
+
+		[Display(Name = "手機版輪播圖片")]
+		public IFormFile? MobileImageFile { get; set; }
+
 
 		[StringLength(200)]
 		[Display(Name = "標題")]

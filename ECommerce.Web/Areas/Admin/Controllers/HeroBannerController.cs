@@ -47,10 +47,10 @@ namespace ECommerce.Web.Areas.Admin.Controllers
 			var imageFile = viewModel.ImageFile!;
 
 			const long maxFileSize = 5 * 1024 * 1024;
-
+		
 			if (imageFile.Length > maxFileSize)
 			{
-				ModelState.AddModelError(nameof(viewModel.ImageFile), "圖片大小不可超過 5 MB");
+				ModelState.AddModelError(nameof(viewModel.ImageFile), "桌面版圖片大小不可超過 5 MB");
 			}
 
 			var allowedExtensions = new[]
@@ -61,12 +61,29 @@ namespace ECommerce.Web.Areas.Admin.Controllers
 				".webp"
 			};
 
-			var extension = Path.GetExtension(imageFile.FileName).ToLowerInvariant();
+			var desktopExtension = Path.GetExtension(imageFile.FileName).ToLowerInvariant();
 
-			if (!allowedExtensions.Contains(extension))
+			if (!allowedExtensions.Contains(desktopExtension))
 			{
-				ModelState.AddModelError(nameof(viewModel.ImageFile), "只允許上傳 JPG、JPEG、PNG、WEBP 圖片");
+				ModelState.AddModelError(nameof(viewModel.ImageFile), "桌面版圖片只允許 JPG、JPEG、PNG、WEBP");
 			}
+
+			// 手機格式
+			if (viewModel.MobileImageFile != null && viewModel.MobileImageFile.Length > 0)
+			{
+				if (viewModel.MobileImageFile.Length > maxFileSize)
+				{
+					ModelState.AddModelError(nameof(viewModel.MobileImageFile), "手機版圖片大小不可超過 5 MB");
+				}
+
+				var mobileExtension = Path.GetExtension(viewModel.MobileImageFile.FileName).ToLowerInvariant();
+
+				if (!allowedExtensions.Contains(mobileExtension))
+				{
+					ModelState.AddModelError(nameof(viewModel.MobileImageFile), "手機版圖片只允許 JPG、JPEG、PNG、WEBP");
+				}
+			}
+
 
 			if (!ModelState.IsValid)
 			{
@@ -80,14 +97,37 @@ namespace ECommerce.Web.Areas.Admin.Controllers
 
 			Directory.CreateDirectory(heroFolder);
 
-			var fileName = $"{Guid.NewGuid()}{extension}";
+			// Desktop
+			var desktopFileName = $"{Guid.NewGuid()}{desktopExtension}";
 
-			var filePath = Path.Combine(heroFolder, fileName);
+			var desktopFilePath = Path.Combine(heroFolder, desktopFileName);
 
-			await using (var fileStream = new FileStream(filePath, FileMode.Create))
+			await using (var fileStream = new FileStream(desktopFilePath, FileMode.Create))
 			{
 				await imageFile.CopyToAsync(fileStream);
 			}
+
+			string? mobileFilePath = null;
+			string? mobileImageUrl = null;
+
+
+			// Mobile
+			if (viewModel.MobileImageFile != null && viewModel.MobileImageFile.Length > 0)
+			{
+				var mobileExtension = Path.GetExtension(viewModel.MobileImageFile.FileName).ToLowerInvariant();
+
+				var mobileFileName = $"{Guid.NewGuid()}{mobileExtension}";
+
+				mobileFilePath = Path.Combine(heroFolder, mobileFileName);
+
+				await using (var fileStream = new FileStream(mobileFilePath, FileMode.Create))
+				{
+					await viewModel.MobileImageFile.CopyToAsync(fileStream);
+				}
+
+				mobileImageUrl = $"/images/hero/{mobileFileName}";
+			}
+
 
 			var heroBanner = new HeroBanner
 			{
@@ -97,7 +137,9 @@ namespace ECommerce.Web.Areas.Admin.Controllers
 				LinkUrl = viewModel.LinkUrl,
 				DisplayOrder = viewModel.DisplayOrder,
 				IsActive = viewModel.IsActive,
-				ImageUrl = $"/images/hero/{fileName}"
+
+				ImageUrl = $"/images/hero/{desktopFileName}",
+				MobileImageUrl = mobileImageUrl
 			};
 
 			try
@@ -110,9 +152,14 @@ namespace ECommerce.Web.Areas.Admin.Controllers
 			}
 			catch
 			{
-				if (System.IO.File.Exists(filePath))
+				if (System.IO.File.Exists(desktopFilePath))
 				{
-					System.IO.File.Delete(filePath);
+					System.IO.File.Delete(desktopFilePath);
+				}
+
+				if (!string.IsNullOrWhiteSpace(mobileFilePath) && System.IO.File.Exists(mobileFilePath))
+				{
+					System.IO.File.Delete(mobileFilePath);
 				}
 
 				throw;
@@ -137,7 +184,10 @@ namespace ECommerce.Web.Areas.Admin.Controllers
 			var viewModel = new HeroBannerUpdateViewModel
 			{
 				Id = heroBanner.Id,
+
 				CurrentImageUrl = heroBanner.ImageUrl,
+				CurrentMobileImageUrl = heroBanner.MobileImageUrl,
+
 				Title = heroBanner.Title,
 				Description = heroBanner.Description,
 				ButtonText = heroBanner.ButtonText,
@@ -166,59 +216,105 @@ namespace ECommerce.Web.Areas.Admin.Controllers
 				return NotFound();
 			}
 
-			string? newFilePath = null;
-			string? oldImageUrl = null;
+			const long maxFileSize = 5 * 1024 * 1024;
 
+			var allowedExtensions = new[]
+					{
+				".jpg",
+				".jpeg",
+				".png",
+				".webp"
+			};
+
+			// 驗證 Desktop
 			if (viewModel.ImageFile != null && viewModel.ImageFile.Length > 0)
 			{
-				const long maxFileSize = 5 * 1024 * 1024;
-
-				var imageFile = viewModel.ImageFile;
-
-				if (imageFile.Length > maxFileSize)
+				if (viewModel.ImageFile.Length > maxFileSize)
 				{
-					ModelState.AddModelError(nameof(viewModel.ImageFile), "圖片大小不可超過 5 MB");
+					ModelState.AddModelError(nameof(viewModel.ImageFile), "桌面版圖片大小不可超過 5 MB");
 				}
 
-				var allowedExtensions = new[]
-				{
-					".jpg",
-					".jpeg",
-					".png",
-					".webp"
-				};
-
-				var extension = Path.GetExtension(imageFile.FileName).ToLowerInvariant();
+				var extension = Path.GetExtension(viewModel.ImageFile.FileName).ToLowerInvariant();
 
 				if (!allowedExtensions.Contains(extension))
 				{
-					ModelState.AddModelError(nameof(viewModel.ImageFile), "只允許上傳 JPG、JPEG、PNG、WEBP 圖片");
+					ModelState.AddModelError(nameof(viewModel.ImageFile), "桌面版圖片只允許 JPG、JPEG、PNG、WEBP");
 				}
+			}
 
-				if (!ModelState.IsValid)
+			// 驗證 Mobile
+			if (viewModel.MobileImageFile != null && viewModel.MobileImageFile.Length > 0)
+			{
+				if (viewModel.MobileImageFile.Length > maxFileSize)
 				{
-					return View(viewModel);
+					ModelState.AddModelError(nameof(viewModel.MobileImageFile), "手機版圖片大小不可超過 5 MB");
 				}
 
-				var heroFolder = Path.Combine(
-					_webHostEnvironment.WebRootPath,
-					"images",
-					"hero");
+				var extension = Path.GetExtension(viewModel.MobileImageFile.FileName).ToLowerInvariant();
 
-				Directory.CreateDirectory(heroFolder);
+				if (!allowedExtensions.Contains(extension))
+				{
+					ModelState.AddModelError(nameof(viewModel.MobileImageFile), "手機版圖片只允許 JPG、JPEG、PNG、WEBP");
+				}
+			}
 
+
+			if (!ModelState.IsValid)
+			{
+				viewModel.CurrentImageUrl = heroBanner.ImageUrl;
+				viewModel.CurrentMobileImageUrl = heroBanner.MobileImageUrl;
+
+				return View(viewModel);
+			}
+
+			var heroFolder = Path.Combine(
+				_webHostEnvironment.WebRootPath,
+				"images",
+				"hero");
+
+			Directory.CreateDirectory(heroFolder);
+
+			string? newDesktopFilePath = null;
+			string? newMobileFilePath = null;
+
+			string? oldDesktopImageUrl = null;
+			string? oldMobileImageUrl = null;
+
+
+			// 更新 Desktop
+			if (viewModel.ImageFile != null && viewModel.ImageFile.Length > 0)
+			{
+				var extension = Path.GetExtension(viewModel.ImageFile.FileName).ToLowerInvariant();
 				var fileName = $"{Guid.NewGuid()}{extension}";
 
-				newFilePath = Path.Combine(heroFolder, fileName);
+				newDesktopFilePath = Path.Combine(heroFolder, fileName);
 
-				await using (var fileStream = new FileStream(newFilePath, FileMode.Create))
+				await using (var fileStream = new FileStream(newDesktopFilePath, FileMode.Create))
 				{
-					await imageFile.CopyToAsync(fileStream);
+					await viewModel.ImageFile.CopyToAsync(fileStream);
 				}
 
-				oldImageUrl = heroBanner.ImageUrl;
+				oldDesktopImageUrl = heroBanner.ImageUrl;
 
 				heroBanner.ImageUrl = $"/images/hero/{fileName}";
+			}
+
+			// 更新 Mobile
+			if (viewModel.MobileImageFile != null && viewModel.MobileImageFile.Length > 0)
+			{
+				var extension = Path.GetExtension(viewModel.MobileImageFile.FileName).ToLowerInvariant();
+				var fileName = $"{Guid.NewGuid()}{extension}";
+
+				newMobileFilePath = Path.Combine(heroFolder, fileName);
+
+				await using (var fileStream = new FileStream(newMobileFilePath, FileMode.Create))
+				{
+					await viewModel.MobileImageFile.CopyToAsync(fileStream);
+				}
+
+				oldMobileImageUrl = heroBanner.MobileImageUrl;
+
+				heroBanner.MobileImageUrl = $"/images/hero/{fileName}";
 			}
 
 			heroBanner.Title = viewModel.Title;
@@ -228,13 +324,19 @@ namespace ECommerce.Web.Areas.Admin.Controllers
 			heroBanner.DisplayOrder = viewModel.DisplayOrder;
 			heroBanner.IsActive = viewModel.IsActive;
 
+
 			try
 			{
 				await _heroBannerService.UpdateHeroBannerAsync(heroBanner);
 
-				if (!string.IsNullOrWhiteSpace(oldImageUrl))
+				if (!string.IsNullOrWhiteSpace(oldDesktopImageUrl))
 				{
-					DeleteHeroImage(oldImageUrl);
+					DeleteHeroImage(oldDesktopImageUrl);
+				}
+
+				if (!string.IsNullOrWhiteSpace(oldMobileImageUrl))
+				{
+					DeleteHeroImage(oldMobileImageUrl);
 				}
 
 				TempData["success"] = "輪播圖更新成功";
@@ -243,15 +345,21 @@ namespace ECommerce.Web.Areas.Admin.Controllers
 			}
 			catch
 			{
-				if (!string.IsNullOrWhiteSpace(newFilePath) && System.IO.File.Exists(newFilePath))
+				if (!string.IsNullOrWhiteSpace(newDesktopFilePath) && System.IO.File.Exists(newDesktopFilePath))
 				{
-					System.IO.File.Delete(newFilePath);
+					System.IO.File.Delete(newDesktopFilePath);
+				}
+
+				if (!string.IsNullOrWhiteSpace(newMobileFilePath) && System.IO.File.Exists(newMobileFilePath))
+				{
+					System.IO.File.Delete(newMobileFilePath);
 				}
 
 				throw;
 			}
+
 		}
-	
+
 
 		public async Task<IActionResult> Delete(int? id)
 		{
@@ -284,12 +392,18 @@ namespace ECommerce.Web.Areas.Admin.Controllers
 			}
 
 			var imageUrl = heroBanner.ImageUrl;
+			var mobileImageUrl = heroBanner.MobileImageUrl;
 
 			await _heroBannerService.DeleteHeroBannerAsync(id);
 
 			DeleteHeroImage(imageUrl);
 
-			TempData["success"] = "刪除成功";
+			if (!string.IsNullOrWhiteSpace(mobileImageUrl))
+			{
+				DeleteHeroImage(mobileImageUrl);
+			}
+
+			TempData["success"] = "輪播圖刪除成功";
 
 			return RedirectToAction(nameof(Index));
 		}

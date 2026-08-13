@@ -34,7 +34,8 @@
 
                         <thead>
                             <tr>
-                                <th>圖片</th>
+                                <th>桌面版</th>
+                                <th>手機版</th>
                                 <th>標題</th>
                                 <th>排序</th>
                                 <th>狀態</th>
@@ -54,6 +55,21 @@
                                         <img src="@banner.ImageUrl"
                                              alt="@banner.Title"
                                              style="width: 140px; height: 70px; object-fit: cover; border-radius: 0.375rem;" />
+                                    </td>
+
+                                    <td>
+                                        @if (!string.IsNullOrWhiteSpace(banner.MobileImageUrl))
+                                        {
+                                            <img src="@banner.MobileImageUrl"
+                                                 alt="@banner.Title"
+                                                 style="width: 46px; height: 70px; object-fit: cover; border-radius: 0.375rem;" />
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-secondary">
+                                                未設定
+                                            </span>
+                                        }
                                     </td>
 
                                     <td>

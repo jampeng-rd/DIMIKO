@@ -29,9 +29,19 @@
 
                     <div class="carousel-item @(i == 0 ? "active" : "")">
 
-                        <img src="@banner.ImageUrl"
-                             class="d-block w-100 hero-carousel-image"
-                             alt="@banner.Title" />
+                        <!-- Banner 圖片 PC & Mobile 格式 -->
+                        <picture>
+                            @if (!string.IsNullOrWhiteSpace(banner.MobileImageUrl))
+                            {
+                                <source media="(max-width: 767.98px)"
+                                        srcset="@banner.MobileImageUrl" />
+                            }
+
+                            <img src="@banner.ImageUrl"
+                                 class="d-block w-100 hero-carousel-image"
+                                 alt="@banner.Title" />
+                        </picture>
+
 
                         @if (!string.IsNullOrWhiteSpace(banner.Title)
                             || !string.IsNullOrWhiteSpace(banner.Description))
@@ -149,13 +159,8 @@
 
 @@media (max-width: 767.98px) {
     .hero-carousel-image {
-        aspect-ratio: 4 / 5;
+        aspect-ratio: 2 / 3;
         object-fit: cover;
-
-        /*
-        * 手機畫面較窄，
-        * 預設先以圖片中央為主要裁切位置
-        */
         object-position: center;
     }
 

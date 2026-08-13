@@ -16,8 +16,12 @@ namespace ECommerce.Models
 
 		[Required]
 		[StringLength(2048)]
-		[Display(Name = "圖片")]
+		[Display(Name = "桌面版圖片")]
 		public string ImageUrl { get; set; } = string.Empty;
+
+		[StringLength(2048)]
+		[Display(Name = "手機版圖片")]
+		public string? MobileImageUrl { get; set; }
 
 		[StringLength(100)]
 		[Display(Name = "按鈕文字")]

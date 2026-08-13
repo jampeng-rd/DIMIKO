@@ -30,6 +30,7 @@
 
                 <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
 
+                <!-- 桌面版圖片 -->
                 <div class="mb-3">
                     <div class="d-flex">
                         <label asp-for="ImageFile" class="form-label fw-medium pe-2"></label>
@@ -45,6 +46,24 @@
 
                     <span asp-validation-for="ImageFile" class="text-danger"></span>
                 </div>
+
+                <!-- 手機版圖片 -->
+                <div class="mb-3">
+                    <div class="d-flex">
+                        <label asp-for="MobileImageFile" class="form-label fw-medium pe-2"></label>
+
+                        <h6 class="badge text-bg-secondary">
+                            建議約 1024 × 1536 px，比例約 2 : 3，可留空
+                        </h6>
+                    </div>
+
+                    <input asp-for="MobileImageFile" type="file"
+                           class="form-control"
+                           accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp" />
+
+                    <span asp-validation-for="MobileImageFile" class="text-danger"></span>
+                </div>
+
 
                 <div class="mb-3">
                     <div class="d-flex">

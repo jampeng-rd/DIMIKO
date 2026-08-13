@@ -7,11 +7,19 @@ namespace ECommerce.Models.ViewModels
 	{
 		public int Id { get; set; }
 
-		[Display(Name = "目前圖片")]
+
+		[Display(Name = "目前桌面版圖片")]
 		public string CurrentImageUrl { get; set; } = string.Empty;
 
-		[Display(Name = "更換輪播圖片")]
+		[Display(Name = "目前手機版圖片")]
+		public string? CurrentMobileImageUrl { get; set; }
+
+		[Display(Name = "更換桌面版輪播圖片")]
 		public IFormFile? ImageFile { get; set; }
+
+		[Display(Name = "更換手機版輪播圖片")]
+		public IFormFile? MobileImageFile { get; set; }
+
 
 		[StringLength(200)]
 		[Display(Name = "標題")]
