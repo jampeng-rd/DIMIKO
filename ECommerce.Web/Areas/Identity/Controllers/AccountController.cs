@@ -13,22 +13,27 @@ namespace ECommerce.Web.Areas.Identity.Controllers
 		private readonly UserManager<ApplicationUser> _userManager;
 		private readonly SignInManager<ApplicationUser> _signInManager;
 		private readonly IShoppingCartService _shoppingCartService;
+		private readonly IEmailSenderService _emailSenderService;
 
 		public AccountController(
 			UserManager<ApplicationUser> userManager,
 			SignInManager<ApplicationUser> signInManager,
-			IShoppingCartService shoppingCartService)
+			IShoppingCartService shoppingCartService,
+			IEmailSenderService emailSenderService)
 		{
 			_userManager = userManager;
 			_signInManager = signInManager;
 			_shoppingCartService = shoppingCartService;
+			_emailSenderService = emailSenderService;
 		}
+
 
 		public IActionResult Login(string? returnUrl = null)
 		{
 			ViewData["ReturnUrl"] = returnUrl;
 			return View();
 		}
+
 
 		[HttpPost]
 		[ValidateAntiForgeryToken]
@@ -85,6 +90,7 @@ namespace ECommerce.Web.Areas.Identity.Controllers
 			return View(loginViewModel);
 		}
 
+
 		public IActionResult Register(string? returnUrl = null)
 		{
 			var model = new RegisterViewModel();
@@ -93,6 +99,7 @@ namespace ECommerce.Web.Areas.Identity.Controllers
 
 			return View(model); ;
 		}
+
 
 		[HttpPost]
 		[ValidateAntiForgeryToken]
@@ -174,10 +181,12 @@ namespace ECommerce.Web.Areas.Identity.Controllers
 			return View(registerViewModel);
 		}
 
+
 		public IActionResult AccessDenied()
 		{
 			return View();
 		}
+
 
 		[HttpPost]
 		[ValidateAntiForgeryToken]
@@ -189,5 +198,157 @@ namespace ECommerce.Web.Areas.Identity.Controllers
 
 			return RedirectToAction("Index", "Home", new { area = "Customer" });
 		}
+
+
+
+		// ================ 忘記密碼流程 ================ //
+		public IActionResult ForgotPassword()
+		{
+			return View(new ForgotPasswordViewModel());
+		}
+
+
+		[HttpPost]
+		[ValidateAntiForgeryToken]
+		public async Task<IActionResult> ForgotPassword(ForgotPasswordViewModel model)
+		{
+			if (!ModelState.IsValid)
+			{
+				return View(model);
+			}
+
+			var email = model.Email.Trim();
+
+			var user = await _userManager.FindByEmailAsync(email);
+
+			// 不論帳號是否存在，都回相同頁面，
+			// 避免透過忘記密碼功能判斷會員 Email 是否存在。
+			if (user == null)
+			{
+				return RedirectToAction(nameof(ForgotPasswordConfirmation));
+			}
+
+			var token = await _userManager.GeneratePasswordResetTokenAsync(user);
+
+			var resetUrl = Url.Action(
+				action: nameof(ResetPassword),
+				controller: "Account",
+				values: new
+				{
+					area = "Identity",
+					email = email,
+					token = token
+				},
+				protocol: Request.Scheme);
+
+
+			if (string.IsNullOrWhiteSpace(resetUrl))
+			{
+				ModelState.AddModelError(string.Empty, "無法產生密碼重設連結");
+
+				return View(model);
+			}
+
+
+			var emailBody = $"""
+				<h2>DIMIKO 密碼重設</h2>
+
+				<p>您好：</p>
+
+				<p>
+					我們收到您的密碼重設要求。
+				</p>
+
+				<p>
+					請點擊以下連結設定新的密碼：
+				</p>
+
+				<p>
+					<a href="{resetUrl}">
+						重設密碼
+					</a>
+				</p>
+
+				<p>
+					如果您沒有提出密碼重設要求，可以忽略這封信。
+				</p>
+
+				<p>
+					DIMIKO
+				</p>
+				""";
+
+
+			await _emailSenderService.SendEmailAsync(
+				email,
+				"DIMIKO 密碼重設",
+				emailBody);
+
+
+			return RedirectToAction(
+				nameof(ForgotPasswordConfirmation));
+		}
+
+
+		public IActionResult ForgotPasswordConfirmation()
+		{
+			return View();
+		}
+
+
+		public IActionResult ResetPassword(string? email, string? token)
+		{
+			if (string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(token))
+			{
+				return BadRequest();
+			}
+
+			var model = new ResetPasswordViewModel
+			{
+				Email = email,
+				Token = token
+			};
+
+			return View(model);
+		}
+
+
+		[HttpPost]
+		[ValidateAntiForgeryToken]
+		public async Task<IActionResult> ResetPassword(ResetPasswordViewModel model)
+		{
+			if (!ModelState.IsValid)
+			{
+				return View(model);
+			}
+
+			var user = await _userManager.FindByEmailAsync(model.Email.Trim());
+
+			if (user == null)
+			{
+				return RedirectToAction(nameof(ResetPasswordConfirmation));
+			}
+
+			var result = await _userManager.ResetPasswordAsync(user, model.Token, model.Password);
+
+			if (!result.Succeeded)
+			{
+				foreach (var error in result.Errors)
+				{
+					ModelState.AddModelError(string.Empty, error.Description);
+				}
+
+				return View(model);
+			}
+
+			return RedirectToAction(nameof(ResetPasswordConfirmation));
+		}
+
+
+		public IActionResult ResetPasswordConfirmation()
+		{
+			return View();
+		}
+
 	}
 }

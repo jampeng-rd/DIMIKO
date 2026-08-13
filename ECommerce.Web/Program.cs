@@ -23,6 +23,9 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 // Register NewebPay settings (註冊藍新金流設定)
 builder.Services.Configure<NewebPaySettings>(builder.Configuration.GetSection("NewebPay"));
 
+// Google Gmail SMTP
+builder.Services.Configure<GmailSmtpSettings>(builder.Configuration.GetSection("GmailSmtp"));
+
 // Register Identity
 builder.Services
 	.AddIdentity<ApplicationUser, IdentityRole>(options =>
@@ -37,6 +40,7 @@ builder.Services
 		options.Password.RequiredUniqueChars = 4;          // 密碼至少需要包含 4 個不同字元。
 	})
 	.AddEntityFrameworkStores<ApplicationDbContext>()
+	.AddDefaultTokenProviders()                            // 要加這個<忘記密碼功能>才有辦法寄信。
 	.AddErrorDescriber<ChineseIdentityErrorDescriber>();
 
 // Register Repository Pattern
@@ -47,6 +51,8 @@ builder.Services.AddScoped<IShoppingCartService, ShoppingCartService>();
 builder.Services.AddScoped<IOrderService, OrderService>();
 builder.Services.AddScoped<IDashboardService, DashboardService>();
 builder.Services.AddScoped<IHeroBannerService, HeroBannerService>();
+// Register Gmail email service
+builder.Services.AddScoped<IEmailSenderService, EmailSenderService>();
 // Register NewebPay service
 builder.Services.AddScoped<INewebPayService, NewebPayService>();
 
