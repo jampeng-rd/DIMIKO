@@ -19,81 +19,115 @@
     <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/css/toastr.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/ECommerce.Web.styles.css" asp-append-version="true" />
 </head>
+
 <body class="d-flex flex-column min-vh-100" style="background-color:#f5f5f5">
-    <header class="sticky-top">
-        <nav class="navbar navbar-expand-lg navbar-dark public-navbar" style="background-color:#191414">
-            <div class="container">
+ 
+    <header class="site-header">
+        <nav class="site-navbar">
 
-                <a class="navbar-brand d-flex align-items-center gap-2" asp-area="Customer" asp-controller="Home" asp-action="Index">
-                    <div class="d-flex align-items-center justify-content-center rounded" style="width: 36px; height: 36px; background: rgba(255,255,255,0);">
-                        <img src="/images/dimiko.png" style="width: 24px; height: 24px;" />
-                    </div>
-                    <span class="fw-bold fs-5 d-none d-sm-inline">
-                        <span style="color: #006fbc;">DIMIKO</span>
-                    </span>
-                </a>
-
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
-                        aria-expanded="false" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-
-                <div class="navbar-collapse collapse">
-                    <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                        <li class="nav-item">
-                            <a asp-area="Customer" asp-controller="Home" asp-action="Index"
-                               class="nav-link nav-link-hover
-                                @(currentArea == "Customer" && currentController == "Home" && currentAction == "Index"
-                                  ? "active"
-                                  : "")">
-                                <i class="bi bi-house me-1"></i>Home</a>
-                        </li>
-
-                        <li class="nav-item">
-                            <a asp-area="Customer" asp-controller="Home" asp-action="Products" 
-                               class="nav-link nav-link-hover
-                                @(currentArea == "Customer" && currentController == "Home" && currentAction == "Products"
-                                 ? "active"
-                                 : "")">
-
-                                <i class="bi bi-grid me-1"></i>
-                                所有商品
-                            </a>
-                        </li>
-
-                        @if (User.Identity?.IsAuthenticated == true)
-                        {
-                            <li class="nav-item">
-                                <a asp-area="Customer" asp-controller="Order" asp-action="Index"
-                                   class="nav-link nav-link-hover
-                                    @(currentArea == "Customer" && currentController == "Order" ? "active" : "")">
-                                    <i class="bi bi-receipt me-1"></i>
-                                    我的訂單
-                                </a>
-                            </li>
-                        }
-                        
-                        @if (User.IsInRole(SD.RoleAdmin) || User.IsInRole(SD.RoleEmployee))
-                        {
-                            <li class="nav-item">
-                                <a asp-area="Admin" asp-controller="Dashboard" asp-action="Index"
-                                   class="nav-link nav-link-hover
-                                   @(currentArea == "Admin" ? "active" : "")">
-                                    <i class="bi bi-speedometer2 me-1"></i>後台系統
-                                </a>
-                            </li>
-                        }
-                    </ul>
-
-                    <div class="d-flex align-items-center gap-3">
-                        <partial name="_CartIcon" />
-                        <partial name="_LoginPartial" />
-                    </div>
+            <div class="site-navbar-container">
+                <!-- 左側：漢堡選單 -->
+                <div class="site-navbar-left">
+                    <button type="button" class="site-menu-toggle" id="siteMenuToggle"
+                            aria-label="開啟導航選單"
+                            aria-controls="siteDrawer"
+                            aria-expanded="false">
+                        <i class="bi bi-list"></i>
+                    </button>
                 </div>
 
+                <!-- 中間：Logo + DIMIKO -->
+                <div class="site-navbar-center">
+                    <a asp-area="Customer" asp-controller="Home" asp-action="Index" class="site-brand">
+                        <img src="/images/dimiko.png" class="site-brand-logo" alt="DIMIKO" />
+
+                        <span class="site-brand-name">DIMIKO</span>
+                    </a>
+                </div>
+
+                <!-- 右側：購物車 / 使用者 / 登入登出 -->
+                <div class="site-navbar-right">
+
+                    <partial name="_CartIcon" />
+
+                    <partial name="_LoginPartial" />
+                </div>
             </div>
+
         </nav>
     </header>
+
+
+    <!-- =========================================
+    左側滑出導航選單
+    ========================================= -->
+    <div class="site-drawer-overlay"id="siteDrawerOverlay"></div>
+
+    <aside class="site-drawer" id="siteDrawer" aria-hidden="true">
+
+        <div class="site-drawer-header">
+            <a asp-area="Customer" asp-controller="Home" asp-action="Index" class="site-drawer-brand">
+                <img src="/images/dimiko.png" alt="DIMIKO" />
+
+                <span>DIMIKO</span>
+            </a>
+
+            <button type="button" class="site-drawer-close" id="siteDrawerClose" aria-label="關閉導航選單">
+                <i class="bi bi-x-lg"></i>
+            </button>
+        </div>
+
+        <nav class="site-drawer-nav">
+
+            <a asp-area="Customer" asp-controller="Home" asp-action="Index" class="site-drawer-link
+                @(currentArea == "Customer" && currentController == "Home" && currentAction == "Index" ? "active" : "")">
+
+                <span class="site-drawer-link-icon">
+                    <i class="bi bi-house"></i>
+                </span>
+
+                <span>Home</span>
+            </a>
+
+            <a asp-area="Customer" asp-controller="Home" asp-action="Products" class="site-drawer-link
+                @(currentArea == "Customer" && currentController == "Home" && currentAction == "Products" ? "active" : "")">
+
+                <span class="site-drawer-link-icon">
+                    <i class="bi bi-grid"></i>
+                </span>
+
+                <span>所有商品</span>
+            </a>
+
+            @if (User.Identity?.IsAuthenticated == true)
+            {
+                <a asp-area="Customer" asp-controller="Order" asp-action="Index" class="site-drawer-link
+                    @(currentArea == "Customer" && currentController == "Order" ? "active" : "")">
+
+                    <span class="site-drawer-link-icon">
+                        <i class="bi bi-receipt"></i>
+                    </span>
+
+                    <span>我的訂單</span>
+                </a>
+            }
+
+            @if (User.IsInRole(SD.RoleAdmin) || User.IsInRole(SD.RoleEmployee))
+            {
+                <a asp-area="Admin" asp-controller="Dashboard" asp-action="Index" class="site-drawer-link
+                    @(currentArea == "Admin" ? "active" : "")">
+
+                    <span class="site-drawer-link-icon">
+                        <i class="bi bi-speedometer2"></i>
+                    </span>
+
+                    <span>後台系統</span>
+                </a>
+            }
+        </nav>
+
+    </aside>
+
 
     <div class="">
         <main role="main">
@@ -103,6 +137,7 @@
 
         </main>
     </div>
+
 
     <footer class="mt-auto py-3" style="background: #0D0D0D;">
         <div class="container">
@@ -119,6 +154,61 @@
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+
+            const menuToggle = document.getElementById("siteMenuToggle");
+            const drawer = document.getElementById("siteDrawer");
+            const drawerClose = document.getElementById("siteDrawerClose");
+            const drawerOverlay = document.getElementById("siteDrawerOverlay");
+            const drawerLinks = document.querySelectorAll(".site-drawer-link");
+
+            function openDrawer() {
+                drawer.classList.add("open");
+                drawerOverlay.classList.add("open");
+
+                document.body.classList.add("drawer-open");
+
+                drawer.setAttribute("aria-hidden", "false");
+                menuToggle.setAttribute("aria-expanded", "true");
+            }
+
+
+            function closeDrawer() {
+                drawer.classList.remove("open");
+                drawerOverlay.classList.remove("open");
+
+                document.body.classList.remove("drawer-open");
+
+                drawer.setAttribute("aria-hidden", "true");
+                menuToggle.setAttribute("aria-expanded", "false");
+            }
+
+
+            menuToggle.addEventListener("click", openDrawer);
+
+            drawerClose.addEventListener("click", closeDrawer);
+
+            drawerOverlay.addEventListener("click", closeDrawer);
+
+
+            drawerLinks.forEach(function (link) {
+                link.addEventListener("click", closeDrawer);
+            });
+
+
+            document.addEventListener("keydown", function (event) {
+                if (event.key === "Escape") {
+                    closeDrawer();
+                }
+            });
+
+        });
+    </script>
+
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>
+
+

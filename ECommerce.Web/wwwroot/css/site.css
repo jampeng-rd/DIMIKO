@@ -305,12 +305,6 @@
     background-color: #121212 !important;
 }
 
-/* Navbar */
-[data-bs-theme="dark"] header .navbar {
-    background: #0a0a0a !important;
-    border-bottom-color: rgba(255,255,255,0.06) !important;
-}
-
 /* Footer */
 [data-bs-theme="dark"] footer {
     background: #0a0a0a !important;
@@ -510,11 +504,11 @@
     border-color: #475569 !important;
 }
 
-    [data-bs-theme="dark"] .btn-outline-dark:hover {
-        background: #2a2a2a !important;
-        color: #fff !important;
-        border-color: #64748b !important;
-    }
+[data-bs-theme="dark"] .btn-outline-dark:hover {
+    background: #2a2a2a !important;
+    color: #fff !important;
+    border-color: #64748b !important;
+}
 
 /* btn-outline-secondary */
 [data-bs-theme="dark"] .btn-outline-secondary {
@@ -522,10 +516,10 @@
     border-color: #475569 !important;
 }
 
-    [data-bs-theme="dark"] .btn-outline-secondary:hover {
-        background: #2a2a2a !important;
-        color: #e2e8f0 !important;
-    }
+[data-bs-theme="dark"] .btn-outline-secondary:hover {
+    background: #2a2a2a !important;
+    color: #e2e8f0 !important;
+}
 
 /* btn-light */
 [data-bs-theme="dark"] .btn-light {
@@ -534,9 +528,9 @@
     border-color: #3a3a3a !important;
 }
 
-    [data-bs-theme="dark"] .btn-light:hover {
-        background: #3a3a3a !important;
-    }
+[data-bs-theme="dark"] .btn-light:hover {
+    background: #3a3a3a !important;
+}
 
 /* card-footer */
 [data-bs-theme="dark"] .card-footer {
@@ -788,34 +782,463 @@
     -moz-appearance: textfield;
 }
 
-/* 公開 Navbar 的目前頁面 */
-.public-navbar .navbar-nav .nav-link {
-    position: relative;
+/* ============================================
+   Public Navbar
+   ============================================ */
+
+.site-header {
+    position: sticky;
+    top: 0;
+    z-index: 1030;
+}
+
+.site-navbar {
+    width: 100%;
+    height: 64px;
+    background: #191414;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.site-navbar-container {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+    width: 100%;
+    max-width: 1320px;
+    height: 100%;
+    margin: 0 auto;
+    padding: 0 1.5rem;
+}
+
+
+/* ============================================
+   Navbar Left
+   ============================================ */
+
+.site-navbar-left {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+}
+
+.site-menu-toggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    padding: 0;
+    color: #e5e7eb;
+    font-size: 1.5rem;
+    line-height: 1;
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 0.45rem;
+    cursor: pointer;
+    transition: color 0.2s ease, background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.site-menu-toggle:hover,
+.site-menu-toggle:focus {
+    color: #ffffff;
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.22);
+    outline: none;
+}
+
+.site-menu-toggle:hover i {
+    color: #1DB954;
+}
+
+
+/* ============================================
+   Navbar Center
+   ============================================ */
+
+.site-navbar-center {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.site-brand {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.55rem;
+    color: inherit;
+    text-decoration: none;
+}
+
+.site-brand-logo {
+    width: 28px;
+    height: 28px;
+    object-fit: contain;
+}
+
+.site-brand-name {
+    color: #006fbc;
+    font-size: 1.25rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+}
+
+
+/* ============================================
+   Navbar Right
+   ============================================ */
+
+.site-navbar-right {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 0.65rem;
+}
+
+
+/* User button */
+
+.navbar-user {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 38px;
+    height: 38px;
+    color: #e5e7eb;
+    text-decoration: none;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 0.4rem;
+    transition: color 0.2s ease, background-color 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+}
+
+.navbar-user i {
+    font-size: 1.25rem;
+    line-height: 1;
+}
+
+.navbar-user:hover,
+.navbar-user:focus {
+    color: #1DB954;
+    background: rgba(255, 255, 255, 0.12);
+    border-color: rgba(255, 255, 255, 0.2);
+    transform: translateY(-1px);
+}
+
+
+/* Login / Logout */
+
+.navbar-auth-form {
+    display: flex;
+    margin: 0;
+}
+
+.navbar-auth-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 36px;
+    padding: 0.4rem 0.8rem;
+    color: #e5e7eb;
+    font-size: 0.75rem;
+    font-weight: 600;
+    line-height: 1;
+    text-decoration: none;
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 0.4rem;
+    cursor: pointer;
+    transition: color 0.2s ease, background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.navbar-auth-button:hover,
+.navbar-auth-button:focus {
+    color: #ffffff;
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.35);
+    outline: none;
+}
+
+.navbar-login-button {
+    color: #ffffff;
+    background: #17A34A;
+    border-color: #17A34A;
+}
+
+.navbar-login-button:hover,
+.navbar-login-button:focus {
+    color: #ffffff;
+    background: #138a3e;
+    border-color: #138a3e;
+}
+
+
+/* ============================================
+   Navigation Drawer
+   ============================================ */
+
+.site-drawer {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 1060;
+    width: 300px;
+    max-width: 85vw;
+    height: 100vh;
+    background: #151515;
+    border-right: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: 12px 0 35px rgba(0, 0, 0, 0.3);
+    transform: translateX(-100%);
+    visibility: hidden;
+    transition: transform 0.3s ease, visibility 0.3s ease;
+}
+
+.site-drawer.open {
+    transform: translateX(0);
+    visibility: visible;
+}
+
+
+/* Drawer overlay */
+
+.site-drawer-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 1050;
+    background: rgba(0, 0, 0, 0.55);
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+.site-drawer-overlay.open {
+    opacity: 1;
+    visibility: visible;
+}
+
+
+/* Drawer header */
+
+.site-drawer-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 64px;
+    padding: 0 1.25rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.site-drawer-brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    text-decoration: none;
+}
+
+.site-drawer-brand img {
+    width: 27px;
+    height: 27px;
+    object-fit: contain;
+}
+
+.site-drawer-brand span {
+    color: #006fbc;
+    font-size: 1.1rem;
+    font-weight: 700;
+}
+
+
+/* Drawer close */
+
+.site-drawer-close {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    padding: 0;
     color: #9ca3af;
-    transition: color 0.2s ease;
+    font-size: 1.15rem;
+    background: transparent;
+    border: 0;
+    border-radius: 0.4rem;
+    cursor: pointer;
+    transition: color 0.2s ease, background-color 0.2s ease;
 }
 
-.public-navbar .navbar-nav .nav-link:hover,
-.public-navbar .navbar-nav .nav-link:focus {
+.site-drawer-close:hover,
+.site-drawer-close:focus {
     color: #ffffff;
+    background: rgba(255, 255, 255, 0.08);
+    outline: none;
 }
 
-.public-navbar .navbar-nav .nav-link.active {
-    color: #ffffff;
+
+/* Drawer navigation */
+
+.site-drawer-nav {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    padding: 1.25rem 0.9rem;
+}
+
+.site-drawer-link {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 0.9rem;
+    min-height: 48px;
+    padding: 0.7rem 0.9rem;
+    color: #9ca3af;
+    font-size: 0.93rem;
     font-weight: 500;
+    text-decoration: none;
+    border-radius: 0.5rem;
+    transition: color 0.2s ease, background-color 0.2s ease;
 }
 
-/* Active 下方綠色線條 */
-.public-navbar .navbar-nav .nav-link.active::after {
+.site-drawer-link:hover,
+.site-drawer-link:focus {
+    color: #ffffff;
+    background: rgba(255, 255, 255, 0.06);
+}
+
+.site-drawer-link.active {
+    color: #ffffff;
+    background: rgba(23, 163, 74, 0.12);
+}
+
+
+/* Active left indicator */
+
+.site-drawer-link.active::before {
     content: "";
     position: absolute;
-    left: 0.75rem;
-    right: 0.75rem;
-    bottom: 0.15rem;
-    height: 0.15rem;
-    background-color: #17A34A;
+    top: 10px;
+    bottom: 10px;
+    left: 0;
+    width: 3px;
+    background: #17A34A;
     border-radius: 999px;
 }
+
+.site-drawer-link-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    color: #9ca3af;
+    font-size: 1.05rem;
+}
+
+.site-drawer-link:hover .site-drawer-link-icon,
+.site-drawer-link.active .site-drawer-link-icon {
+    color: #1DB954;
+}
+
+
+/* Drawer 開啟時避免 body 背景滾動 */
+
+body.drawer-open {
+    overflow: hidden;
+}
+
+
+/* ============================================
+   Navbar Mobile
+   ============================================ */
+
+@media (max-width: 767.98px) {
+
+    .site-navbar {
+        height: 58px;
+    }
+
+    .site-navbar-container {
+        padding: 0 0.65rem;
+    }
+
+    .site-menu-toggle {
+        width: 36px;
+        height: 36px;
+        font-size: 1.35rem;
+    }
+
+    .site-brand {
+        gap: 0.35rem;
+    }
+
+    .site-brand-logo {
+        width: 24px;
+        height: 24px;
+    }
+
+    .site-brand-name {
+        font-size: 1rem;
+    }
+
+    .site-navbar-right {
+        gap: 0.35rem;
+    }
+
+    .navbar-cart,
+    .navbar-user {
+        width: 34px;
+        height: 34px;
+    }
+
+    .navbar-cart i,
+    .navbar-user i {
+        font-size: 1.05rem;
+    }
+
+    .navbar-auth-button {
+        min-height: 34px;
+        padding: 0.35rem 0.55rem;
+        font-size: 0.68rem;
+    }
+
+    .site-drawer-header {
+        height: 58px;
+    }
+}
+
+
+/* 很窄的手機 */
+
+@media (max-width: 420px) {
+
+    .site-navbar-container {
+        padding: 0 0.45rem;
+    }
+
+    .site-brand-name {
+        font-size: 0.9rem;
+    }
+
+    .site-brand-logo {
+        width: 22px;
+        height: 22px;
+    }
+
+    .site-navbar-right {
+        gap: 0.25rem;
+    }
+
+    .navbar-cart,
+    .navbar-user {
+        width: 32px;
+        height: 32px;
+    }
+
+    .navbar-auth-button {
+        min-height: 32px;
+        padding: 0.3rem 0.45rem;
+        font-size: 0.64rem;
+    }
+}
+
 
 /* ============================================
 Admin Order Calendar
