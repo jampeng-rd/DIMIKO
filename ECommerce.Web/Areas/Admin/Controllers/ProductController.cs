@@ -26,17 +26,26 @@ namespace ECommerce.Web.Areas.Admin.Controllers
 			_productImageFileService = productImageFileService;
 		}
 
+
 		public async Task<IActionResult> Index(
+			string? query,
 			int page = PaginationSettings.DefaultPageNumber,
 			int pageSize = PaginationSettings.DefaultPageSize)
 		{
 			var products = await _productService.GetPagedProductsAsync(
-				page,
-				pageSize,
+				pageNumber: page,
+				pageSize: pageSize,
+				query: query,
 				includeCategory: true,
 				includeImages: true);
 
-			return View(products);
+			var viewModel = new AdminProductListViewModel
+			{
+				Products = products,
+				Query = query?.Trim()
+			};
+
+			return View(viewModel);
 		}
 
 

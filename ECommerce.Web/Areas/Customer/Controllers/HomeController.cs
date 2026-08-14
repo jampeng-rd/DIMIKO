@@ -57,9 +57,10 @@ namespace ECommerce.Web.Areas.Customer.Controllers
 		}
 
 
-		// 產品分頁
+		// 所有商品頁
 		public async Task<IActionResult> Products(
 			int? categoryId,
+			string? query,
 			int page = PaginationSettings.DefaultPageNumber,
 			int pageSize = PaginationSettings.DefaultPageSize)
 		{
@@ -81,9 +82,10 @@ namespace ECommerce.Web.Areas.Customer.Controllers
 			}
 
 			var products = await _productService.GetPagedActiveProductsAsync(
-				page,
-				pageSize,
-				categoryId,
+				pageNumber: page,
+				pageSize: pageSize,
+				categoryId: categoryId,
+				query: query,
 				includeCategory: true,
 				includeImages: true);
 
@@ -92,6 +94,7 @@ namespace ECommerce.Web.Areas.Customer.Controllers
 				Categories = categories,
 				Products = products,
 				SelectedCategoryId = categoryId,
+				Query = query?.Trim(),
 				SelectedCategoryName = selectedCategory?.Name ?? "全部"
 			};
 

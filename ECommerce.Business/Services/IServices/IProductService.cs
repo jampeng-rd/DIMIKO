@@ -13,6 +13,7 @@ namespace ECommerce.Business.Services.IServices
 			int pageNumber,
 			int pageSize,
 			int? categoryId = null,
+			string? query = null,
 			bool includeCategory = false,
 			bool includeImages = false);
 
@@ -23,6 +24,7 @@ namespace ECommerce.Business.Services.IServices
 		Task<PagedResult<Product>> GetPagedProductsAsync(
 			int pageNumber,
 			int pageSize,
+			string? query = null,
 			bool includeCategory = false,
 			bool includeImages = false);
 

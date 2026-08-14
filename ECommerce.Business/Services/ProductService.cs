@@ -52,32 +52,40 @@ namespace ECommerce.Business.Services
 			int pageNumber,
 			int pageSize,
 			int? categoryId = null,
+			string? query = null,
 			bool includeCategory = false,
 			bool includeImages = false)
 		{
 			pageNumber = PaginationSettings.NormalizePageNumber(pageNumber);
 			pageSize = PaginationSettings.NormalizePageSize(pageSize);
 
-			IQueryable<Product> query = _dbContext.Products
+			IQueryable<Product> productQuery = _dbContext.Products
 				.AsNoTracking()
 				.Where(product => product.IsActive);
 
 			if (categoryId.HasValue)
 			{
-				query = query.Where(product => product.CategoryId == categoryId.Value);
+				productQuery = productQuery.Where(product => product.CategoryId == categoryId.Value);
+			}
+
+			if (!string.IsNullOrWhiteSpace(query))
+			{
+				string keyword = query.Trim();
+
+				productQuery = productQuery.Where(product => product.Title.Contains(keyword) || product.SKU.Contains(keyword));
 			}
 
 			if (includeCategory)
 			{
-				query = query.Include(product => product.Category);
+				productQuery = productQuery.Include(product => product.Category);
 			}
 
 			if (includeImages)
 			{
-				query = query.Include(product => product.ProductImages);
+				productQuery = productQuery.Include(product => product.ProductImages);
 			}
 
-			var totalCount = await query.CountAsync();
+			var totalCount = await productQuery.CountAsync();
 
 			var totalPages = totalCount == 0 ? 0 : (int)Math.Ceiling(totalCount / (double)pageSize);
 
@@ -86,7 +94,7 @@ namespace ECommerce.Business.Services
 				pageNumber = totalPages;
 			}
 
-			var items = await query
+			var items = await productQuery
 				.OrderByDescending(product => product.Id)
 				.Skip((pageNumber - 1) * pageSize)
 				.Take(pageSize)
@@ -126,25 +134,33 @@ namespace ECommerce.Business.Services
 		public async Task<PagedResult<Product>> GetPagedProductsAsync(
 			int pageNumber,
 			int pageSize,
+			string? query = null,
 			bool includeCategory = false,
 			bool includeImages = false)
 		{
 			pageNumber = PaginationSettings.NormalizePageNumber(pageNumber);
 			pageSize = PaginationSettings.NormalizePageSize(pageSize);
 
-			IQueryable<Product> query = _dbContext.Products.AsNoTracking();
+			IQueryable<Product> productQuery = _dbContext.Products.AsNoTracking();
+
+			if (!string.IsNullOrWhiteSpace(query))
+			{
+				string keyword = query.Trim();
+
+				productQuery = productQuery.Where(product => product.Title.Contains(keyword) || product.SKU.Contains(keyword));
+			}
 
 			if (includeCategory)
 			{
-				query = query.Include(product => product.Category);
+				productQuery = productQuery.Include(product => product.Category);
 			}
 
 			if (includeImages)
 			{
-				query = query.Include(product => product.ProductImages);
+				productQuery = productQuery.Include(product => product.ProductImages);
 			}
 
-			var totalCount = await query.CountAsync();
+			var totalCount = await productQuery.CountAsync();
 
 			var totalPages = totalCount == 0
 				? 0
@@ -155,7 +171,7 @@ namespace ECommerce.Business.Services
 				pageNumber = totalPages;
 			}
 
-			var items = await query
+			var items = await productQuery
 				.OrderByDescending(product => product.Id)
 				.Skip((pageNumber - 1) * pageSize)
 				.Take(pageSize)
@@ -202,6 +218,7 @@ namespace ECommerce.Business.Services
 				.FirstOrDefaultAsync(product => product.Id == id);
 		}
 
+
 		public async Task<bool> UpdateProductAsync(Product product)
 		{
 			var existingProduct = await _dbContext.Products.FindAsync(product.Id);
@@ -226,6 +243,7 @@ namespace ECommerce.Business.Services
 
 			return true;
 		}
+
 
 		public async Task<bool> DeleteProductAsync(int id)
 		{
@@ -254,6 +272,7 @@ namespace ECommerce.Business.Services
 
 			return await query.AnyAsync(product => product.SKU == sku);
 		}
+
 
 		// 新增照片
 		public async Task AddProductImagesAsync(int productId, IEnumerable<ProductImage> productImages)
@@ -294,6 +313,7 @@ namespace ECommerce.Business.Services
 			await _dbContext.SaveChangesAsync();
 		}
 
+
 		// 取得單張圖片
 		public async Task<ProductImage?> GetProductImageByIdAsync(int imageId)
 		{
@@ -301,6 +321,7 @@ namespace ECommerce.Business.Services
 				.AsNoTracking()
 				.FirstOrDefaultAsync(image => image.Id == imageId);
 		}
+
 
 		// 刪除圖片資料列
 		public async Task<bool> DeleteProductImageAsync(int imageId)
@@ -342,6 +363,7 @@ namespace ECommerce.Business.Services
 
 			return true;
 		}
+
 
 		// 指定首圖
 		public async Task<bool> SetPrimaryImageAsync(int productId, int imageId)

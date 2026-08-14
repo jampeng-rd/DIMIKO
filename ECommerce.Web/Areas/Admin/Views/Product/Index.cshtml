@@ -2,7 +2,7 @@
 @using ECommerce.Models
 @using ECommerce.Models.Common
 @using ECommerce.Models.ViewModels
-@model PagedResult<Product>
+@model AdminProductListViewModel
 
 @{
     ViewData["Title"] = "商品管理";
@@ -13,12 +13,17 @@
         Controller = "Product",
         Action = "Index",
 
-        PageNumber = Model.PageNumber,
-        PageSize = Model.PageSize,
-        TotalCount = Model.TotalCount,
-        TotalPages = Model.TotalPages,
-        FirstItemNumber = Model.FirstItemNumber,
-        LastItemNumber = Model.LastItemNumber
+        PageNumber = Model.Products.PageNumber,
+        PageSize = Model.Products.PageSize,
+        TotalCount = Model.Products.TotalCount,
+        TotalPages = Model.Products.TotalPages,
+        FirstItemNumber = Model.Products.FirstItemNumber,
+        LastItemNumber = Model.Products.LastItemNumber,
+
+        RouteValues = new Dictionary<string, string?>
+        {
+            ["query"] = Model.Query
+        }
     };
 }
 
@@ -46,6 +51,44 @@
             }
         </div>
 
+        <!-- 搜尋框 -->
+        <div class="px-4 py-3 border-bottom bg-light">
+
+            <form asp-area="Admin" asp-controller="Product" asp-action="Index" method="get">
+
+                <input type="hidden" name="pageSize" value="@Model.Products.PageSize" />
+
+                <div class="d-flex gap-2">
+
+                    <div class="input-group" style="max-width: 520px;">
+                        <span class="input-group-text bg-white">
+                            <i class="bi bi-search text-secondary"></i>
+                        </span>
+
+                        <input type="text" name="query" value="@Model.Query"
+                               class="form-control product-search-input"
+                               placeholder="搜尋商品名稱或商品編號..." />
+
+                        <button type="submit" class="btn btn-success">
+                            搜尋
+                        </button>
+                    </div>
+
+                    @if (!string.IsNullOrWhiteSpace(Model.Query))
+                    {
+                        <a asp-area="Admin" asp-controller="Product" asp-action="Index"
+                           asp-route-pageSize="@Model.Products.PageSize"
+                           class="btn btn-outline-secondary d-inline-flex align-items-center">
+
+                            <i class="bi bi-x-lg me-1"></i>
+                            清除
+                        </a>
+                    }
+                </div>
+            </form>
+        </div>
+
+
         <div class="table-responsive">
             <table class="table-styled">
                 <thead>
@@ -63,46 +106,77 @@
                 </thead>
 
                 <tbody>
-                    @foreach (var product in Model.Items)
+                    @if (!Model.Products.Items.Any())
                     {
                         <tr>
-                            @{
-                                var primaryImage = product.ProductImages.FirstOrDefault(image => image.IsPrimary)
-                                    ?? product.ProductImages.OrderBy(image => image.SortOrder).FirstOrDefault();
-                            }
+                            <td colspan="7" class="text-center py-5 text-secondary">
 
-                            <td>
-                                @if (primaryImage != null)
+                                @if (!string.IsNullOrWhiteSpace(Model.Query))
                                 {
-                                    <img src="@primaryImage.ImageUrl"
-                                         alt="@product.Title"
-                                         class="img-thumbnail"
-                                         style="width: 70px; height: 70px; object-fit: cover;" />
+                                    <i class="bi bi-search fs-2 d-block mb-2"></i>
+
+                                    <div class="fw-semibold">
+                                        找不到符合「@Model.Query」的商品
+                                    </div>
+
+                                    <div class="small mt-1">
+                                        請嘗試其他商品名稱或商品編號。
+                                    </div>
                                 }
                                 else
                                 {
-                                    <div class="bg-light border rounded d-flex align-items-center justify-content-center"
-                                         style="width: 70px; height: 70px;">
-                                        <i class="bi bi-image text-secondary"></i>
+                                    <i class="bi bi-box-seam fs-2 d-block mb-2"></i>
+
+                                    <div class="fw-semibold">
+                                        目前沒有商品
                                     </div>
                                 }
                             </td>
-
-                            <td class="fw-medium">@product.Title</td>
-                            <td class="fw-medium">@product.SKU</td>
-                            <td class="fw-medium">@product.Price.ToString("N0")</td>
-                            <td class="fw-medium">@product.StockQuantity</td>
-                            <td class="fw-medium">@(product.Category?.Name ?? "未分類")</td>
-
-                            @if (User.IsInRole(SD.RoleAdmin))
-                            {
-                                <td class="text-end">
-                                    <a asp-action="Update" asp-route-id="@product.Id" class="btn btn-sm btn-outline-success me-1"><i class="bi bi-pencil-square me-1"></i>編輯</a>
-                                    <a asp-action="Delete" asp-route-id="@product.Id" class="btn btn-sm btn-outline-danger"><i class="bi bi-trash me-1"></i>刪除</a>
-                                </td>
-                            }
                         </tr>
                     }
+                    else
+                    {
+                        @foreach (var product in Model.Products.Items)
+                        {
+                            <tr>
+                                @{
+                                    var primaryImage = product.ProductImages.FirstOrDefault(image => image.IsPrimary)
+                                        ?? product.ProductImages.OrderBy(image => image.SortOrder).FirstOrDefault();
+                                }
+
+                                <td>
+                                    @if (primaryImage != null)
+                                    {
+                                        <img src="@primaryImage.ImageUrl"
+                                             alt="@product.Title"
+                                             class="img-thumbnail"
+                                             style="width: 70px; height: 70px; object-fit: cover;" />
+                                    }
+                                    else
+                                    {
+                                        <div class="bg-light border rounded d-flex align-items-center justify-content-center"
+                                             style="width: 70px; height: 70px;">
+                                            <i class="bi bi-image text-secondary"></i>
+                                        </div>
+                                    }
+                                </td>
+
+                                <td class="fw-medium">@product.Title</td>
+                                <td class="fw-medium">@product.SKU</td>
+                                <td class="fw-medium">@product.Price.ToString("N0")</td>
+                                <td class="fw-medium">@product.StockQuantity</td>
+                                <td class="fw-medium">@(product.Category?.Name ?? "未分類")</td>
+
+                                @if (User.IsInRole(SD.RoleAdmin))
+                                {
+                                    <td class="text-end">
+                                        <a asp-action="Update" asp-route-id="@product.Id" class="btn btn-sm btn-outline-success me-1"><i class="bi bi-pencil-square me-1"></i>編輯</a>
+                                        <a asp-action="Delete" asp-route-id="@product.Id" class="btn btn-sm btn-outline-danger"><i class="bi bi-trash me-1"></i>刪除</a>
+                                    </td>
+                                }
+                            </tr>
+                        }
+                    }                   
                 </tbody>
             </table>
         </div>
@@ -112,3 +186,11 @@
     </div>
 
 </div>
+
+<style>
+    .product-search-input:focus {
+        border-color: #17A34A;
+        box-shadow: none;
+        outline: none;
+    }
+</style>

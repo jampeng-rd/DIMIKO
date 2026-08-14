@@ -14,6 +14,9 @@ namespace ECommerce.Models.ViewModels
 		// 現在選哪一類
 		public int? SelectedCategoryId { get; set; }
 
+		// 目前搜尋文字
+		public string? Query { get; set; }
+
 		// 右側標題
 		public string SelectedCategoryName { get; set; } = "全部商品";
 	}
