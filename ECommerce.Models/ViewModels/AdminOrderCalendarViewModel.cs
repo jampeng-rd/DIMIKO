@@ -46,5 +46,15 @@
 		public int NextYear { get; set; }
 
 		public int NextMonth { get; set; }
+
+		/// <summary>
+		/// 保留搜尋框輸入內容
+		/// </summary>
+		public string? SearchOrderNumber { get; set; }
+
+		/// <summary>
+		/// 告訴 View 哪一天是搜尋到的訂單
+		/// </summary>
+		public int? HighlightDay { get; set; }
 	}
 }

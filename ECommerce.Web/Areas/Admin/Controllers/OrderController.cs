@@ -19,13 +19,38 @@ namespace ECommerce.Web.Areas.Admin.Controllers
 		}
 
 
-		public async Task<IActionResult> Index(int? year, int? month)
+		public async Task<IActionResult> Index(int? year, int? month, string? orderNumber)
 		{
 			var taiwanNow = TaiwanTimeHelper.GetTaiwanNow();
 
 			var selectedYear = year ?? taiwanNow.Year;
-
 			var selectedMonth = month ?? taiwanNow.Month;
+
+			int? highlightDay = null;
+
+			// 搜尋訂單
+			if (!string.IsNullOrWhiteSpace(orderNumber))
+			{
+				orderNumber = orderNumber.Trim();
+
+				var order = await _orderService.GetOrderByNumberAsync(orderNumber);
+
+				if (order == null)
+				{
+					TempData["error"] = "查無此訂單編號";
+				}
+				else
+				{
+					// OrderDate 在資料庫保存 UTC，
+					// 月曆顯示的是台灣日期，因此先轉回台灣時間。
+					var orderDateTaiwan = TaiwanTimeHelper.ConvertUtcToTaiwan(order.OrderDate);
+
+					selectedYear = orderDateTaiwan.Year;
+					selectedMonth = orderDateTaiwan.Month;
+					highlightDay = orderDateTaiwan.Day;
+				}
+			}
+
 
 			if (selectedYear is < 2000 or > 2100)
 			{
@@ -40,34 +65,39 @@ namespace ECommerce.Web.Areas.Admin.Controllers
 			var monthStart = new DateTime(selectedYear, selectedMonth, 1);
 
 			var previousMonth = monthStart.AddMonths(-1);
-
 			var nextMonth = monthStart.AddMonths(1);
 
 			var dailyOrderCounts = await _orderService.GetMonthlyOrderCountsAsync(selectedYear, selectedMonth);
 
-			var viewModel =
-				new AdminOrderCalendarViewModel
-				{
-					Year = selectedYear,
-					Month = selectedMonth,
-					MonthStart = monthStart,
 
-					DaysInMonth = DateTime.DaysInMonth(selectedYear, selectedMonth),
+			var viewModel = new AdminOrderCalendarViewModel
+			{
+				Year = selectedYear,
+				Month = selectedMonth,
 
-					StartDayOffset = (int)monthStart.DayOfWeek,
+				MonthStart = monthStart,
 
-					DailyOrderCounts = dailyOrderCounts,
+				DaysInMonth = DateTime.DaysInMonth(selectedYear, selectedMonth),
 
-					TotalOrders = dailyOrderCounts.Values.Sum(),
 
-					PreviousYear = previousMonth.Year,
+				StartDayOffset = (int)monthStart.DayOfWeek,
 
-					PreviousMonth = previousMonth.Month,
+				DailyOrderCounts = dailyOrderCounts,
 
-					NextYear = nextMonth.Year,
+				TotalOrders = dailyOrderCounts.Values.Sum(),
 
-					NextMonth = nextMonth.Month
-				};
+				PreviousYear = previousMonth.Year,
+		
+				PreviousMonth = previousMonth.Month,
+
+				NextYear = nextMonth.Year,
+
+				NextMonth = nextMonth.Month,
+
+				SearchOrderNumber = orderNumber,
+
+				HighlightDay = highlightDay
+			};
 
 			return View(viewModel);
 		}

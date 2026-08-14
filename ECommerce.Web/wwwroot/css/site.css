@@ -1290,6 +1290,13 @@ Admin Order Calendar
     box-shadow: inset 0 0 0 3px #0d6efd;
 }
 
+.admin-calendar-day.is-search-highlight {
+    position: relative;
+    outline: 3px solid #ffc107;
+    outline-offset: -3px;
+    background-color: rgba(255, 193, 7, 0.08);
+}
+
 .admin-calendar-empty {
     background: #f8fafc;
 }
@@ -1322,12 +1329,6 @@ Admin Order Calendar
     box-shadow: 0 4px 10px rgba(23, 163, 74, 0.22);
 }
 
-/*.admin-calendar-no-orders {
-    margin-top: 1.5rem;
-    color: #cbd5e1;
-    font-size: 0.75rem;
-}*/
-
 .calendar-legend {
     display: inline-block;
     width: 16px;
@@ -1337,6 +1338,10 @@ Admin Order Calendar
 
 .calendar-legend-today {
     border: 3px solid #0d6efd;
+}
+
+.calendar-legend-query {
+    border: 3px solid #FFC107;
 }
 
 .calendar-legend-orders {

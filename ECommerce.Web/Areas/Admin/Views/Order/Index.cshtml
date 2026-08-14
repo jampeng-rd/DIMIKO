@@ -45,6 +45,37 @@
             </div>
         </div>
 
+
+        <!-- 訂單搜尋 -->
+        <div class="card-body border-bottom px-4 py-3">
+
+            <form asp-area="Admin" asp-controller="Order" asp-action="Index" method="get">
+
+                <div class="row g-2 justify-content-center">
+                    <div class="col-12 col-md-7 col-lg-5">
+
+                        <div class="input-group">
+                            <span class="input-group-text">
+                                <i class="bi bi-search"></i>
+                            </span>
+
+                            <input type="text" name="orderNumber" value="@Model.SearchOrderNumber"
+                                   class="form-control order-search-input"
+                                   placeholder="輸入完整訂單編號"
+                                   autocomplete="off" />
+
+                            <button type="submit" class="btn btn-primary">
+                                搜尋
+                            </button>
+                        </div>
+
+                    </div>
+                </div>
+            </form>
+
+        </div>
+
+
         <!-- 月份控制列 -->
         <div class="card-body border-bottom px-4 py-3">
 
@@ -114,28 +145,40 @@
                         day
                     );
 
-                    var isToday =
-                        currentDate == taiwanToday;
+                    var isToday = currentDate == taiwanToday;
 
                     var hasOrders = Model.DailyOrderCounts.TryGetValue(day, out var orderCount);
 
+                    var isHighlighted = Model.HighlightDay == day;
+
                     <div class="admin-calendar-day
                          @(isToday ? "is-today" : "")
-                         @(hasOrders ? "has-orders" : "")">
+                         @(hasOrders ? "has-orders" : "")
+                         @(isHighlighted ? "is-search-highlight" : "")">
 
-                        <div class="d-flex align-items-start
-                            justify-content-between gap-2">
+                        <div class="d-flex align-items-start justify-content-between gap-2">
 
                             <span class="admin-calendar-date-number">
                                 @day
                             </span>
 
-                            @if (isToday)
-                            {
-                                <span class="badge bg-primary">
-                                    今天
-                                </span>
-                            }
+                            <div class="d-flex align-items-center gap-1">
+
+                                @if (isHighlighted)
+                                {
+                                    <span class="badge bg-warning text-dark">
+                                        搜尋結果
+                                    </span>
+                                }
+
+                                @if (isToday)
+                                {
+                                    <span class="badge bg-primary">
+                                        今天
+                                    </span>
+                                }
+
+                            </div>
                         </div>
 
                         @if (hasOrders)
@@ -181,8 +224,21 @@
                     有訂單
                 </span>
 
+                <span class="d-inline-flex align-items-center gap-2">
+                    <span class="calendar-legend calendar-legend-query"></span>
+                    搜尋結果
+                </span>
             </div>
         </div>
 
     </div>
 </div>
+
+
+<style>
+    .order-search-input:focus {
+        border-color: #17A34A;
+        box-shadow: none;
+        outline: none;
+    }
+</style>
