@@ -101,7 +101,7 @@ namespace ECommerce.DataAccess.Data
 					Price = 2680m,
 					Price5 = 2500m,
 					Price10 = 2300m,
-					StockQuantity = 40,
+					StockQuantity = 20,
 					CategoryId = 2,
 					IsActive = true
 				},
@@ -115,7 +115,7 @@ namespace ECommerce.DataAccess.Data
 					Price = 2380m,
 					Price5 = 2200m,
 					Price10 = 2050m,
-					StockQuantity = 30,
+					StockQuantity = 10,
 					CategoryId = 3,
 					IsActive = true
 				},
@@ -129,7 +129,7 @@ namespace ECommerce.DataAccess.Data
 					Price = 1480m,
 					Price5 = 1380m,
 					Price10 = 1280m,
-					StockQuantity = 50,
+					StockQuantity = 20,
 					CategoryId = 4,
 					IsActive = true
 				},
@@ -146,9 +146,275 @@ namespace ECommerce.DataAccess.Data
 					StockQuantity = 60,
 					CategoryId = 6,
 					IsActive = true
-				}
+				},
+				// ====================
+				// 帳篷與天幕
+				// ====================
+				new Product
+				{
+					Id = 6,
+					Title = "森境雙人輕量帳篷",
+					Description = "適合雙人露營與登山使用的輕量雙層帳篷，具備良好通風與防潑水能力。",
+					SKU = "TENT-002",
+					ListPrice = 6800m,
+					Price = 5680m,
+					Price5 = 5350m,
+					Price10 = 4980m,
+					StockQuantity = 25,
+					CategoryId = 1,
+					IsActive = true
+				},
+				new Product
+				{
+					Id = 7,
+					Title = "黑岩戶外六角天幕",
+					Description = "大型六角天幕提供寬廣遮蔽空間，適合家庭露營與多人活動使用。",
+					SKU = "TENT-003",
+					ListPrice = 5200m,
+					Price = 4380m,
+					Price5 = 4100m,
+					Price10 = 3850m,
+					StockQuantity = 15,
+					CategoryId = 1,
+					IsActive = true
+				},
 
+				// ====================
+				// 睡眠裝備
+				// ====================
+				new Product
+				{
+					Id = 8,
+					Title = "四季保暖羽絨睡袋",
+					Description = "適合春秋與低溫露營使用的羽絨睡袋，輕量且方便壓縮收納。",
+					SKU = "SLEEP-002",
+					ListPrice = 4600m,
+					Price = 3980m,
+					Price5 = 3750m,
+					Price10 = 3500m,
+					StockQuantity = 35,
+					CategoryId = 2,
+					IsActive = true
+				},
+				new Product
+				{
+					Id = 9,
+					Title = "露營充氣枕",
+					Description = "人體工學弧形充氣枕，可快速充放氣，收納後體積小巧。",
+					SKU = "SLEEP-003",
+					ListPrice = 780m,
+					Price = 650m,
+					Price5 = 600m,
+					Price10 = 550m,
+					StockQuantity = 70,
+					CategoryId = 2,
+					IsActive = true
+				},
+
+				// ====================
+				// 露營家具
+				// ====================
+				new Product
+				{
+					Id = 10,
+					Title = "高背折疊露營椅",
+					Description = "高背包覆設計搭配透氣布料，適合長時間戶外休息使用。",
+					SKU = "FURN-002",
+					ListPrice = 2200m,
+					Price = 1850m,
+					Price5 = 1720m,
+					Price10 = 1600m,
+					StockQuantity = 45,
+					CategoryId = 3,
+					IsActive = true
+				},
+				new Product
+				{
+					Id = 11,
+					Title = "輕量月亮椅",
+					Description = "輕量鋁合金骨架搭配耐磨椅布，收納體積小，方便攜帶。",
+					SKU = "FURN-003",
+					ListPrice = 1600m,
+					Price = 1380m,
+					Price5 = 1280m,
+					Price10 = 1180m,
+					StockQuantity = 50,
+					CategoryId = 3,
+					IsActive = true
+				},
+				new Product
+				{
+					Id = 12,
+					Title = "三層折疊露營置物架",
+					Description = "可快速展開的三層置物架，適合擺放炊具、食材與露營用品。",
+					SKU = "FURN-004",
+					ListPrice = 2400m,
+					Price = 1980m,
+					Price5 = 1850m,
+					Price10 = 1720m,
+					StockQuantity = 28,
+					CategoryId = 3,
+					IsActive = true
+				},
+
+				// ====================
+				// 炊具與餐具
+				// ====================
+				new Product
+				{
+					Id = 13,
+					Title = "戶外琺瑯餐具四件組",
+					Description = "包含餐盤、碗與杯具，耐用且方便清潔，適合戶外用餐。",
+					SKU = "COOK-002",
+					ListPrice = 1200m,
+					Price = 980m,
+					Price5 = 900m,
+					Price10 = 820m,
+					StockQuantity = 55,
+					CategoryId = 4,
+					IsActive = true
+				},
+
+				// ====================
+				// 照明與電源
+				// ====================
+				new Product
+				{
+					Id = 14,
+					Title = "復古 LED 露營燈",
+					Description = "可調整亮度與色溫的復古造型 LED 燈，適合帳篷與戶外桌面照明。",
+					SKU = "LIGHT-001",
+					ListPrice = 1680m,
+					Price = 1380m,
+					Price5 = 1280m,
+					Price10 = 1180m,
+					StockQuantity = 42,
+					CategoryId = 5,
+					IsActive = true
+				},
+				new Product
+				{
+					Id = 15,
+					Title = "戶外行動電源 20000mAh",
+					Description = "大容量行動電源，支援多裝置充電，適合露營與戶外活動使用。",
+					SKU = "LIGHT-002",
+					ListPrice = 2800m,
+					Price = 2380m,
+					Price5 = 2250m,
+					Price10 = 2100m,
+					StockQuantity = 32,
+					CategoryId = 5,
+					IsActive = true
+				},
+
+				// ====================
+				// 戶外服飾
+				// ====================
+				new Product
+				{
+					Id = 16,
+					Title = "快乾機能短袖上衣",
+					Description = "透氣快乾材質，適合健行、露營與日常戶外活動穿著。",
+					SKU = "WEAR-002",
+					ListPrice = 1200m,
+					Price = 980m,
+					Price5 = 900m,
+					Price10 = 820m,
+					StockQuantity = 80,
+					CategoryId = 6,
+					IsActive = true
+				},
+				new Product
+				{
+					Id = 17,
+					Title = "戶外彈性機能長褲",
+					Description = "四向彈性布料搭配耐磨設計，適合健行與露營活動。",
+					SKU = "WEAR-003",
+					ListPrice = 2200m,
+					Price = 1880m,
+					Price5 = 1750m,
+					Price10 = 1620m,
+					StockQuantity = 65,
+					CategoryId = 6,
+					IsActive = true
+				},
+				new Product
+				{
+					Id = 18,
+					Title = "防曬透氣漁夫帽",
+					Description = "寬帽簷設計提供戶外遮陽效果，使用透氣快乾材質。",
+					SKU = "WEAR-004",
+					ListPrice = 980m,
+					Price = 780m,
+					Price5 = 720m,
+					Price10 = 650m,
+					StockQuantity = 90,
+					CategoryId = 6,
+					IsActive = true
+				},
+				new Product
+				{
+					Id = 19,
+					Title = "保暖刷毛機能外套",
+					Description = "柔軟刷毛內層提供良好保暖效果，適合秋冬露營與戶外活動。",
+					SKU = "WEAR-005",
+					ListPrice = 3200m,
+					Price = 2680m,
+					Price5 = 2500m,
+					Price10 = 2320m,
+					StockQuantity = 48,
+					CategoryId = 6,
+					IsActive = true
+				},
+
+				// ====================
+				// 戶外配件
+				// ====================
+				new Product
+				{
+					Id = 20,
+					Title = "多功能戶外收納箱",
+					Description = "大容量耐用收納箱，可收納露營裝備，也可作為戶外桌面使用。",
+					SKU = "ACC-001",
+					ListPrice = 1800m,
+					Price = 1480m,
+					Price5 = 1380m,
+					Price10 = 1280m,
+					StockQuantity = 38,
+					CategoryId = 7,
+					IsActive = true
+				},
+				new Product
+				{
+					Id = 21,
+					Title = "防水戶外裝備袋",
+					Description = "耐磨防潑水材質的大容量裝備袋，適合攜帶衣物與露營用品。",
+					SKU = "ACC-002",
+					ListPrice = 1500m,
+					Price = 1280m,
+					Price5 = 1180m,
+					Price10 = 1080m,
+					StockQuantity = 52,
+					CategoryId = 7,
+					IsActive = true
+				},
+				new Product
+				{
+					Id = 22,
+					Title = "鋁合金營繩調節器組",
+					Description = "耐用鋁合金營繩調節器，可快速調整帳篷與天幕營繩張力。",
+					SKU = "ACC-003",
+					ListPrice = 520m,
+					Price = 420m,
+					Price5 = 380m,
+					Price10 = 350m,
+					StockQuantity = 100,
+					CategoryId = 7,
+					IsActive = true
+				}
 			);
+
+
 
 		}
 
