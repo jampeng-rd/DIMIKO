@@ -57,6 +57,7 @@ namespace ECommerce.Web.Areas.Admin.Controllers
 
 
 		public async Task<IActionResult> Index(
+			string? keyword,
 			int page = PaginationSettings.DefaultPageNumber,
 			int pageSize = PaginationSettings.DefaultPageSize)
 		{
@@ -65,7 +66,19 @@ namespace ECommerce.Web.Areas.Admin.Controllers
 
 			var query = _userManager.Users.AsNoTracking();
 
+			// 使用者搜尋
+			if (!string.IsNullOrWhiteSpace(keyword))
+			{
+				keyword = keyword.Trim();
+
+				query = query.Where(user =>
+					user.Name.Contains(keyword) ||
+					(user.Email != null && user.Email.Contains(keyword)) ||
+					(user.PhoneNumber != null && user.PhoneNumber.Contains(keyword)));
+			}
+
 			var totalCount = await query.CountAsync();
+
 			var totalPages = totalCount == 0 ? 0 : (int)Math.Ceiling(totalCount / (double)pageSize);
 
 			if (totalPages > 0 && page > totalPages)
@@ -106,6 +119,8 @@ namespace ECommerce.Web.Areas.Admin.Controllers
 				PageSize = pageSize,
 				TotalCount = totalCount
 			};
+
+			ViewData["Keyword"] = keyword;
 
 			return View(result);
 		}

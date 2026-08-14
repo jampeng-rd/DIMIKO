@@ -64,7 +64,7 @@
                                    placeholder="輸入完整訂單編號"
                                    autocomplete="off" />
 
-                            <button type="submit" class="btn btn-primary">
+                            <button type="submit" class="btn btn-success">
                                 搜尋
                             </button>
                         </div>
@@ -79,8 +79,7 @@
         <!-- 月份控制列 -->
         <div class="card-body border-bottom px-4 py-3">
 
-            <div class="d-flex flex-wrap align-items-center
-                justify-content-between gap-3">
+            <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
 
                 <a asp-area="Admin" asp-controller="Order" asp-action="Index" asp-route-year="@Model.PreviousYear"
                    asp-route-month="@Model.PreviousMonth"

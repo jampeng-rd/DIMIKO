@@ -11,6 +11,8 @@
 
     var currentUserId = UserManager.GetUserId(User);
 
+    var keyword = ViewData["Keyword"] as string;
+
     var paginationModel = new PaginationViewModel
     {
         Area = "Admin",
@@ -22,23 +24,65 @@
         TotalCount = Model.TotalCount,
         TotalPages = Model.TotalPages,
         FirstItemNumber = Model.FirstItemNumber,
-        LastItemNumber = Model.LastItemNumber
+        LastItemNumber = Model.LastItemNumber,
+
+        RouteValues = new Dictionary<string, string?>
+        {
+            ["keyword"] = keyword
+        }
     };
 }
 
 <div class="container-fluid py-4 px-4">
     <div class="card border shadow-sm overflow-hidden">
-        <div class="card-header admin-card-header text-white py-3 px-4 d-flex align-items-center justify-content-between" ">
+
+        <div class="card-header admin-card-header text-white py-3 px-4 d-flex align-items-center justify-content-between">
             <div>
                 <h5 class="mb-0 fw-bold"><i class="bi bi-people me-2"></i>Users Management</h5>
                 <p class="mb-0 small admin-card-subtitle">使用者管理</p>
             </div>
 
-            @* <a asp-controller="User" asp-action="Create"
+            <!-- <a asp-controller="User" asp-action="Create"
                class="btn btn-sm btn-outline-light fw-semibold d-inline-flex align-items-center gap-1">
                 <i class="bi bi-person-plus"></i> Create User
-            </a> *@
+            </a> -->
 
+        </div>
+
+        <!-- 搜尋框 -->
+        <div class="card-body border-bottom px-4 py-3">
+            <form asp-area="Admin" asp-controller="User" asp-action="Index" method="get">
+
+                <div class="row g-2 align-items-center">
+                    <div class="col-12 col-md-6 col-lg-5">
+                        <div class="input-group">
+                            <span class="input-group-text">
+                                <i class="bi bi-search"></i>
+                            </span>
+
+                            <input type="text" name="keyword" value="@keyword"
+                                   class="form-control user-search-input"
+                                   placeholder="搜尋姓名、Email 或電話"
+                                   autocomplete="off" />
+
+                            <button type="submit" class="btn btn-success">
+                                搜尋
+                            </button>
+                        </div>
+                    </div>
+
+                    @if (!string.IsNullOrWhiteSpace(keyword))
+                    {
+                        <div class="col-auto">
+                            <a asp-area="Admin" asp-controller="User" asp-action="Index"
+                               class="btn btn-outline-secondary">
+                                清除
+                            </a>
+                        </div>
+                    }
+
+                </div>
+            </form>
         </div>
 
         <div class="table-responsive">
@@ -81,7 +125,20 @@
                     {
                         <tr>
                             <td colspan="6" class="text-center text-secondary py-5">
-                                目前沒有使用者資料。
+
+                                @if (!string.IsNullOrWhiteSpace(keyword))
+                                {
+                                    <span>
+                                        找不到符合「@keyword」的使用者。
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span>
+                                        目前沒有使用者資料。
+                                    </span>
+                                }
+
                             </td>
                         </tr>
                     }
@@ -174,3 +231,10 @@
 </div>
 
 
+<style>
+    .user-search-input:focus {
+        border-color: #17A34A;
+        box-shadow: none;
+        outline: none;
+    }
+</style>
