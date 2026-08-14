@@ -14,6 +14,10 @@
 
 		public int TotalUsers { get; set; }
 
+		// 低庫存商品數量
+		public int LowStockProductCount { get; set; }
+
+
 		// 每日營收圖表
 		public IReadOnlyList<DashboardDailyRevenueViewModel> DailyRevenue { get; set; }
 			= new List<DashboardDailyRevenueViewModel>();
@@ -30,5 +34,10 @@
 		public IReadOnlyList<DashboardCategoryProductViewModel> ProductsPerCategory { get; set; }
 			= new List<DashboardCategoryProductViewModel>();
 
+		// 商品庫存圖表
+		public IReadOnlyList<DashboardProductStockViewModel> ProductStocks { get; set; }
+			= new List<DashboardProductStockViewModel>();
+
+		
 	}
 }

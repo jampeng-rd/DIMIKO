@@ -162,4 +162,119 @@
     }
 
 
+    // 商品庫存
+    const stockCanvas = document.getElementById("productStockChart");
+    const stockScroll = document.querySelector(".dashboard-stock-scroll");
+    const stockChartContainer = document.getElementById("productStockChartContainer");
+
+    if (stockCanvas &&
+        stockScroll &&
+        stockChartContainer &&
+        data.productStocks
+    ) {
+
+        const stockItems = data.productStocks;
+
+        // 每個商品保留固定寬度
+        const widthPerProduct = 120;
+
+        // 目前庫存卡片真正可看到的寬度
+        const visibleWidth = stockScroll.getBoundingClientRect().width;
+
+        // 所有商品需要的完整圖表寬度
+        const requiredWidth = stockItems.length * widthPerProduct;
+
+        // 商品少時填滿卡片；商品多時只放大內部圖表
+        const chartWidth = Math.max(visibleWidth, requiredWidth);
+
+        stockChartContainer.style.width = `${chartWidth}px`;
+
+        new Chart(stockCanvas, {
+            type: "bar",
+            data: {
+                labels:
+                    stockItems.map(item => item.Title),
+
+                datasets: [{
+                    label: "庫存量",
+
+                    data:
+                        stockItems.map(item => item.StockQuantity),
+
+                    backgroundColor:
+                        stockItems.map(item => item.StockQuantity <= 5 ? "#dc3545" : "#36a2eb"),
+
+                    borderColor:
+                        stockItems.map(item => item.StockQuantity <= 5 ? "#dc3545" : "#36a2eb"),
+
+                    borderWidth: 1
+                }]
+            },
+
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+
+                    tooltip: {
+                        callbacks: {
+                            title: function (items) {
+                                if (!items.length) {
+                                    return "";
+                                }
+
+                                return stockItems[
+                                    items[0].dataIndex
+                                ].Title;
+                            },
+
+                            afterTitle: function (items) {
+                                if (!items.length) {
+                                    return "";
+                                }
+
+                                const product =
+                                    stockItems[
+                                    items[0].dataIndex
+                                    ];
+
+                                return `SKU：${product.SKU}`;
+                            },
+
+                            label: function (context) {
+                                return `庫存：${context.raw} 件`;
+                            }
+                        }
+                    }
+                },
+
+                scales: {
+
+                    x: {
+
+                        ticks: {
+                            autoSkip: false,
+                            maxRotation: 0,   // 名稱最大旋轉 角度
+                            minRotation: 0    // 名稱最小旋轉 角度
+                        }
+                    },
+
+                    y: {
+
+                        beginAtZero: true,
+
+                        ticks: {
+                            precision: 0
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+
 });

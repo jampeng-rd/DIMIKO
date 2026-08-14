@@ -158,8 +158,24 @@ namespace ECommerce.Business.Services
 				.ToListAsync();
 
 
+			// 商品庫存資料
+			var productStocks = await _dbContext.Products
+				.AsNoTracking()
+				.OrderBy(product => product.Title)
+				.ThenBy(product => product.Id)
+				.Select(product => new DashboardProductStockViewModel
+				{
+					ProductId = product.Id,
+					Title = product.Title,
+					SKU = product.SKU,
+					StockQuantity = product.StockQuantity
+				})
+				.ToListAsync();
+
 			// 目前商品總數
-			var totalProducts = await _dbContext.Products.AsNoTracking().CountAsync();
+			var totalProducts = productStocks.Count;
+
+			var lowStockProductCount = productStocks.Count(product => product.StockQuantity <= 5);
 
 			// 目前會員總數
 			var totalUsers = await _dbContext.ApplicationUsers.AsNoTracking().CountAsync();
@@ -168,15 +184,20 @@ namespace ECommerce.Business.Services
 			{
 				SelectedYear = year,
 				SelectedMonth = month,
+
 				MonthlyRevenue = monthlyRevenue,
 				MonthlyOrders = monthlyOrders,
+
 				TotalProducts = totalProducts,
 				TotalUsers = totalUsers,
+
+				LowStockProductCount = lowStockProductCount,
 
 				DailyRevenue = dailyRevenue,
 				DailyOrders = dailyOrders,
 				OrderStatusBreakdown = orderStatusBreakdown,
-				ProductsPerCategory = productsPerCategory
+				ProductsPerCategory = productsPerCategory,
+				ProductStocks = productStocks
 			};
 		}
 

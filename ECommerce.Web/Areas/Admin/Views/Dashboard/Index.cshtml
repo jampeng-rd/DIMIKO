@@ -2,9 +2,20 @@
 
 @{
     ViewData["Title"] = "Dashboard";
+
+    var dashboardData = new
+    {
+        dailyRevenue = Model.DailyRevenue,
+        dailyOrders = Model.DailyOrders,
+        orderStatusBreakdown = Model.OrderStatusBreakdown,
+        productsPerCategory = Model.ProductsPerCategory,
+        productStocks = Model.ProductStocks
+    };
+
+    var dashboardJson = System.Text.Json.JsonSerializer.Serialize(dashboardData);
 }
 
-<div class="container-fluid">
+<div class="container-fluid dashboard-page">
 
     <!-- 標題 -->
     <div class="mb-4">
@@ -330,23 +341,134 @@
 
     </div>
 
+    <!-- 圖表-商品庫存 -->
+    <div class="row g-3 mb-4">
+
+        <div class="col-12 dashboard-stock-column">
+
+            <div class="card border shadow-sm dashboard-stock-card">
+
+                <div class="card-body">
+
+                    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+
+                        <h5 class="fw-semibold mb-0">
+                            <i class="bi bi-boxes me-1 text-primary"></i>
+
+                            商品庫存量
+                        </h5>
+
+                        @if (Model.LowStockProductCount > 0)
+                        {
+                            <span class="badge bg-danger">
+                                <i class="bi bi-exclamation-triangle me-1"></i>
+
+                                低庫存 @Model.LowStockProductCount 項
+                            </span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-success">
+                                庫存正常
+                            </span>
+                        }
+
+                    </div>
+
+                    <div class="dashboard-stock-viewport">
+                        <div class="dashboard-stock-scroll">
+                            <div id="productStockChartContainer" class="dashboard-stock-chart">
+
+                                <canvas id="productStockChart"></canvas>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="small text-secondary mt-2">
+                        <span class="me-3">
+                            <span class="dashboard-stock-legend dashboard-stock-legend-normal"></span>
+                            一般庫存
+                        </span>
+
+                        <span>
+                            <span class="dashboard-stock-legend dashboard-stock-legend-low"></span>
+                            低庫存（5 件以下）
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
 </div>
+
+
+<style>
+    /* Dashboard 本身不得被庫存圖表撐寬 */
+    .dashboard-page {
+        width: 100%;
+        max-width: 100%;
+        min-width: 0;
+    }
+
+    /* Bootstrap column 不允許內容決定自己的寬度 */
+    .dashboard-stock-column {
+        min-width: 0;
+    }
+
+    /* 庫存 Card 永遠只能跟 Dashboard 一樣寬 */
+    .dashboard-stock-card {
+        width: 100%;
+        min-width: 0;
+    }
+
+    /* 固定「可視區域」寬度 */
+    .dashboard-stock-viewport {
+        width: 100%;
+        min-width: 0;
+    }
+
+    /* 只有這一層允許左右捲動 */
+    .dashboard-stock-scroll {
+        width: 100%;
+        overflow-x: auto;
+        overflow-y: hidden;
+        padding-bottom: 0.5rem;
+    }
+
+    /* JS 可以把這一層設成 1500px、2000px...
+       但寬度只存在於 scroll 區域內 */
+    .dashboard-stock-chart {
+        position: relative;
+        height: 320px;
+        min-width: 100%;
+    }
+
+    .dashboard-stock-legend {
+        display: inline-block;
+        width: 14px;
+        height: 14px;
+        border-radius: 2px;
+    }
+
+    .dashboard-stock-legend-normal {
+        background-color: #36a2eb;
+    }
+
+    .dashboard-stock-legend-low {
+        background-color: #dc3545;
+    }
+</style>
+
 
 @section Scripts {
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <script>
-        window.dashboardData = {
-
-            dailyRevenue: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.DailyRevenue)),
-
-            dailyOrders: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.DailyOrders)),
-
-            orderStatusBreakdown: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.OrderStatusBreakdown)),
-
-            productsPerCategory: @Html.Raw(System.Text.Json.JsonSerializer.Serialize( Model.ProductsPerCategory))
-        };
+        window.dashboardData = @Html.Raw(dashboardJson);
     </script>
 
     <script src="~/js/dashboard.js" asp-append-version="true"></script>
