@@ -14,13 +14,16 @@ namespace ECommerce.Web.Areas.Customer.Controllers
 	{
 		private readonly INewebPayService _newebPayService;
 		private readonly IOrderService _orderService;
+		private readonly ILogger<PaymentController> _logger;
 
 		public PaymentController(
 			INewebPayService newebPayService,
-			IOrderService orderService)
+			IOrderService orderService,
+			ILogger<PaymentController> logger)
 		{
 			_newebPayService = newebPayService;
 			_orderService = orderService;
+			_logger = logger;
 		}
 
 		// 使用者付款完成後，由瀏覽器回到網站
@@ -57,6 +60,20 @@ namespace ECommerce.Web.Areas.Customer.Controllers
 				// 驗證 TradeSha、解密 TradeInfo，並確認 MerchantID 是否正確。
 				var response = _newebPayService.ValidateAndDecryptPaymentResponse(TradeInfo, TradeSha);
 
+				// 藍新明確回傳付款失敗
+				if (!string.Equals(response.Status, "SUCCESS", StringComparison.OrdinalIgnoreCase))
+				{
+					TempData["error"] =
+						string.IsNullOrWhiteSpace(response.Message) ? "付款失敗，請重新付款" : $"付款失敗：{response.Message}";
+
+					return RedirectToAction("Details", "Order",
+						new
+						{
+							area = "Customer",
+							id = orderId
+						});
+				}
+			
 				if (response.Result == null)
 				{
 					TempData["error"] = "無法取得付款結果";
@@ -77,10 +94,11 @@ namespace ECommerce.Web.Areas.Customer.Controllers
 				{
 					TempData["error"] = "付款訂單資料驗證失敗";
 
-					return RedirectToAction("Index", "Home",
+					return RedirectToAction("Details", "Order",
 						new
 						{
-							area = "Customer"
+							area = "Customer",
+							id = orderId
 						});
 				}
 
@@ -99,24 +117,6 @@ namespace ECommerce.Web.Areas.Customer.Controllers
 						});
 				}
 
-				// 藍新回傳不是 SUCCESS，代表付款失敗。
-				if (!string.Equals(
-					response.Status,
-					"SUCCESS",
-					StringComparison.OrdinalIgnoreCase))
-				{
-					TempData["error"] =
-						string.IsNullOrWhiteSpace(response.Message)
-							? "付款失敗，請重新付款"
-							: $"付款失敗：{response.Message}";
-
-					return RedirectToAction("Details", "Order",
-						new
-						{
-							area = "Customer",
-							id = orderId
-						});
-				}
 
 				// Return 只負責顯示付款結果。
 				// 真正更新 PaymentStatus 的工作仍交給 Notify。
@@ -129,8 +129,12 @@ namespace ECommerce.Web.Areas.Customer.Controllers
 						orderId
 					});
 			}
-			catch
+			catch (Exception exception)
 			{
+				_logger.LogError(exception,
+					"藍新 Return 付款結果處理失敗。OrderId: {OrderId}",
+					orderId);
+
 				TempData["error"] = "付款結果驗證失敗，請至我的訂單確認付款狀態";
 
 				return RedirectToAction("Details", "Order",
