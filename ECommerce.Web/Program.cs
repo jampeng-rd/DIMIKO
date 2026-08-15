@@ -26,6 +26,17 @@ builder.Services.Configure<NewebPaySettings>(builder.Configuration.GetSection("N
 // Google Gmail SMTP
 builder.Services.Configure<GmailSmtpSettings>(builder.Configuration.GetSection("GmailSmtp"));
 
+// Register Azure Blob Storage settings
+var azureBlobStorageSettings =
+	builder.Configuration
+		.GetSection(AzureBlobStorageSettings.SectionName)
+		.Get<AzureBlobStorageSettings>()
+	?? throw new InvalidOperationException(
+		"找不到 AzureBlobStorage 設定。");
+
+builder.Services.AddSingleton(azureBlobStorageSettings);
+
+
 // Register Identity
 builder.Services
 	.AddIdentity<ApplicationUser, IdentityRole>(options =>
@@ -46,17 +57,28 @@ builder.Services
 // Register Repository Pattern
 builder.Services.AddScoped<ICategoryService, CategoryService>();
 builder.Services.AddScoped<IProductService, ProductService>();
-builder.Services.AddScoped<IProductImageFileService, ProductImageFileService>();
 builder.Services.AddScoped<IShoppingCartService, ShoppingCartService>();
 builder.Services.AddScoped<IOrderService, OrderService>();
 builder.Services.AddScoped<IDashboardService, DashboardService>();
 builder.Services.AddScoped<IHeroBannerService, HeroBannerService>();
+
+// Register image storage service
+if (builder.Environment.IsDevelopment())
+{
+	builder.Services.AddScoped<IImageStorageService, LocalImageStorageService>();
+}
+else
+{
+	builder.Services.AddScoped<IImageStorageService, AzureBlobStorageService>();
+}
+
 // Register Gmail email service
 builder.Services.AddScoped<IEmailSenderService, EmailSenderService>();
 // Register NewebPay service
 builder.Services.AddScoped<INewebPayService, NewebPayService>();
 
 builder.Services.AddHostedService<ExpiredOrderCleanupService>();
+
 
 // Register Session
 builder.Services.AddDistributedMemoryCache();

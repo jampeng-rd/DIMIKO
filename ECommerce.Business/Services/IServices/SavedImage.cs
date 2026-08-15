@@ -1,7 +1,6 @@
-﻿
-namespace ECommerce.Business.Services.IServices
+﻿namespace ECommerce.Business.Services.IServices
 {
-	public class SavedProductImage
+	public class SavedImage
 	{
 		public string FileName { get; set; } = string.Empty;
 

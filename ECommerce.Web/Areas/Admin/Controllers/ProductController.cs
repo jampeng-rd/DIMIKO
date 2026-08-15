@@ -14,16 +14,16 @@ namespace ECommerce.Web.Areas.Admin.Controllers
 	{
 		private readonly IProductService _productService;
 		private readonly ICategoryService _categoryService;
-		private readonly IProductImageFileService _productImageFileService;
+		private readonly IImageStorageService _imageStorageService;
 
 		public ProductController(
 			IProductService productService,
 			ICategoryService categoryService,
-			IProductImageFileService productImageFileService)
+			IImageStorageService imageStorageService)
 		{
 			_productService = productService;
 			_categoryService = categoryService;
-			_productImageFileService = productImageFileService;
+			_imageStorageService = imageStorageService;
 		}
 
 
@@ -99,24 +99,31 @@ namespace ECommerce.Web.Areas.Admin.Controllers
 			// 建立 ProductImage 資料列
 			try
 			{
-				//IReadOnlyList<SavedProductImage> savedImages =
-				var savedImages = await _productImageFileService.SaveImagesAsync(product.Id, viewModel.Images!);
+				var savedImages = new List<SavedImage>();
+
+				foreach (var image in viewModel.Images!)
+				{
+					var savedImage = await _imageStorageService.SaveImageAsync($"products/{product.Id}", image);
+
+					savedImages.Add(savedImage);
+				}
 
 				List<ProductImage> productImages = savedImages.Select((savedImage, index) =>
-							new ProductImage
-							{
-								ProductId = product.Id,
-								FileName = savedImage.FileName,
-								ImageUrl = savedImage.ImageUrl,
-								SortOrder = index,
-								IsPrimary = index == 0
-							}).ToList();
+						new ProductImage
+						{
+							ProductId = product.Id,
+							FileName = savedImage.FileName,
+							ImageUrl = savedImage.ImageUrl,
+							SortOrder = index,
+							IsPrimary = index == 0
+						})
+						.ToList();
 
 				await _productService.AddProductImagesAsync(product.Id, productImages);
 			}
 			catch (InvalidOperationException exception)
 			{
-				_productImageFileService.DeleteProductDirectory(product.Id);
+				await _imageStorageService.DeleteFolderAsync($"products/{product.Id}");
 
 				await _productService.DeleteProductAsync(product.Id);
 
@@ -207,14 +214,23 @@ namespace ECommerce.Web.Areas.Admin.Controllers
 			{
 				try
 				{
-					var savedImages = await _productImageFileService.SaveImagesAsync(product.Id, viewModel.NewImages);
+					var savedImages = new List<SavedImage>();
 
-					var productImages = savedImages.Select(savedImage => new ProductImage
-						{
-							ProductId = product.Id,
-							FileName = savedImage.FileName,
-							ImageUrl = savedImage.ImageUrl
-						}).ToList();
+					foreach (var image in viewModel.NewImages)
+					{
+						var savedImage = await _imageStorageService.SaveImageAsync($"products/{product.Id}", image);
+
+						savedImages.Add(savedImage);
+					}
+
+					var productImages = savedImages.Select(savedImage =>
+							new ProductImage
+							{
+								ProductId = product.Id,
+								FileName = savedImage.FileName,
+								ImageUrl = savedImage.ImageUrl
+							})
+							.ToList();
 
 					await _productService.AddProductImagesAsync(product.Id, productImages);
 				}
@@ -268,8 +284,7 @@ namespace ECommerce.Web.Areas.Admin.Controllers
 				return NotFound();
 			}
 
-			// 刪除 wwwroot 中的商品圖片資料夾。 資料夾不存在時回傳 false，不影響商品刪除結果。
-			_productImageFileService.DeleteProductDirectory(id);
+			await _imageStorageService.DeleteFolderAsync($"products/{id}");
 
 			TempData["success"] = "刪除成功";
 
@@ -277,7 +292,7 @@ namespace ECommerce.Web.Areas.Admin.Controllers
 		}
 
 
-		//刪除圖片
+		// 刪除圖片
 		[HttpPost]
 		[ValidateAntiForgeryToken]
 		[Authorize(Roles = SD.RoleAdmin)]
@@ -290,7 +305,7 @@ namespace ECommerce.Web.Areas.Admin.Controllers
 				return NotFound();
 			}
 
-			bool fileDeleted = _productImageFileService.DeleteImage(image.ImageUrl);
+			bool fileDeleted = await _imageStorageService.DeleteImageAsync(image.ImageUrl);
 
 			bool recordDeleted = await _productService.DeleteProductImageAsync(imageId);
 
