@@ -27,23 +27,119 @@ namespace ECommerce.Web.Areas.Customer.Controllers
 		[HttpPost]
 		[AllowAnonymous]
 		[IgnoreAntiforgeryToken]
-		public IActionResult Return(int orderId)
+		public async Task<IActionResult> Return(int orderId, string TradeInfo, string TradeSha)
 		{
 			if (orderId <= 0)
 			{
 				TempData["error"] = "無法取得付款訂單資訊";
 
-				return RedirectToAction("Index", "Home", new { area = "Customer" });
+				return RedirectToAction("Index", "Home",
+					new
+					{
+						area = "Customer"
+					});
 			}
 
-			TempData["success"] = "付款流程已完成";
+			if (string.IsNullOrWhiteSpace(TradeInfo) || string.IsNullOrWhiteSpace(TradeSha))
+			{
+				TempData["error"] = "無法取得藍新付款結果";
 
-			return RedirectToAction("OrderConfirmation", "Cart",
-				new
+				return RedirectToAction("Details", "Order",
+					new
+					{
+						area = "Customer",
+						id = orderId
+					});
+			}
+
+			try
+			{
+				// 驗證 TradeSha、解密 TradeInfo，並確認 MerchantID 是否正確。
+				var response = _newebPayService.ValidateAndDecryptPaymentResponse(TradeInfo, TradeSha);
+
+				if (response.Result == null)
 				{
-					area = "Customer",
-					orderId
-				});
+					TempData["error"] = "無法取得付款結果";
+
+					return RedirectToAction("Details", "Order",
+						new
+						{
+							area = "Customer",
+							id = orderId
+						});
+				}
+
+				// 確認藍新回傳的 MerchantOrderNo，確實對應到系統中的訂單。 
+				var order = await _orderService.GetOrderByNumberAsync(
+					response.Result.MerchantOrderNo);
+
+				if (order == null || order.Id != orderId)
+				{
+					TempData["error"] = "付款訂單資料驗證失敗";
+
+					return RedirectToAction("Index", "Home",
+						new
+						{
+							area = "Customer"
+						});
+				}
+
+				// 再確認付款金額與訂單金額一致。
+				var orderAmount = decimal.ToInt32(order.OrderTotal);
+
+				if (response.Result.Amt != orderAmount)
+				{
+					TempData["error"] = "付款金額驗證失敗";
+
+					return RedirectToAction("Details", "Order",
+						new
+						{
+							area = "Customer",
+							id = orderId
+						});
+				}
+
+				// 藍新回傳不是 SUCCESS，代表付款失敗。
+				if (!string.Equals(
+					response.Status,
+					"SUCCESS",
+					StringComparison.OrdinalIgnoreCase))
+				{
+					TempData["error"] =
+						string.IsNullOrWhiteSpace(response.Message)
+							? "付款失敗，請重新付款"
+							: $"付款失敗：{response.Message}";
+
+					return RedirectToAction("Details", "Order",
+						new
+						{
+							area = "Customer",
+							id = orderId
+						});
+				}
+
+				// Return 只負責顯示付款結果。
+				// 真正更新 PaymentStatus 的工作仍交給 Notify。
+				TempData["success"] = "付款成功";
+
+				return RedirectToAction("OrderConfirmation", "Cart",
+					new
+					{
+						area = "Customer",
+						orderId
+					});
+			}
+			catch
+			{
+				TempData["error"] = "付款結果驗證失敗，請至我的訂單確認付款狀態";
+
+				return RedirectToAction("Details", "Order",
+					new
+					{
+						area = "Customer",
+						id = orderId
+					});
+			}
 		}
 
 
