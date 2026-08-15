@@ -19,6 +19,7 @@ namespace ECommerce.Business.Services
 			_dbContext = dbContext;
 		}
 
+
 		public async Task<CreateOrderResult> CreateOrderAsync(OrderHeader orderHeader, string userId)
 		{
 			if (string.IsNullOrWhiteSpace(userId))
@@ -115,6 +116,7 @@ namespace ECommerce.Business.Services
 			}
 		}
 
+
 		// 前台：取訂單編號
 		public async Task<OrderHeader?> GetOrderByIdAsync(int orderId, string userId)
 		{
@@ -129,6 +131,21 @@ namespace ECommerce.Business.Services
 					order.Id == orderId &&
 					order.ApplicationUserId == userId);
 		}
+
+
+		// 「金流專用」查詢 - 用途只限定 金流 Return：依訂單 Id 取得訂單 (不要給一般前台使用)
+		public async Task<OrderHeader?> GetOrderByIdAsync(int orderId)
+		{
+			if (orderId <= 0)
+			{
+				return null;
+			}
+
+			return await _dbContext.OrderHeaders
+				.AsNoTracking()
+				.FirstOrDefaultAsync(order => order.Id == orderId);
+		}
+
 
 		// 前台：藍新付款成功後更新訂單付款資訊
 		public async Task<bool> MarkPaymentAsApprovedAsync(

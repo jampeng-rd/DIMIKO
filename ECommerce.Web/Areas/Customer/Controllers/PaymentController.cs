@@ -30,7 +30,7 @@ namespace ECommerce.Web.Areas.Customer.Controllers
 		[HttpPost]
 		[AllowAnonymous]
 		[IgnoreAntiforgeryToken]
-		public async Task<IActionResult> Return(int orderId, string TradeInfo, string TradeSha)
+		public async Task<IActionResult> Return(int orderId)
 		{
 			if (orderId <= 0)
 			{
@@ -43,9 +43,36 @@ namespace ECommerce.Web.Areas.Customer.Controllers
 					});
 			}
 
-			if (string.IsNullOrWhiteSpace(TradeInfo) || string.IsNullOrWhiteSpace(TradeSha))
+			try
 			{
-				TempData["error"] = "無法取得藍新付款結果";
+				var order = await _orderService.GetOrderByIdAsync(orderId);
+
+				if (order == null)
+				{
+					TempData["error"] = "找不到付款訂單";
+
+					return RedirectToAction("Index", "Home",
+						new
+						{
+							area = "Customer"
+						});
+				}
+
+				// Notify 已確認付款成功
+				if (order.PaymentStatus == SD.PaymentStatusApproved)
+				{
+					TempData["success"] = "付款成功";
+
+					return RedirectToAction("OrderConfirmation", "Cart",
+						new
+						{
+							area = "Customer",
+							orderId
+						});
+				}
+
+				// Notify 沒有將付款改為 Approved，代表目前仍是未付款狀態。 
+				TempData["error"] = "付款未成功，您可以在付款期限內重新付款";
 
 				return RedirectToAction("Details", "Order",
 					new
@@ -54,88 +81,14 @@ namespace ECommerce.Web.Areas.Customer.Controllers
 						id = orderId
 					});
 			}
-
-			try
-			{
-				// 驗證 TradeSha、解密 TradeInfo，並確認 MerchantID 是否正確。
-				var response = _newebPayService.ValidateAndDecryptPaymentResponse(TradeInfo, TradeSha);
-
-				// 藍新明確回傳付款失敗
-				if (!string.Equals(response.Status, "SUCCESS", StringComparison.OrdinalIgnoreCase))
-				{
-					TempData["error"] =
-						string.IsNullOrWhiteSpace(response.Message) ? "付款失敗，請重新付款" : $"付款失敗：{response.Message}";
-
-					return RedirectToAction("Details", "Order",
-						new
-						{
-							area = "Customer",
-							id = orderId
-						});
-				}
-			
-				if (response.Result == null)
-				{
-					TempData["error"] = "無法取得付款結果";
-
-					return RedirectToAction("Details", "Order",
-						new
-						{
-							area = "Customer",
-							id = orderId
-						});
-				}
-
-				// 確認藍新回傳的 MerchantOrderNo，確實對應到系統中的訂單。 
-				var order = await _orderService.GetOrderByNumberAsync(
-					response.Result.MerchantOrderNo);
-
-				if (order == null || order.Id != orderId)
-				{
-					TempData["error"] = "付款訂單資料驗證失敗";
-
-					return RedirectToAction("Details", "Order",
-						new
-						{
-							area = "Customer",
-							id = orderId
-						});
-				}
-
-				// 再確認付款金額與訂單金額一致。
-				var orderAmount = decimal.ToInt32(order.OrderTotal);
-
-				if (response.Result.Amt != orderAmount)
-				{
-					TempData["error"] = "付款金額驗證失敗";
-
-					return RedirectToAction("Details", "Order",
-						new
-						{
-							area = "Customer",
-							id = orderId
-						});
-				}
-
-
-				// Return 只負責顯示付款結果。
-				// 真正更新 PaymentStatus 的工作仍交給 Notify。
-				TempData["success"] = "付款成功";
-
-				return RedirectToAction("OrderConfirmation", "Cart",
-					new
-					{
-						area = "Customer",
-						orderId
-					});
-			}
 			catch (Exception exception)
 			{
-				_logger.LogError(exception,
-					"藍新 Return 付款結果處理失敗。OrderId: {OrderId}",
+				_logger.LogError(
+					exception,
+					"藍新 Return 處理失敗。OrderId: {OrderId}",
 					orderId);
 
-				TempData["error"] = "付款結果驗證失敗，請至我的訂單確認付款狀態";
+				TempData["error"] = "取得付款結果時發生錯誤，請至我的訂單確認付款狀態";
 
 				return RedirectToAction("Details", "Order",
 					new
