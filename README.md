@@ -4,6 +4,28 @@ DIMIKO 是一個使用 ASP.NET Core MVC 建立的露營用品電商專案，整�
 
 專案採用分層架構，將 MVC UI、商業邏輯、資料存取、模型與共用工具分離，作為 ASP.NET Core MVC、Entity Framework Core、Identity 與第三方金流整合的實作。
 
+## Preview
+
+<table width="100%">
+    <tr>
+    <td width="50%">
+    &nbsp;
+    <br>
+    <p align="center">
+    Desktop
+    </p>
+    <img src="docs/images/public/desktop.png" alt="桌機瀏覽器格式">
+    </td>
+    <td width="21%"
+    <br>
+    <p align="center">
+    Mobile
+    </p>
+    <img src="docs/images/public/mobile.jpg" alt="手機格式">
+    </td>
+    </tr>
+</table>
+
 ## 專案功能
 
 ### 前台網站
