@@ -16,14 +16,23 @@ namespace ECommerce.Business.Services.IServices
 		// 「金流專用」查詢
 		Task<OrderHeader?> GetOrderByIdAsync(int orderId);
 
+		// 前台：建立一次新的付款交易 (每一次付款都會建立一筆交易訂單)
+		Task<PaymentTransaction?> CreatePaymentTransactionAsync(int orderId, string userId);
 
-		// 前台：藍新付款成功後更新訂單付款資訊
-		Task<bool> MarkPaymentAsApprovedAsync(
+
+		// 藍新付款成功：更新付款交易與訂單
+		Task<bool> MarkPaymentTransactionAsSuccessAsync(
 			string merchantOrderNo,
 			int amount,
 			string tradeNo,
 			string paymentType,
 			DateTime paymentDate);
+
+		// 藍新付款失敗：更新單次付款交易
+		Task<bool> MarkPaymentTransactionAsFailedAsync(
+			string merchantOrderNo,
+			int amount,
+			string? message);
 
 
 		// 金流回傳：依訂單編號取得訂單

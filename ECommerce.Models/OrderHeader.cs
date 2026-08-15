@@ -16,30 +16,39 @@ namespace ECommerce.Models
 		[Display(Name = "訂單編號")]
 		public string OrderNumber { get; set; } = string.Empty;
 
+
 		[ValidateNever]
 		public string ApplicationUserId { get; set; } = string.Empty;
+
 
 		[ForeignKey(nameof(ApplicationUserId))]
 		[ValidateNever]
 		public ApplicationUser ApplicationUser { get; set; } = null!;
 
+
 		public DateTime OrderDate { get; set; }
+
 
 		// 付款期限
 		public DateTime? PaymentExpireDate { get; set; }
 
+
 		public DateTime? ShippingDate { get; set; }
+
 
 		[Column(TypeName = "decimal(18,2)")]
 		public decimal OrderTotal { get; set; }
+
 
 		[ValidateNever]
 		[Required]
 		[StringLength(50)]
 		public string OrderStatus { get; set; } = string.Empty;
 
+
 		[StringLength(100)]
 		public string? TrackingNumber { get; set; }
+
 
 		[StringLength(100)]
 		public string? Carrier { get; set; }
@@ -49,9 +58,11 @@ namespace ECommerce.Models
 		[StringLength(100)]
 		public string? NewebPayTradeNo { get; set; }
 
+
 		// 付款方式
 		[StringLength(50)]
 		public string? PaymentType { get; set; }
+
 
 		// 實際付款時間
 		public DateTime? PaymentDate { get; set; }
@@ -69,32 +80,44 @@ namespace ECommerce.Models
 		[Display(Name = "收件人電話")]
 		public string PhoneNumber { get; set; } = string.Empty;
 
+
 		[Required(ErrorMessage = "請輸入縣市")]
 		[StringLength(100)]
 		[Display(Name = "縣市")]
 		public string City { get; set; } = string.Empty;
+
 
 		[Required(ErrorMessage = "請輸入縣市地區")]
 		[StringLength(100)]
 		[Display(Name = "區／鄉／鎮／市")]
 		public string State { get; set; } = string.Empty;
 
+
 		[Required(ErrorMessage = "請輸入收件地址")]
 		[StringLength(200)]
 		[Display(Name = "地址")]
 		public string StreetAddress { get; set; } = string.Empty;
+
 
 		[Required(ErrorMessage = "請輸入郵遞區號")]
 		[StringLength(20)]
 		[Display(Name = "郵遞區號")]
 		public string PostalCode { get; set; } = string.Empty;
 
+
 		[Required(ErrorMessage = "請輸入收件人姓名")]
 		[StringLength(100)]
 		[Display(Name = "收件人姓名")]
 		public string Name { get; set; } = string.Empty;
 
+
 		[ValidateNever]
 		public ICollection<OrderDetail> OrderDetails { get; set; } = new List<OrderDetail>();
+
+
+		[ValidateNever]
+		public ICollection<PaymentTransaction> PaymentTransactions { get; set; }
+			= new List<PaymentTransaction>();
+
 	}
 }

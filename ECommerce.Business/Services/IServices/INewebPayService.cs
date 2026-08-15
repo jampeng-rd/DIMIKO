@@ -7,7 +7,9 @@ namespace ECommerce.Business.Services.IServices
 	{
 		bool IsConfigured();
 
-		NewebPayPaymentRequest CreatePaymentRequest(OrderHeader orderHeader);
+		NewebPayPaymentRequest CreatePaymentRequest(
+			OrderHeader orderHeader,
+			PaymentTransaction paymentTransaction);
 
 		NewebPayPaymentResponse DecryptPaymentResponse(string tradeInfo);
 

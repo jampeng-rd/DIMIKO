@@ -23,6 +23,8 @@ namespace ECommerce.DataAccess.Data
 
 		public DbSet<OrderDetail> OrderDetails { get; set; }
 
+		public DbSet<PaymentTransaction> PaymentTransactions { get; set; }
+
 		public DbSet<HeroBanner> HeroBanners { get; set; }
 
 
@@ -62,6 +64,18 @@ namespace ECommerce.DataAccess.Data
 			// 限制訂單編號是唯一值
 			modelBuilder.Entity<OrderHeader>()
 				.HasIndex(order => order.OrderNumber)
+				.IsUnique();
+
+			// 刪除整張訂單時，連同該訂單的付款紀錄一起刪除
+			modelBuilder.Entity<PaymentTransaction>()
+				.HasOne(transaction => transaction.OrderHeader)
+				.WithMany(order => order.PaymentTransactions)
+				.HasForeignKey(transaction => transaction.OrderHeaderId)
+				.OnDelete(DeleteBehavior.Cascade);
+
+			// 每一次送往藍新的 MerchantOrderNo 都必須唯一
+			modelBuilder.Entity<PaymentTransaction>()
+				.HasIndex(transaction => transaction.MerchantOrderNo)
 				.IsUnique();
 
 

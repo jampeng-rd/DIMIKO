@@ -30,30 +30,52 @@ namespace ECommerce.Business.Services
 				!string.IsNullOrWhiteSpace(_settings.NotifyUrl);
 		}
 
-		public NewebPayPaymentRequest CreatePaymentRequest(OrderHeader orderHeader)
+		public NewebPayPaymentRequest CreatePaymentRequest(
+			OrderHeader orderHeader,
+			PaymentTransaction paymentTransaction)
 		{
 			if (!IsConfigured())
 			{
-				throw new InvalidOperationException("藍新金流設定不完整");
+				throw new InvalidOperationException(
+					"藍新金流設定不完整");
 			}
 
 			if (orderHeader == null)
 			{
-				throw new ArgumentNullException(nameof(orderHeader));
+				throw new ArgumentNullException(
+					nameof(orderHeader));
 			}
 
-			if (string.IsNullOrWhiteSpace(orderHeader.OrderNumber))
+			if (paymentTransaction == null)
 			{
-				throw new ArgumentException("訂單編號不可為空白", nameof(orderHeader));
+				throw new ArgumentNullException(
+					nameof(paymentTransaction));
 			}
 
-			if (orderHeader.OrderTotal <= 0)
+			if (string.IsNullOrWhiteSpace(
+				paymentTransaction.MerchantOrderNo))
 			{
-				throw new ArgumentException("訂單金額必須大於 0", nameof(orderHeader));
+				throw new ArgumentException(
+					"付款交易編號不可為空白",
+					nameof(paymentTransaction));
+			}
+
+			if (paymentTransaction.Amount <= 0)
+			{
+				throw new ArgumentException(
+					"付款金額必須大於 0",
+					nameof(paymentTransaction));
+			}
+
+			if (paymentTransaction.OrderHeaderId != orderHeader.Id)
+			{
+				throw new ArgumentException(
+					"付款交易與訂單不一致",
+					nameof(paymentTransaction));
 			}
 
 			// 建立原始付款資料
-			var tradeInfoData = BuildTradeInfo(orderHeader);
+			var tradeInfoData = BuildTradeInfo(orderHeader, paymentTransaction);
 
 			// 把交易資料加密
 			var tradeInfo = EncryptTradeInfo(tradeInfoData);
@@ -70,6 +92,7 @@ namespace ECommerce.Business.Services
 				PaymentUrl = _settings.PaymentUrl
 			};
 		}
+
 
 		public NewebPayPaymentResponse DecryptPaymentResponse(string tradeInfo)
 		{
@@ -95,6 +118,7 @@ namespace ECommerce.Business.Services
 			return response;
 		}
 
+
 		public bool VerifyTradeSha(string tradeInfo, string tradeSha)
 		{
 			if (!IsConfigured())
@@ -114,6 +138,7 @@ namespace ECommerce.Business.Services
 				tradeSha,
 				StringComparison.OrdinalIgnoreCase);
 		}
+
 
 		public NewebPayPaymentResponse ValidateAndDecryptPaymentResponse(string tradeInfo, string tradeSha)
 		{
@@ -142,14 +167,19 @@ namespace ECommerce.Business.Services
 
 
 		// 建立原始付款資料
-		private string BuildTradeInfo(OrderHeader orderHeader)
+		private string BuildTradeInfo(OrderHeader orderHeader, PaymentTransaction paymentTransaction)
 		{
 			var timeStamp = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
 
-			var amount = decimal.ToInt32(orderHeader.OrderTotal);
+			var amount = decimal.ToInt32(paymentTransaction.Amount);
 
 			var returnUrlSeparator = _settings.ReturnUrl.Contains('?') ? "&" : "?";
-			var returnUrl = $"{_settings.ReturnUrl}{returnUrlSeparator}orderId={orderHeader.Id}";
+
+			var returnUrl =
+				$"{_settings.ReturnUrl}" +
+				$"{returnUrlSeparator}" +
+				$"orderId={orderHeader.Id}";
+
 
 			var parameters = new Dictionary<string, string>
 			{
@@ -157,7 +187,10 @@ namespace ECommerce.Business.Services
 				["RespondType"] = "JSON",
 				["TimeStamp"] = timeStamp.ToString(),
 				["Version"] = _settings.Version,
-				["MerchantOrderNo"] = orderHeader.OrderNumber,
+
+				// 每一次付款都使用獨立的付款交易編號
+				["MerchantOrderNo"] = paymentTransaction.MerchantOrderNo,
+
 				["Amt"] = amount.ToString(),
 				["ItemDesc"] = "DIMIKO 商品訂單",
 
@@ -171,8 +204,10 @@ namespace ECommerce.Business.Services
 			return string.Join(
 				"&",
 				parameters.Select(parameter =>
-					$"{parameter.Key}={Uri.EscapeDataString(parameter.Value)}"));
+					$"{parameter.Key}=" +
+					$"{Uri.EscapeDataString(parameter.Value)}"));
 		}
+
 
 		// 送付款資料給藍新
 		private string EncryptTradeInfo(string tradeInfo)
@@ -197,6 +232,7 @@ namespace ECommerce.Business.Services
 			return Convert.ToHexString(encryptedBytes).ToLowerInvariant();
 		}
 
+
 		private string CreateTradeSha(string tradeInfo)
 		{
 			var rawData =
@@ -208,6 +244,7 @@ namespace ECommerce.Business.Services
 
 			return Convert.ToHexString(hashBytes).ToUpperInvariant();
 		}
+
 
 		// 讀取藍新回傳資料
 		private string DecryptTradeInfo(string tradeInfo)

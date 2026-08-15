@@ -147,8 +147,61 @@ namespace ECommerce.Business.Services
 		}
 
 
-		// 前台：藍新付款成功後更新訂單付款資訊
-		public async Task<bool> MarkPaymentAsApprovedAsync(
+		// 前台：建立一次新的付款交易 (每一次付款都會建立一筆交易訂單)
+		public async Task<PaymentTransaction?> CreatePaymentTransactionAsync(int orderId, string userId)
+		{
+			if (orderId <= 0 || string.IsNullOrWhiteSpace(userId))
+			{
+				return null;
+			}
+
+			var order = await _dbContext.OrderHeaders
+				.FirstOrDefaultAsync(order =>
+					order.Id == orderId &&
+					order.ApplicationUserId == userId);
+
+			if (order == null)
+			{
+				return null;
+			}
+
+			// 只有待付款、尚未取消的訂單才能建立付款交易
+			if (order.OrderStatus != SD.OrderStatusPending ||
+				order.PaymentStatus != SD.PaymentStatusPending)
+			{
+				return null;
+			}
+
+			// 已超過付款期限
+			if (order.PaymentExpireDate == null ||
+				order.PaymentExpireDate <= DateTime.UtcNow)
+			{
+				return null;
+			}
+
+			var paymentTransaction = new PaymentTransaction
+			{
+				OrderHeaderId = order.Id,
+
+				MerchantOrderNo = PaymentNumberGenerator.Generate(),
+
+				Amount = order.OrderTotal,
+
+				Status = SD.PaymentTransactionPending,
+
+				CreatedDate = DateTime.UtcNow
+			};
+
+			await _dbContext.PaymentTransactions.AddAsync(paymentTransaction);
+
+			await _dbContext.SaveChangesAsync();
+
+			return paymentTransaction;
+		}
+
+
+		// 藍新付款成功：更新付款交易與訂單
+		public async Task<bool> MarkPaymentTransactionAsSuccessAsync(
 			string merchantOrderNo,
 			int amount,
 			string tradeNo,
@@ -170,50 +223,176 @@ namespace ECommerce.Business.Services
 				return false;
 			}
 
-			var order = await _dbContext.OrderHeaders.FirstOrDefaultAsync(order => order.OrderNumber == merchantOrderNo);
+			await using var transaction = await _dbContext.Database.BeginTransactionAsync();
 
-			if (order == null)
+			try
+			{
+				var paymentTransaction = await _dbContext.PaymentTransactions
+						.Include(payment => payment.OrderHeader)
+						.FirstOrDefaultAsync(payment =>
+							payment.MerchantOrderNo == merchantOrderNo);
+
+				if (paymentTransaction == null)
+				{
+					return false;
+				}
+
+				var order = paymentTransaction.OrderHeader;
+
+				// 驗證本次付款交易金額
+				var transactionAmount = decimal.ToInt32(paymentTransaction.Amount);
+
+				if (transactionAmount != amount)
+				{
+					return false;
+				}
+
+				// 再驗證訂單總金額
+				var orderAmount = decimal.ToInt32(order.OrderTotal);
+
+				if (orderAmount != amount)
+				{
+					return false;
+				}
+
+				// 已取消的訂單不能再付款成功
+				if (order.OrderStatus == SD.OrderStatusCancelled)
+				{
+					return false;
+				}
+
+				// 實際付款時間已超過付款期限
+				if (order.PaymentExpireDate.HasValue &&
+					paymentDate > order.PaymentExpireDate.Value)
+				{
+					return false;
+				}
+
+				// Notify 可能重送。
+				// 同一筆付款交易已經成功時，不重複更新。
+				if (paymentTransaction.Status == SD.PaymentTransactionSuccess)
+				{
+					var sameTradeNo =
+						string.Equals(
+							paymentTransaction.NewebPayTradeNo,
+							tradeNo,
+							StringComparison.Ordinal);
+
+					await transaction.CommitAsync();
+
+					return sameTradeNo;
+				}
+
+				// 這張訂單如果已由其他付款交易付款成功，
+				// 不允許另一筆交易覆蓋付款資訊。
+				if (order.PaymentStatus == SD.PaymentStatusApproved)
+				{
+					return false;
+				}
+
+				// 更新單次付款交易
+				paymentTransaction.Status = SD.PaymentTransactionSuccess;
+
+				paymentTransaction.NewebPayTradeNo = tradeNo.Trim();
+
+				paymentTransaction.PaymentType =
+					string.IsNullOrWhiteSpace(paymentType)
+						? null
+						: paymentType.Trim();
+
+				paymentTransaction.PaymentDate = paymentDate;
+
+				paymentTransaction.Message = null;
+
+
+				// 更新整張訂單的最終付款摘要
+				order.PaymentStatus = SD.PaymentStatusApproved;
+
+				order.NewebPayTradeNo = tradeNo.Trim();
+
+				order.PaymentType =
+					string.IsNullOrWhiteSpace(paymentType)
+						? null
+						: paymentType.Trim();
+
+				order.PaymentDate = paymentDate;
+
+				await _dbContext.SaveChangesAsync();
+
+				await transaction.CommitAsync();
+
+				return true;
+			}
+			catch
+			{
+				await transaction.RollbackAsync();
+
+				throw;
+			}
+		}
+
+
+		// 藍新付款失敗：只更新本次付款交易
+		public async Task<bool> MarkPaymentTransactionAsFailedAsync(
+			string merchantOrderNo,
+			int amount,
+			string? message)
+		{
+			if (string.IsNullOrWhiteSpace(merchantOrderNo))
 			{
 				return false;
 			}
 
-			var orderAmount = decimal.ToInt32(order.OrderTotal);
+			if (amount <= 0)
+			{
+				return false;
+			}
+
+			var paymentTransaction = await _dbContext.PaymentTransactions
+					.Include(payment => payment.OrderHeader)
+					.FirstOrDefaultAsync(payment =>
+						payment.MerchantOrderNo == merchantOrderNo);
+
+			if (paymentTransaction == null)
+			{
+				return false;
+			}
+
+			var transactionAmount = decimal.ToInt32(paymentTransaction.Amount);
+
+			if (transactionAmount != amount)
+			{
+				return false;
+			}
+
+			var orderAmount = decimal.ToInt32(paymentTransaction.OrderHeader.OrderTotal);
 
 			if (orderAmount != amount)
 			{
 				return false;
 			}
 
-			// 實際付款時間已超過付款期限
-			if (order.PaymentExpireDate.HasValue && paymentDate > order.PaymentExpireDate.Value)
+			// 如果同一筆交易已經成功，不可以被後來的重複通知改回 Failed。
+			if (paymentTransaction.Status == SD.PaymentTransactionSuccess)
 			{
-				return false;
+				return true;
 			}
 
-			// 已取消的訂單不能再更新為付款成功
-			if (order.OrderStatus == SD.OrderStatusCancelled)
+			paymentTransaction.Status = SD.PaymentTransactionFailed;
+
+			if (string.IsNullOrWhiteSpace(message))
 			{
-				return false;
+				paymentTransaction.Message = null;
 			}
-
-			// NotifyURL 可能被藍新重送，已付款的訂單不要重複更新。
-			if (order.PaymentStatus == SD.PaymentStatusApproved)
+			else
 			{
-				return string.Equals(
-					order.NewebPayTradeNo,
-					tradeNo,
-					StringComparison.Ordinal);
+				var trimmedMessage = message.Trim();
+
+				paymentTransaction.Message =
+					trimmedMessage.Length <= 500
+						? trimmedMessage
+						: trimmedMessage[..500];
 			}
-
-			order.PaymentStatus = SD.PaymentStatusApproved;
-
-			order.NewebPayTradeNo = tradeNo.Trim();
-
-			order.PaymentType = string.IsNullOrWhiteSpace(paymentType)
-					? null
-					: paymentType.Trim();
-
-			order.PaymentDate = paymentDate;
 
 			await _dbContext.SaveChangesAsync();
 

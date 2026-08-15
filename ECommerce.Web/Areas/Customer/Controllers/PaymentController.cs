@@ -106,7 +106,8 @@ namespace ECommerce.Web.Areas.Customer.Controllers
 		[IgnoreAntiforgeryToken]
 		public async Task<IActionResult> Notify(string TradeInfo, string TradeSha)
 		{
-			if (string.IsNullOrWhiteSpace(TradeInfo) || string.IsNullOrWhiteSpace(TradeSha))
+			if (string.IsNullOrWhiteSpace(TradeInfo) ||
+				string.IsNullOrWhiteSpace(TradeSha))
 			{
 				return Content("FAIL");
 			}
@@ -120,32 +121,47 @@ namespace ECommerce.Web.Areas.Customer.Controllers
 					return Content("FAIL");
 				}
 
-				if (!string.Equals(response.Status, "SUCCESS", StringComparison.OrdinalIgnoreCase))
+				
+				// 付款失敗
+				if (!string.Equals(
+					response.Status,
+					"SUCCESS",
+					StringComparison.OrdinalIgnoreCase))
 				{
-					return Content("SUCCESS");
+					var updated = await _orderService.MarkPaymentTransactionAsFailedAsync(
+							response.Result.MerchantOrderNo,
+							response.Result.Amt,
+							response.Message);
+
+					return Content(updated ? "SUCCESS" : "FAIL");
 				}
 
-				var paymentDate = ParsePaymentDate(response.Result.PayTime);
+			
+				// 付款成功
+				var paymentDate =ParsePaymentDate(response.Result.PayTime);
 
 				if (paymentDate == null)
 				{
 					return Content("FAIL");
 				}
 
-				var updated = await _orderService.MarkPaymentAsApprovedAsync(
-							response.Result.MerchantOrderNo,
-							response.Result.Amt,
-							response.Result.TradeNo,
-							response.Result.PaymentType,
-							paymentDate.Value);
+				var successUpdated = await _orderService.MarkPaymentTransactionAsSuccessAsync(
+						response.Result.MerchantOrderNo,
+						response.Result.Amt,
+						response.Result.TradeNo,
+						response.Result.PaymentType,
+						paymentDate.Value);
 
-				return Content(updated ? "SUCCESS" : "FAIL");
+				return Content(successUpdated ? "SUCCESS" : "FAIL");
 			}
-			catch
+			catch (Exception exception)
 			{
+				_logger.LogError(exception, "處理藍新 Notify 發生錯誤");
+
 				return Content("FAIL");
 			}
 		}
+
 
 		private static DateTime? ParsePaymentDate(string payTime)
 		{
@@ -290,14 +306,34 @@ namespace ECommerce.Web.Areas.Customer.Controllers
 
 			try
 			{
-				var paymentRequest = _newebPayService.CreatePaymentRequest(order);
+				// 每一次進入付款流程，都建立新的付款交易紀錄。
+				var paymentTransaction = await _orderService.CreatePaymentTransactionAsync(order.Id, userId);
+
+				if (paymentTransaction == null)
+				{
+					TempData["error"] = "目前無法建立付款交易，請稍後再試";
+
+					return RedirectToAction("Details", "Order",
+						new
+						{
+							area = "Customer",
+							id = orderId
+						});
+				}
+
+				var paymentRequest = _newebPayService.CreatePaymentRequest(order, paymentTransaction);
 
 				return View(
 					"~/Areas/Customer/Views/Cart/Payment.cshtml",
 					paymentRequest);
 			}
-			catch
+			catch (Exception exception)
 			{
+				_logger.LogError(
+					exception,
+					"建立藍新付款交易失敗。OrderId: {OrderId}",
+					orderId);
+
 				TempData["error"] = "建立付款資料時發生錯誤，請稍後再試";
 
 				return RedirectToAction("Details", "Order",
