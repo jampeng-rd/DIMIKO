@@ -120,7 +120,16 @@ DIMIKO 是一個使用 ASP.NET Core MVC 建立的露營用品電商專案，整�
 - GitHub
 - Visual Studio
 - Entity Framework Core CLI
-- Azure App Service
+- Docker
+
+### Cloud & Storage
+
+- Azure SQL Database
+- Azure Blob Storage
+- Azure Container Apps
+- Azure Container Registry
+- Managed Identity
+- Azure RBAC
 
 ## 專案結構
 
@@ -174,7 +183,7 @@ cd ECommerce.Web
 dotnet user-secrets init
 ```
 
-接著開啟本機的 `secrets.json`，加入以下設定：
+接著開啟 **ECommerce.Web** 的 `secrets.json`，加入以下設定：
 
 ```json
 {
@@ -188,7 +197,7 @@ dotnet user-secrets init
     "HashIV": ""
   },
   "GmailSmtp": {
-    "Username": "YOUR_GMAIL@gmail.com",
+    "Username": "YOUR_GMAIL",
     "AppPassword": "YOUR_GMAIL_APP_PASSWORD"
   }
 }
@@ -210,7 +219,7 @@ dotnet user-secrets init
 
 在 Visual Studio 中開啟：
 
-`工具 → NuGet 套件管理員 → 套件管理器主控台`
+**工具** → **NuGet 套件管理員** → **套件管理器主控台**
 
 接著執行：
 
@@ -226,7 +235,7 @@ dotnet ef database update   --context ApplicationDbContext   --project ECommerce
 
 ### 5. 啟動專案
 
-將 `ECommerce.Web` 設為啟動專案後，使用 Visual Studio 執行專案。
+將 **ECommerce.Web** 設定為啟動專案後，使用 Visual Studio 執行專案。
 
 ## 身分驗證與授權
 
@@ -250,7 +259,7 @@ dotnet ef database update   --context ApplicationDbContext   --project ECommerce
 4. 使用者透過重設頁面輸入新密碼。
 5. ASP.NET Core Identity 驗證 Token 後完成密碼更新。
 
-為避免洩漏帳號是否存在，忘記密碼功能不應直接向使用者顯示指定 Email 是否已註冊。
+為避免洩漏帳號是否存在，忘記密碼功能不直接向使用者顯示指定 Email 是否已註冊。
 
 ## 購物車與價格
 
@@ -383,19 +392,81 @@ dotnet ef database update   --context ApplicationDbContext   --project ECommerce
 
 訂單詳細頁面可依目前訂單狀態執行對應操作，例如確認訂單、開始處理、設定物流資訊、標記已出貨或取消訂單。
 
-## 商品圖片管理
+## 圖片儲存與管理
+
+**商品圖片** 與 **首頁輪播圖** 使用共用的圖片儲存服務管理。
+
+系統依執行環境切換圖片儲存方式：
+
+```text
+Development
+    ↓
+LocalImageStorageService
+    ↓
+wwwroot/images
+
+Production
+    ↓
+AzureBlobStorageService
+    ↓
+Azure Blob Storage
+```
+
+本機開發環境將圖片儲存於 `wwwroot/images`。
+
+Azure Production 環境則使用 Azure Blob Storage，避免 Container 重新部署、重新啟動或更換執行個體後造成上傳圖片遺失。
+
+### 商品圖片
 
 商品支援多張圖片，並可指定其中一張作為首圖。
 
 主要功能包含：
 
-- 新增商品時上傳圖片
+- 新增商品時上傳多張圖片
 - 修改商品時保留既有圖片
-- 新增多張商品圖片
+- 更新商品時新增圖片
 - 刪除一般圖片
-- 刪除首圖後自動選擇下一張圖片作為首圖
+- 刪除首圖後自動指定下一張圖片為首圖
+- 刪除商品時一併刪除對應圖片
 - 前台商品列表與詳細頁顯示商品圖片
 - 商品沒有圖片時顯示預設佔位內容
+
+### 首頁輪播圖
+
+首頁輪播圖支援：
+
+- Desktop 圖片
+- Mobile 圖片
+- 新增、更新與刪除圖片
+- 更新圖片後自動刪除被取代的舊圖片
+- 刪除 Banner 時一併刪除對應圖片
+
+## Azure Blob Storage
+
+Production 環境的 **商品圖片** 與 **首頁輪播圖** 儲存於 Azure Blob Storage。
+
+目前使用：
+
+```text
+Storage Account
+└─ images
+   ├─ hero/
+   └─ products/
+      └─ {productId}/
+```
+
+Blob Container 僅開放 Blob 匿名讀取，因此前台可以透過圖片 URL 顯示圖片，但匿名使用者無法列舉 Container 中的 Blob，也沒有新增、修改或刪除權限。
+
+後端透過 Azure Container Apps 的 System-assigned Managed Identity 存取 Blob Storage，並授予 `Storage Blob Data Contributor` 權限。
+
+因此應用程式不需要將 Storage Account Key 或 Storage Connection String 儲存在程式碼或設定檔中。
+
+Production 使用以下環境變數指定 Blob Storage：
+
+```text
+AzureBlobStorage__AccountName
+AzureBlobStorage__ContainerName
+```
 
 ## 專案特色
 
@@ -436,7 +507,6 @@ Controller 不直接集中處理所有商業邏輯，而是透過 Service Interf
 目前主要功能已完成：
 
 - ASP.NET Core MVC 網站架構
-- SQL Server / Azure SQL Database
 - 商品分類管理
 - 商品管理
 - 商品多圖片管理
@@ -462,7 +532,13 @@ Controller 不直接集中處理所有商業邏輯，而是透過 Service Interf
 - 藍新付款成功與失敗流程
 - 未付款訂單重新付款
 - 付款交易紀錄管理
-- Azure 部署相關設定
+- SQL Server
+- Azure Container Apps 部署
+- Azure Container Registry
+- Azure SQL Database
+- Azure Blob Storage 圖片永久儲存
+- Managed Identity 與 Azure RBAC
+- Development / Production 圖片儲存環境切換
 - 響應式版面設計
 
 ## 作者
