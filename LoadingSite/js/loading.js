@@ -23,7 +23,7 @@ function showReadyState() {
     statusTitle.textContent = "商城已準備完成";
 
     statusMessage.textContent =
-        "DIMIKO 商城已經準備完成，您現在可以進入商城";
+        "DIMIKO 商城已經準備完成，您現在可以進入";
 
     statusText.textContent = "服務已啟動";
 
