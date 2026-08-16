@@ -1,7 +1,8 @@
 "use strict";
 
-const healthCheckUrl = "https://localhost:7202/health/ready";
-const storeUrl = "https://localhost:7202";
+const healthCheckUrl = "https://ecommerce-web.happymushroom-ad074909.japaneast.azurecontainerapps.io/health/ready";
+
+const storeUrl = "https://ecommerce-web.happymushroom-ad074909.japaneast.azurecontainerapps.io";
 
 const healthCheckInterval = 2000;
 
@@ -47,7 +48,7 @@ async function checkHealth() {
             console.log("商城已準備完成");
 
             showReadyState();
-            
+
             return;
         }
     } catch (error) {
