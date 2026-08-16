@@ -17,6 +17,27 @@ builder.Services.AddControllersWithViews();
 // 檢查啟動狀態 (給靜態 Loading Page 用)
 builder.Services.AddHealthChecks();
 
+// LoadingSite CORS
+var loadingSiteOrigins = builder.Configuration
+		.GetSection("Cors:LoadingSiteOrigins")
+		.Get<string[]>() ?? [];
+
+if (loadingSiteOrigins.Length == 0)
+{
+	throw new InvalidOperationException("找不到 Cors:LoadingSiteOrigins 設定。");
+}
+
+builder.Services.AddCors(options =>
+{
+	options.AddPolicy("LoadingSitePolicy", policy =>
+	{
+		policy
+			.WithOrigins(loadingSiteOrigins)
+			.WithMethods("GET")
+			.AllowAnyHeader();
+	});
+});
+
 
 // Register DbContext
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
@@ -130,6 +151,8 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 
 app.UseRouting();
+
+app.UseCors("LoadingSitePolicy");
 
 app.UseSession();
 
