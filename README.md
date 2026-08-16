@@ -130,6 +130,7 @@ DIMIKO 是一個使用 ASP.NET Core MVC 建立的露營用品電商專案，整�
 - Azure Container Registry
 - Managed Identity
 - Azure RBAC
+- Azure Storage Static Website
 
 ## 專案結構
 
@@ -141,6 +142,15 @@ ECommerce/
 ├─ ECommerce.DataAccess/                   # DbContext、Repository、Migrations
 ├─ ECommerce.Models/                       # Entity、ViewModel
 ├─ ECommerce.Utility/                      # 共用常數、驗證與工具
+├─ LoadingSite/                            # Azure 啟動等待頁面
+│  ├─ index.html
+│  ├─ css/
+│  └─ js/
+├─ .github/
+│  └─ workflows/
+│     ├─ ci.yml                            # MVC Docker Image CI
+│     └─ loading-site.yml                  # LoadingSite 靜態網站部署
+├─ Dockerfile
 ├─ .gitignore
 └─ README.md
 ```
@@ -502,6 +512,28 @@ Controller 不直接集中處理所有商業邏輯，而是透過 Service Interf
 
 網站使用 Bootstrap 與自訂 CSS，支援桌面、平板與手機畫面。
 
+### Azure 啟動等待頁面
+
+Azure Container Apps 採用可縮放至 0 Replica 的部署方式，閒置後首次存取可能需要等待 Container 啟動。
+
+專案另外建立獨立的 `LoadingSite` 靜態網站並部署至 Azure Storage Static Website，不依賴 ASP.NET Core Container，因此可在商城啟動期間先顯示等待畫面。
+
+LoadingSite 會定期呼叫 `ECommerce.Web` 的 `/health/ready` Health Check Endpoint；當服務回傳成功狀態後，才顯示「進入商城」按鈕。
+
+```text
+Azure Storage Static Website
+        ↓
+LoadingSite
+        ↓
+/health/ready
+        ↓
+Azure Container Apps
+        ↓
+ECommerce.Web Ready
+        ↓
+顯示「進入商城」
+```
+
 ## 專案狀態
 
 目前主要功能已完成：
@@ -537,6 +569,8 @@ Controller 不直接集中處理所有商業邏輯，而是透過 Service Interf
 - Azure Container Registry
 - Azure SQL Database
 - Azure Blob Storage 圖片永久儲存
+- Azure Storage Static Website
+- Container Apps 冷啟動 Health Check / LoadingSite
 - Managed Identity 與 Azure RBAC
 - Development / Production 圖片儲存環境切換
 - 響應式版面設計
