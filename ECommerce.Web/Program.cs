@@ -14,6 +14,10 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 
+// 檢查啟動狀態 (給靜態 Loading Page 用)
+builder.Services.AddHealthChecks();
+
+
 // Register DbContext
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
 {
@@ -133,6 +137,9 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapStaticAssets();
+
+// 檢查啟動狀態 (給靜態 Loading Page 用路由)
+app.MapHealthChecks("/health/ready");
 
 app.MapControllerRoute(
 	name: "MyArea",
